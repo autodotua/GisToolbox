@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gpx_head" translatable="false">
+        &lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;
+&lt;gpx xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.topografix.com/GPX/1/0\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\" version=\"1.0\" &gt;
+&lt;name&gt;%0$s&lt;/name&gt;
+&lt;desc&gt;GIS工具箱&lt;/desc&gt;
+&lt;time&gt;%2$s&lt;/time&gt;
+&lt;keywords&gt;GIS工具箱&lt;/keywords&gt;
+&lt;trk&gt;
+&lt;trkseg&gt;</string>
+
+    <string name="gpx_point" translatable="false">
+    &lt;trkpt lat=\"%1$f\" lon=\"%2$f\"&gt;
+&lt;ele&gt;%3$f&lt;/ele&gt;
+&lt;time&gt;%4$s&lt;/time&gt;&lt;/trkpt&gt;
+</string>
+
+    <string name="gpx_foot" translatable="false">
+&lt;/trkseg&gt;&lt;/trk&gt;&lt;/gpx&gt;
+    </string>
+</resources>

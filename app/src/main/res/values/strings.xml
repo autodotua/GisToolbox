@@ -1,0 +1,77 @@
+<resources>
+    <string name="app_name">智慧林工Pad</string>
+    <string name="view_location_callout">%1$.6f°%2$s\n%3$.6f°%4$s</string>
+    <string name="track_notification_message">已记录%1$d个点，总长度%2$.2f米</string>
+    <string name="track_notification_title_running">正在记录轨迹</string>
+    <string name="track_notification_title_pausing">暂停记录轨迹</string>
+    <string name="import_btn_ftp">打开FTP</string>
+    <string name="import_btn_search">自动搜索</string>
+    <string name="file_btn_up">返回上级</string>
+    <string name="layer_btn_open">打开</string>
+    <string name="layer_btn_save">保存</string>
+    <string name="layer_btn_save_as">另存为</string>
+    <string name="main_img_map_compass">地图指南针</string>
+    <string name="main_img_compass">指南针</string>
+    <string name="main_btn_zoom_in">放大</string>
+    <string name="main_btn_zoom_out">缩小</string>
+    <string name="main_btn_layer">图层</string>
+    <string name="main_btn_reset_map">重置</string>
+    <string name="main_btn_import">导入</string>
+    <string name="main_btn_table">属性表</string>
+    <string name="main_btn_edit">编辑</string>
+    <string name="main_btn_track">轨迹</string>
+    <string name="main_btn_zoom_to_layer">缩放到图层</string>
+    <string name="main_btn_zoom_to_default">缩放到默认</string>
+    <string name="main_btn_pan">定位</string>
+    <string name="main_img_satellite">正在记录轨迹</string>
+    <string name="domain_tvw_min_value">最小值：</string>
+    <string name="domain_tvw_max_value">最大值：</string>
+    <string name="domain_tvw_allowed_content">允许输入的内容：</string>
+    <string name="domain_btn_save">保存</string>
+    <string name="domain_btn_close">关闭</string>
+    <string name="edit_btn_draw">画图</string>
+    <string name="edit_btn_split">分割</string>
+    <string name="edit_btn_union">合并</string>
+    <string name="edit_btn_delete">删除</string>
+    <string name="edit_btn_clear_selection">取消</string>
+    <string name="edit_tbtn_single_select">单选</string>
+    <string name="edit_tbtn_multi_select">多选</string>
+    <string name="edit_btn_undo">撤销</string>
+    <string name="edit_btn_redo">重做</string>
+    <string name="attri_table_btn_edit">编辑</string>
+    <string name="attri_table_btn_close">关闭</string>
+    <string name="layer_btn_to_up">▲</string>
+    <string name="layer_btn_to_down">▼</string>
+    <string name="layer_tvw_opacity">透明度：100%</string>
+    <string name="layer_btn_menu">设置</string>
+    <string name="layer_btn_delete">删除</string>
+    <string name="menu_map">地图</string>
+    <string name="menu_rotate">地图旋转</string>
+    <string name="menu_location_display">定位标志</string>
+    <string name="menu_center_when_recording">记录轨迹时自动置中</string>
+    <string name="menu_keep_location_display_background">后台保持定位</string>
+    <string name="menu_feature_layer_query_extent_every_time">矢量图层重算范围</string>
+    <string name="menu_location">位置</string>
+    <string name="menu_tile_url">瓦片底图地址</string>
+    <string name="menu_default_scale">默认比例尺</string>
+    <string name="menu_gps_min_time">GPS最小更新时间</string>
+    <string name="menu_load_esri_map">加载Esri底图</string>
+    <string name="menu_about">关于</string>
+    <string name="menu_exit">退出</string>
+    <string name="menu_side_button_right">在右侧显示按钮</string>
+    <string name="menu_ui">界面</string>
+    <string name="menu_use_tiled_base_layer">使用瓦片底图</string>
+    <string name="attri_table_area">面积：%1$.2f㎡\n周长：%2$.2fm</string>
+    <string name="attri_table_length">长度：%1$.2fm</string>
+    <string name="menu_gps_min_distance">GPS最小更新距离</string>
+    <string name="menu_create_feature_layer">创建矢量图层</string>
+    <string name="menu_compass">显示地图指北针</string>
+    <string name="menu_use_barometer">优先使用气压计获得相对高度</string>
+    <string name="menu_use_relative_altitude">使用相对气压海拔</string>
+    <string name="main_btn_boolean_statistics">布尔统计</string>
+    <string-array name="boolean_type">
+        <item>交集</item>
+        <item>并集</item>
+        <!--<item>Array Item Three</item>-->
+    </string-array>
+</resources>

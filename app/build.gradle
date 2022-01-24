@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+android {
+    packagingOptions {
+        exclude 'META-INF/spring.schemas'
+        exclude 'META-INF/spring.DEPENDENCIES'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/spring.handlers'
+        exclude 'META-INF/license.txt'
+    }
+    //注意：要访问外置存储，目标SDK最高设置为29，然后在清单文件中设置android:requestLegacyExternalStorage="true"
+    compileSdkVersion 29
+    defaultConfig {
+        applicationId 'com.autod.gis'
+        minSdkVersion 23
+        targetSdkVersion 29
+        versionCode 1
+        versionName "21.5.12"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        normal{
+            initWith debug
+            applicationIdSuffix ".u"
+
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+    productFlavors {
+    }
+}
+
+dependencies {
+    //切换到13.0时，提示：Duplicate class org.slf4j.*
+    implementation 'com.esri.arcgisruntime:arcgis-android:100.11.0'
+    implementation 'com.jaredrummler:colorpicker:1.0.2'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'org.apache.ftpserver:ftpserver-core:1.1.1'
+    implementation 'com.google.code.gson:gson:2.8.8'
+}

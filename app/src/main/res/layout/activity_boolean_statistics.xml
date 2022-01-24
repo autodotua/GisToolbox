@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:gravity="center_horizontal"
+    tools:context="com.autod.gis.ui.activity.BooleanStatisticsActivity">
+
+    <LinearLayout
+        android:id="@+id/regional_llt_items"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/boolean_pgb"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dp"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/boolean_ltt_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/boolean_spn_type"
+            android:entries="@array/boolean_type" />
+
+        <Button
+            android:id="@+id/boolean_btn_calc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="计算" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/boolean_tvw_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="64dp"
+        android:textSize="20sp"
+        android:gravity="center_horizontal" />
+</RelativeLayout>

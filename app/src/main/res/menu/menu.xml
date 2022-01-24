@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/menu_map">
+        <menu>
+            <item
+                android:id="@+id/menu_load_esri_map"
+                android:title="@string/menu_load_esri_map" />
+            <item
+                android:id="@+id/menu_use_tiled_base_layer"
+                android:checkable="true"
+                android:title="@string/menu_use_tiled_base_layer" />
+            <item
+                android:id="@+id/menu_tile_url"
+                android:title="@string/menu_tile_url" />
+            <item
+                android:id="@+id/menu_rotate"
+                android:checkable="true"
+                android:title="@string/menu_rotate" />
+
+            <item
+                android:id="@+id/menu_feature_layer_query_extent_every_time"
+                android:checkable="true"
+                android:title="@string/menu_feature_layer_query_extent_every_time" />
+
+            <item
+                android:id="@+id/menu_default_scale"
+                android:title="@string/menu_default_scale" />
+            <item
+                android:id="@+id/menu_create_feature_layer"
+                android:title="@string/menu_create_feature_layer" />
+        </menu>
+    </item>
+    <item android:title="@string/menu_location">
+        <menu>
+
+            <item
+                android:id="@+id/menu_location_display"
+                android:checkable="true"
+                android:title="@string/menu_location_display" />
+            <item
+                android:id="@+id/menu_center_when_recording"
+                android:checkable="true"
+                android:title="@string/menu_center_when_recording" />
+            <item
+                android:id="@+id/menu_use_barometer"
+                android:checkable="true"
+                android:title="@string/menu_use_barometer" />
+            <item
+                android:id="@+id/menu_use_relative_altitude"
+                android:checkable="true"
+                android:title="@string/menu_use_relative_altitude" />
+            <item
+                android:id="@+id/menu_keep_location_display_background"
+                android:checkable="true"
+                android:title="@string/menu_keep_location_display_background" />
+            <item
+                android:id="@+id/menu_gps_min_time"
+                android:title="@string/menu_gps_min_time" />
+            <item
+                android:id="@+id/menu_gps_min_distance"
+                android:title="@string/menu_gps_min_distance" />
+        </menu>
+    </item>
+    <item android:title="@string/menu_ui">
+        <menu>
+            <item
+                android:id="@+id/menu_side_buttons_right"
+                android:checkable="true"
+                android:title="@string/menu_side_button_right" />
+            <item
+                android:id="@+id/menu_compass"
+                android:checkable="true"
+                android:title="@string/menu_compass" />
+
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/menu_about"
+        android:title="@string/menu_about" />
+    <item
+        android:id="@+id/menu_exit"
+        android:title="@string/menu_exit" />
+
+</menu>
