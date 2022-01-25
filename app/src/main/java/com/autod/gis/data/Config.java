@@ -38,13 +38,9 @@ public class Config
         {
             instance = new Config();
 
-            if (isNormal())
-            {
-//                instance.normal = true;
-                instance.useTiledBaseLayer = true;
-                instance.featureLayerQueryExtentEveryTime = true;
-                instance.useBarometer = true;
-            }
+            instance.useTiledBaseLayer = true;
+            instance.featureLayerQueryExtentEveryTime = true;
+            instance.useBarometer = true;
             instance.tileUrls.add("https://mt1.google.cn/vt/lyrs=s&x={x}&y={y}&z={z}");
 
             FileHelper.setConfigJson(gson.toJson(instance));
@@ -63,10 +59,6 @@ public class Config
         }
     }
 
-    public static boolean isNormal()
-    {
-        return BuildConfig.BUILD_TYPE.equals("normal");
-    }
 
     public String gpkPath = FileHelper.getProgramPath() + "/BaseMap/raster.gpkg";
     public ArrayList<String> layerPath = new ArrayList<String>()
@@ -180,7 +172,7 @@ public class Config
         }
     }
 
-    public  void  trySave(Context context)
+    public void trySave(Context context)
     {
         try
         {

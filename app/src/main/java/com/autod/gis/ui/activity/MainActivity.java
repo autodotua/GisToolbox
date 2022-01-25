@@ -77,17 +77,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-//        if (initialized)
-//        {
-
-//            if (Config.getInstance().normal)
-//            {
-//                getMenuInflater().inflate(R.menu.menu, menu); //通过getMenuInflater()方法得到MenuInflater对象，再调用它的inflate()方法就可以给当前活动创建菜单了，第一个参数：用于指定我们通过哪一个资源文件来创建菜单；第二个参数：用于指定我们的菜单项将添加到哪一个Menu对象当中。
-        MenuHelper.getInstance().initialize(getMenuInflater(), menu);
+     MenuHelper.getInstance().initialize(getMenuInflater(), menu);
         return true; // true：允许创建的菜单显示出来，false：创建的菜单将无法显示。
-//            }
-//        }
-//        return false;
+
     }
 
     /**
@@ -108,36 +100,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     private void Initialize()
     {
-        if (BuildConfig.BUILD_TYPE.equals("normal"))
-
-        {
-            setTitle("GIS工具箱");
-        }
-        else
-        {
-            setTitle("智慧林工Pad");
-        }
+        setTitle("GIS工具箱");
         MapViewHelper.getInstance().Initialize();
         initializeControls();
-        //mapviewHelper.setLocationTextTimer();
-        // tvwLocation.setText(("纬度：30.000\n经度：120.000"));
-
 
         //设置地图指南针
         try
         {
-            //LayerManager.getInstance().needAddedLayers = DataAnalysis.getSavedLayers();
-
             BaseLayerHelper.loadBaseLayer();
-
-
         }
         catch (Exception ex)
         {
             Toast.makeText(this, "加载底图失败", Toast.LENGTH_SHORT).show();
         }
-        //LayerManager.getInstance().addSavedLayers(DataAnalysis.getSavedLayers());
-//        LocationService.locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         initialized = true;
     }
 
@@ -192,14 +167,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         if (initialized)
         {
-
             try
             {
                 if (Config.getInstance().location)
                 {
                     LocationDisplayHelper.instance.start();
                 }
-                //SensorHelper.instance.start();
 
             }
             catch (Exception ex)
@@ -215,21 +188,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onPause()
     {
-//        try
-//        {
-//            if (Config.getInstance().location && !Config.getInstance().keepLocationBackground)
-//            {
-//                LocationDisplayHelper.instance.stop();
-//            }
-//            //mapView.pause();
-//            //SensorHelper.instance.stop();
-//
-//            //DataAnalysis.saveLayers();
-//        }
-//        catch (Exception ex)
-//        {
-//
-//        }
         super.onPause();
     }
 
@@ -247,7 +205,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 {
                     LocationDisplayHelper.instance.stop();
                 }
-                //SensorHelper.getInstance().stop();
             }
             catch (Exception ex)
             {
@@ -261,7 +218,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         if (initialized)
         {
-
             MapViewHelper.getInstance().unlinkMapAndMapView();
         }
         super.onDestroy();
@@ -280,12 +236,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnImport.setOnClickListener(this);
         btnImport.setOnLongClickListener(this);
 
-        // ImageButton btnOpenFile = findViewById(R.id.btnOpenFile);
-        //btnOpenFile.setOnClickListener(this);
 
         ImageButton btnLayer = findViewById(R.id.main_btn_layer);
         btnLayer.setOnClickListener(this);
-        //btnLayer.setOnLongClickListener(this);
 
         ImageButton btnZoomIn = findViewById(R.id.main_btn_zoom_in);
         btnZoomIn.setOnClickListener(this);

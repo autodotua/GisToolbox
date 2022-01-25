@@ -15,7 +15,8 @@
         android:id="@+id/main_map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="64dp" />
+        android:layout_marginTop="-72dp"
+        android:layout_marginBottom="-24dp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -25,15 +26,14 @@
         android:orientation="vertical">
 
         <!--<TextView-->
-            <!--android:id="@+id/main_tvw_location"-->
-            <!--android:layout_width="144dp"-->
-            <!--android:layout_height="36dp"-->
-            <!--android:shadowColor="#FFFFFF"-->
-            <!--android:shadowDx="0"-->
-            <!--android:shadowDy="0"-->
-            <!--android:shadowRadius="1"-->
-            <!--android:visibility="gone"-->
-            <!--android:textColor="#222222" />-->
+        <!--android:id="@+id/main_tvw_location"-->
+        <!--android:layout_width="144dp"-->
+        <!--android:layout_height="36dp"-->
+        <!--android:shadowColor="#FFFFFF"-->
+        <!--android:shadowDx="0"-->
+        <!--android:shadowDy="0"-->
+        <!--android:shadowRadius="1"-->
+        <!--android:textColor="#222222" />-->
 
         <ImageView
             android:id="@+id/main_img_map_compass"
@@ -90,7 +90,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="48dp"
         android:layout_alignParentBottom="true"
         android:background="#D6D7D7"
         android:orientation="horizontal">
@@ -112,13 +112,6 @@
             android:src="@drawable/ic_bottom_import"
             android:contentDescription="@string/main_btn_import" />
 
-        <!--<ImageButton-->
-        <!--android:id="@+id/btnOpenFile"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_weight="1"-->
-        <!--android:src="@drawable/ic_bottom_load" />-->
-
 
         <ImageButton
             android:id="@+id/main_btn_table"
@@ -127,14 +120,6 @@
             android:layout_weight="1"
             android:src="@drawable/ic_bottom_table"
             android:contentDescription="@string/main_btn_table" />
-
-        <!--<ImageButton-->
-            <!--android:id="@+id/btnSettings"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--android:src="@drawable/ic_bottom_settings"-->
-            <!--android:visibility="gone" />-->
 
 
         <ImageButton
@@ -166,6 +151,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:visibility="gone"
             app:srcCompat="@drawable/ic_bottom_scale"
             android:contentDescription="@string/main_btn_zoom_to_default" />
         <ImageButton
@@ -173,6 +159,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:visibility="gone"
             app:srcCompat="@drawable/ic_bottom_boolean_statistics"
             android:contentDescription="@string/main_btn_boolean_statistics" />
 
@@ -208,11 +195,11 @@
     <fragment
         android:id="@+id/main_fgm_edit"
         android:name="com.autod.gis.ui.fragment.EditFragment"
-        android:layout_width="240dp"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="-240dp" />
+        android:layout_marginEnd="-180dp" />
 
     <fragment
         android:id="@+id/main_fgm_attri"
@@ -220,7 +207,7 @@
         android:layout_width="348dp"
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="64dp" />
+        android:layout_marginBottom="48dp" />
 
     <fragment
         android:id="@+id/main_fgm_domain"

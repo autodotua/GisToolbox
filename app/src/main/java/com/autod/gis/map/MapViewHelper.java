@@ -257,26 +257,14 @@ public class MapViewHelper
             {
                 extent = LayerManager.getInstance().currentLayer.getFullExtent();
             }
-            if (BuildConfig.BUILD_TYPE.equals("normal"))
+
+            mapView.setViewpointGeometryAsync(extent, 24).addDoneListener(() ->
             {
-                mapView.setViewpointGeometryAsync(extent,24).addDoneListener(() ->
+                if (toDefaultScale)
                 {
-                    if (toDefaultScale)
-                    {
-                        mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> MainActivity.getInstance().setScaleText(Config.getInstance().defaultScale));
-                    }
-                });
-            }
-            else
-            {
-                mapView.setViewpointGeometryAsync(extent).addDoneListener(() ->
-                {
-                    if (toDefaultScale)
-                    {
-                        mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> MainActivity.getInstance().setScaleText(Config.getInstance().defaultScale));
-                    }
-                });
-            }
+                    mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> MainActivity.getInstance().setScaleText(Config.getInstance().defaultScale));
+                }
+            });
         }
         catch (Exception ignored)
         {

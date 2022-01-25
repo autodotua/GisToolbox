@@ -4,60 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.autod.gis.ui.activity.ImportFilesActivity">
 
-    <RelativeLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
+    <ListView
+        android:id="@+id/import_lvw_files"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="vertical">
+    <TextView
+        android:id="@+id/import_tvw_ftp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"/>
+    <Button
+        android:id="@+id/import_btn_ftp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+         android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        style="@style/normal_button"
+        android:drawableStart="@drawable/ic_net"
+        android:text="@string/import_btn_ftp"
+        android:layout_gravity="center_horizontal"/>
 
-            <Button
-                android:id="@+id/import_btn_ftp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                style="@style/normal_button"
-                android:drawableStart="@drawable/ic_net"
-                android:text="@string/import_btn_ftp"
-                android:layout_gravity="center_horizontal"
-
-                android:textSize="36sp" />
-
-            <TextView
-                android:id="@+id/import_tvw_ftp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:textSize="24sp" />
-        </LinearLayout>
-    </RelativeLayout>
-
-
-    <RelativeLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical">
-
-        <ListView
-            android:id="@+id/import_lvw_files"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="64dp" />
-
-        <Button
-            android:id="@+id/import_btn_search"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            style="@style/normal_button"
-            android:text="@string/import_btn_search" />
-    </RelativeLayout>
 </LinearLayout>

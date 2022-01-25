@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">智慧林工Pad</string>
+    <string name="app_name">GIS工具箱</string>
     <string name="view_location_callout">%1$.6f°%2$s\n%3$.6f°%4$s</string>
     <string name="track_notification_message">已记录%1$d个点，总长度%2$.2f米</string>
     <string name="track_notification_title_running">正在记录轨迹</string>

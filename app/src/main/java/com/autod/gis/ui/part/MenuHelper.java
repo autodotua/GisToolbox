@@ -47,14 +47,6 @@ public class MenuHelper
 
     public void initialize(MenuInflater menuInflater, Menu menu)
     {
-        if (!BuildConfig.BUILD_TYPE.equals("normal"))
-        {
-            menuInflater.inflate(R.menu.menu_min, menu);
-            menuUseTiledBaseLayer = menu.findItem(R.id.menu_min_use_tiled_base_layer);
-            menuUseTiledBaseLayer.setChecked(Config.getInstance().useTiledBaseLayer);
-            return;
-        }
-
         menuInflater.inflate(R.menu.menu, menu);
         menuRotate = menu.findItem(R.id.menu_rotate);
 

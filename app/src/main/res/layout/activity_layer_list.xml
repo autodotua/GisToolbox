@@ -11,10 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:descendantFocusability="blocksDescendants"
-        android:layout_marginBottom="64dp"/>
+        android:layout_marginBottom="48dp"/>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
+
         android:layout_alignParentBottom="true">
 
         <!--<Button-->

@@ -7,51 +7,43 @@
     android:orientation="vertical"
     tools:context="com.autod.gis.ui.fragment.EditFragment">
 
-    <TableLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:stretchColumns="*">
-
-        <TableRow>
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp">
 
             <Button
                 android:id="@+id/edit_btn_draw"
                 style="@style/edit_button"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:drawableTop="@drawable/ic_draw_draw"
                 android:text="@string/edit_btn_draw" />
-            <!--<Button-->
-            <!--android:id="@+id/btnClip"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--style="@style/drawButton"-->
-            <!--android:drawableTop="@drawable/ic_draw_clip_colorful"-->
-            <!--android:text="裁剪"/>-->
             <Button
                 android:id="@+id/edit_btn_split"
                 style="@style/edit_button"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:drawableTop="@drawable/ic_draw_split"
                 android:text="@string/edit_btn_split" />
-        </TableRow>
+    </LinearLayout>
 
-        <TableRow>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp">
 
-
-            <!--<Button-->
-            <!--android:id="@+id/btnMove"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--style="@style/drawButton"-->
-            <!--android:drawableTop="@drawable/ic_draw_move"-->
-            <!--android:text="移动"/>-->
             <Button
                 android:id="@+id/edit_btn_union"
                 style="@style/edit_button"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:drawableTop="@drawable/ic_draw_union"
                 android:text="@string/edit_btn_union" />
@@ -59,35 +51,12 @@
             <Button
                 android:id="@+id/edit_btn_delete"
                 style="@style/edit_button"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:drawableTop="@drawable/ic_draw_delete_colorful"
                 android:text="@string/edit_btn_delete" />
-        </TableRow>
-        <!--<TableRow>-->
-        <!--<Button-->
-        <!--android:id="@+id/btnReset"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--style="@style/drawButton"-->
-        <!--android:drawableTop="@drawable/ic_draw_reset"-->
-        <!--android:text="重置"/>-->
-        <!--<Button-->
-        <!--android:id="@+id/btnSave"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--style="@style/drawButton"-->
-        <!--android:drawableTop="@drawable/ic_draw_save_2"-->
-        <!--android:text="保存"/>-->
-        <!--<Button-->
-        <!--android:id="@+id/btnSaveAs"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:drawableTop="@drawable/ic_draw_saveas"-->
-        <!--style="@style/drawButton"-->
-        <!--android:text="另存为"/>-->
-        <!--</TableRow>-->
-    </TableLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
