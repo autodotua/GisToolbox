@@ -52,7 +52,7 @@
     <string name="menu_keep_location_display_background">后台保持定位</string>
     <string name="menu_feature_layer_query_extent_every_time">矢量图层重算范围</string>
     <string name="menu_location">位置</string>
-    <string name="menu_tile_url">瓦片底图地址</string>
+    <string name="menu_base_urls">底图地址</string>
     <string name="menu_default_scale">默认比例尺</string>
     <string name="menu_gps_min_time">GPS最小更新时间</string>
     <string name="menu_load_esri_map">加载Esri底图</string>

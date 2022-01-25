@@ -255,7 +255,7 @@ public class LayerManager
                 layer.setSelectionColor(Color.YELLOW);
                 layer.setSelectionWidth(10);
                 LayerStyleHelper.setLayerStyle(layer, new File(path).getName());
-                if (path.contains("轨迹"))
+                if (path.contains("Track"))
                 {
                     Symbol symbol = null;
                     if (table.getGeometryType() == GeometryType.POLYGON)

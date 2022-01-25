@@ -6,12 +6,8 @@
                 android:id="@+id/menu_load_esri_map"
                 android:title="@string/menu_load_esri_map" />
             <item
-                android:id="@+id/menu_use_tiled_base_layer"
-                android:checkable="true"
-                android:title="@string/menu_use_tiled_base_layer" />
-            <item
                 android:id="@+id/menu_tile_url"
-                android:title="@string/menu_tile_url" />
+                android:title="@string/menu_base_urls" />
             <item
                 android:id="@+id/menu_rotate"
                 android:checkable="true"

@@ -6,7 +6,6 @@ import android.widget.Toast;
 import com.esri.arcgisruntime.layers.Layer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.autod.gis.BuildConfig;
 import com.autod.gis.layer.LayerManager;
 import com.autod.gis.ui.activity.MainActivity;
 
@@ -38,10 +37,9 @@ public class Config
         {
             instance = new Config();
 
-            instance.useTiledBaseLayer = true;
             instance.featureLayerQueryExtentEveryTime = true;
             instance.useBarometer = true;
-            instance.tileUrls.add("https://mt1.google.cn/vt/lyrs=s&x={x}&y={y}&z={z}");
+            instance.baseUrls.add("https://mt1.google.cn/vt/lyrs=s&x={x}&y={y}&z={z}");
 
             FileHelper.setConfigJson(gson.toJson(instance));
         }
@@ -59,32 +57,13 @@ public class Config
         }
     }
 
-
-    public String gpkPath = FileHelper.getProgramPath() + "/BaseMap/raster.gpkg";
-    public ArrayList<String> layerPath = new ArrayList<String>()
-    {{
-        //add(FileHelper.getProgramPath() + "/BaseShapefiles/等高线.shp");
-//        add(FileHelper.getProgramPath() + "/BaseShapefiles/县.shp");
-//        add(FileHelper.getProgramPath() + "/BaseShapefiles/镇.shp");
-//        add(FileHelper.getProgramPath() + "/BaseShapefiles/村.shp");
-//        add(FileHelper.getProgramPath() + "/BaseShapefiles/小班.shp");
-//        add(FileHelper.getProgramPath() + "/BaseShapefiles/公益林.shp");
-    }};
-    public HashMap<String, Boolean> layerVisible = new HashMap<String, Boolean>()
-    {{
-//        put(FileHelper.getProgramPath() + "/BaseShapefiles/等高线.shp", false);
-//        put(FileHelper.getProgramPath() + "/BaseShapefiles/县.shp", false);
-//        put(FileHelper.getProgramPath() + "/BaseShapefiles/镇.shp", true);
-//        put(FileHelper.getProgramPath() + "/BaseShapefiles/村.shp", true);
-//        put(FileHelper.getProgramPath() + "/BaseShapefiles/小班.shp", false);
-//        put(FileHelper.getProgramPath() + "/BaseShapefiles/公益林.shp", true);
-    }};
+    public ArrayList<String> layerPath = new ArrayList<String>();
+    public HashMap<String, Boolean> layerVisible = new HashMap<String, Boolean>();
     public String styleFolder = FileHelper.getProgramPath() + "/Style";
 
     public String getUniqueValueStyleFile(String shapeFileName)
     {
-        String path = styleFolder + "/" + shapeFileName.substring(0, shapeFileName.length() - 4) + ".uniqueValue.style";
-        return path;
+        return styleFolder + "/" + shapeFileName.substring(0, shapeFileName.length() - 4) + ".uniqueValue.style";
     }
 
     public String getLabelStyleFile(String shapeFileName)
@@ -100,9 +79,7 @@ public class Config
     public int animationDuration = 500;
     public boolean canRotate = true;
 
-    //    public boolean normal = false;
-    public boolean useTiledBaseLayer = false;
-    public ArrayList<String> tileUrls = new ArrayList<>();
+    public ArrayList<String> baseUrls = new ArrayList<>();
 
     public double defaultScale = 10000;
 

@@ -152,7 +152,7 @@ public class TrackHelper
 
     private static void loadGpx()
     {
-        String name = getTimeBasedFileName(startTime) + "轨迹";
+        String name = getTimeBasedFileName(startTime) + "Track";
         String time = getGpxTime(startTime);
         gpxString = new StringBuilder().append(MainActivity.getInstance().getResources()
                 .getString(R.string.gpx_head, name, time
@@ -309,8 +309,7 @@ public class TrackHelper
 
         saveGpx();
 
-        final String polylineFile = getShapefile(GeometryType.POLYLINE);
-        final String polygonFile = getShapefile(GeometryType.POLYGON);
+        final String polylineFile = getShapefile();
 
         if (polylineFile == null)
         {
@@ -327,9 +326,6 @@ public class TrackHelper
         Toast.makeText(MainActivity.getInstance(), "轨迹记录停止", Toast.LENGTH_SHORT).show();
 
         new Thread(() -> {
-//            Looper.prepare();
-//            Toast.makeText(MainActivity.getInstance(), "闪退", Toast.LENGTH_SHORT).show();
-//            Looper.loop();
             if (polylineTable != null && polylineTable.getFeatureLayer() != null)
             {
                 LayerManager.getInstance().getLayers().remove(polylineTable.getFeatureLayer());
@@ -347,19 +343,12 @@ public class TrackHelper
                         // feature.setGeometry(geometry);
                         Map<String, Object> map = new HashMap<>();
                         Polyline line = new Polyline(points);
-                        //map.put("长度", GeometryEngine.length((Polyline) GeometryEngine.project(line, SpatialReferences.getWebMercator())));
                         map.put("长度", GeometryEngine.lengthGeodetic(line, null, GeodeticCurveType.NORMAL_SECTION));
 
                         Feature feature = polylineTable.createFeature(map, line);
                         polylineTable.addFeatureAsync(feature).addDoneListener(() -> {
                             polylineTable.close();
                             LayerManager.getInstance().addLayer(polylineFile);
-                            //polylineTable.updateFeatureAsync(feature).addDoneListener(() -> {
-                            //Envelope e2 = polylineTable.getExtent();
-                            // FeatureLayer featureLayer = new FeatureLayer(polylineTable);
-                            //LayerManager.getInstance().layerFilePath.put(featureLayer, polylineFile);
-                            //LayerManager.getInstance().getLayers().add(featureLayer);
-                            //});
 
                         });
                     }
@@ -380,75 +369,18 @@ public class TrackHelper
 
                 }
             });
-            //});
-
-
-            if (polygonFile == null)
-            {
-                return;
-            }
-//       LayerManager.getInstance().getLayers().remove(pointFeatureTable.getFeatureLayer());
-            ShapefileFeatureTable polygonTable = new ShapefileFeatureTable(polygonFile);
-
-            polygonTable.loadAsync();
-            polygonTable.addDoneLoadingListener(() -> {
-                if (polygonTable.getLoadStatus() == LoadStatus.LOADED)
-                {
-                    try
-                    {
-                        PointCollection points = new PointCollection(locationPoints);
-                        Polygon polygon = new Polygon(points);
-                        Map<String, Object> map = new HashMap<>();
-                        // map.put("周长", GeometryEngine.length((Polyline) GeometryEngine.project(polygon.toPolyline(), SpatialReferences.getWebMercator())));
-
-                        map.put("周长", GeometryEngine.lengthGeodetic(polygon, null, GeodeticCurveType.NORMAL_SECTION));
-                        map.put("面积", GeometryEngine.areaGeodetic(polygon, null, GeodeticCurveType.NORMAL_SECTION));
-                        Feature feature = polygonTable.createFeature(map, polygon);
-                        polygonTable.addFeatureAsync(feature);
-                    }
-                    catch (Exception ex)
-                    {
-                        Looper.prepare();
-                        Toast.makeText(MainActivity.getInstance(), "面图层生成失败\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
-                        Looper.loop();
-                    }
-                }
-                else
-                {
-                    String error = "写入面轨迹文件失败\n: " + polygonTable.getLoadError().toString();
-                    Looper.prepare();
-                    Toast.makeText(MainActivity.getInstance(), error, Toast.LENGTH_LONG).show();
-                    Looper.loop();
-                }
-            });
-
-
         }).start();
 
     }
 
 
-    private static String getShapefile(GeometryType type)
+    private static String getShapefile( )
     {
-
-
         String targetPath = null;
 
-        switch (type)
-        {
-            case POLYGON:
-                targetPath = FileHelper.getPolygonTrackFilePath(getTimeBasedFileName(startTime));
-                break;
-            case POLYLINE:
-                targetPath = FileHelper.getPolylineTrackFilePath(getTimeBasedFileName(startTime));
-                break;
-            default:
-                Toast.makeText(MainActivity.getInstance(), "未知图形格式", Toast.LENGTH_SHORT).show();
-                break;
-        }
+        targetPath = FileHelper.getPolylineTrackFilePath(getTimeBasedFileName(startTime));
 
-
-        return FileHelper.createShapefile(type, targetPath);
+        return FileHelper.createShapefile(GeometryType.POLYLINE, targetPath);
     }
 
     public enum Status

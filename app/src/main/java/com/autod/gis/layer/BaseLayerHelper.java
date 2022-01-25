@@ -1,20 +1,13 @@
 package com.autod.gis.layer;
 
-import android.widget.Toast;
-
-import com.esri.arcgisruntime.data.GeoPackage;
 import com.esri.arcgisruntime.io.RequestConfiguration;
 import com.esri.arcgisruntime.layers.Layer;
-import com.esri.arcgisruntime.layers.RasterLayer;
 import com.esri.arcgisruntime.layers.WebTiledLayer;
-import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.autod.gis.data.Config;
 import com.autod.gis.map.MapViewHelper;
-import com.autod.gis.ui.activity.MainActivity;
 
-import java.io.File;
 import java.util.ArrayList;
 
 
@@ -24,79 +17,20 @@ public class BaseLayerHelper
 
     public static void loadBaseLayer()
     {
-        if (Config.getInstance().useTiledBaseLayer)
-        {
-            loadTiledBaseLayer();
-        }
-        else
-        {
-            loadGpkBaseLayer();
-        }
+        loadTiledBaseLayer();
     }
 
-    private static void loadGpkBaseLayer()
-    {
-       // baseLayerCount = 0;
-        //IndexHelper.checkIndexs();
-        if (new File(Config.getInstance().gpkPath).exists())
-        {
-            GeoPackage geoPackage = new GeoPackage(Config.getInstance().gpkPath);
-            geoPackage.loadAsync();
-            geoPackage.addDoneLoadingListener(() -> {
-                if (geoPackage.getLoadStatus() == LoadStatus.LOADED)
-                {
-                    RasterLayer geoPackageRasterLayer = new RasterLayer(geoPackage.getGeoPackageRasters().get(0));
-                    //geoPackageRasterLayer.setVisible(false);
-                    Basemap base = new Basemap();
-                    base.getBaseLayers().add(geoPackageRasterLayer);
-                    LayerManager.getInstance().map = new ArcGISMap(base);
-                    MapViewHelper.getInstance().linkMapAndMapView();
-                    //baseLayerCount += 1;
-//                    if (Config.getInstance().layerPath.size() > 0)
-//                    {
-//                        loadFeatureLayer(0);
-//                    }
-                    loadOtherLayers();
-                }
-            });
-        }
-        else
-        {
-            Toast.makeText(MainActivity.getInstance(), "底图不存在", Toast.LENGTH_SHORT).show();
-            LayerManager.getInstance().map = new ArcGISMap();
-            MapViewHelper.getInstance().linkMapAndMapView();
-            loadOtherLayers();
-
-//                loadFeatureLayer(0);
-
-        }
-//        Basemap base=new Basemap();
-//        (LayerManager.getInstance().map = new ArcGISMap(base)).addLoadStatusChangedListener(loadStatusChangedEvent -> {
-//            if (loadStatusChangedEvent.getNewLoadStatus() == LoadStatus.LOADED)
-//            {
-//               // loadBaseLayer2();
-//            }
-//        });
-//       LayerManager.getInstance().map.loadAsync();
-//        loadBaseLayer2();
-        //LayerManager.getInstance().map = new ArcGISMap();
-
-        MapViewHelper.getInstance().linkMapAndMapView();
-        //loadBaseLayer2();
-        //loadBaseLayer1();
-    }
 
     private static void loadTiledBaseLayer()
     {
-        //WebTiledLayer baseLayer = new WebTiledLayer("http://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&scl=1&style=8&x={col}&y={row}&z={level}");
         ArrayList<Layer> layers = new ArrayList<>();
-        for (String url : Config.getInstance().tileUrls)
+        for (String url : Config.getInstance().baseUrls)
         {
             url = url.replace("{x}", "{col}").replace("{y}", "{row}").replace("{z}", "{level}");
             WebTiledLayer layer = new WebTiledLayer(url);
-            RequestConfiguration requestConfiguration =new RequestConfiguration();
+            RequestConfiguration requestConfiguration = new RequestConfiguration();
             requestConfiguration.getHeaders().put("referer", "http://www.arcgis.com");
-            layer.setRequestConfiguration( requestConfiguration);
+            layer.setRequestConfiguration(requestConfiguration);
             layers.add(layer);
         }
         //Basemap basemap = new Basemap(baseLayer);
@@ -120,7 +54,7 @@ public class BaseLayerHelper
     {
         if (Config.getInstance().layerPath.size() > 0)
         {
-            isLoadingBaseLayers =true;
+            isLoadingBaseLayers = true;
             baseLayerIndex = 0;
             LayerManager.getInstance().addLayer(Config.getInstance().layerPath.get(0));
         }

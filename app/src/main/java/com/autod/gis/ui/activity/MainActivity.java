@@ -400,10 +400,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 intent = new Intent(this, LayerListActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.main_btn_statistics:
-                intent = new Intent(this, RegionalStatisticActivity.class);
-                startActivity(intent);
-                break;
             case R.id.main_btn_zoom_in:
                 try
                 {

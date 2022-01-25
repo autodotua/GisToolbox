@@ -126,7 +126,7 @@ public class FileHelper
 
     public static String getProgramPath()
     {
-        return Environment.getExternalStorageDirectory().toString() + "/Gis/";
+        return Environment.getExternalStorageDirectory().toString() + "/GisToolbox/";
     }
 
     public static String getVerificationPath()
@@ -181,42 +181,20 @@ public class FileHelper
         return getProgramPath()+ "EmptyShapefiles";
     }
 
-    public static String getPolygonTrackFilePath(String name)
-    {
-        return getProgramPath() + "轨迹/面数据/面-" + name;
-    }
 
     public static String getPolylineTrackFilePath(String name)
     {
-        return getProgramPath() + "轨迹/线数据/线-" + name;
+        return getProgramPath() + "Track/Shapefile/" + name;
     }
 
-//    public static String getPointTrackFilePath(String name)
-//    {
-//        return getProgramPath() + "轨迹/" + name;
-//    }
     public static String getGpxTrackFilePath(String name)
     {
-        return getProgramPath() + "轨迹/" + name;
-    }
-
-    public static String getIndexPath(String name)
-    {
-        if (name == null)
-        {
-            return Environment.getExternalStorageDirectory().toString() + "/Gis/Index";
-        }
-        return Environment.getExternalStorageDirectory().toString() + "/Gis/Index/" + name + ".index";
+        return getProgramPath() + "Track/" + name;
     }
 
     public static String getStylePath(String fileName)
     {
         return getProgramPath() + "Style/" + fileName;
-    }
-
-    public static String getStyleJsonString(String fileName)
-    {
-        return readTextFile(new File(getStylePath(fileName)));
     }
 
     //文件拷贝

@@ -7,7 +7,7 @@ public class UIHelper
 {
     public static void showSimpleErrorDialog(Activity activity, String message)
     {
-        activity.  runOnUiThread(() -> {
+        activity.runOnUiThread(() -> {
             AlertDialog alertDialog = new AlertDialog.Builder(activity)
                     .setTitle("错误")
                     .setMessage(message)

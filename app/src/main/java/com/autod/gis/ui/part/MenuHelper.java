@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.autod.gis.BuildConfig;
 import com.autod.gis.R;
 import com.autod.gis.data.Config;
 import com.autod.gis.layer.LayerManager;
@@ -32,7 +31,6 @@ public class MenuHelper
     private MenuItem menuKeepLocationBackground;
     private MenuItem menuFeatureLayerQueryExtentEveryTime;
     private MenuItem menuSideButtonsRight;
-    private MenuItem menuUseTiledBaseLayer;
     private MenuItem menuMapCompass;
     private MenuItem menuUseBarometer;
     private MenuItem menuUseRelativeAltitude;
@@ -60,8 +58,6 @@ public class MenuHelper
 
         menuSideButtonsRight = menu.findItem(R.id.menu_side_buttons_right);
 
-        menuUseTiledBaseLayer = menu.findItem(R.id.menu_use_tiled_base_layer);
-
         menuMapCompass = menu.findItem(R.id.menu_compass);
 
         menuUseBarometer = menu.findItem(R.id.menu_use_barometer);
@@ -79,7 +75,6 @@ public class MenuHelper
         menuKeepLocationBackground.setChecked(Config.getInstance().keepLocationBackground);
         menuFeatureLayerQueryExtentEveryTime.setChecked(Config.getInstance().featureLayerQueryExtentEveryTime);
         menuSideButtonsRight.setChecked(Config.getInstance().sideButtonsRight);
-        menuUseTiledBaseLayer.setChecked(Config.getInstance().useTiledBaseLayer);
         menuMapCompass.setChecked(Config.getInstance().showMapCompass);
         menuUseBarometer.setChecked(Config.getInstance().useBarometer);
         menuUseRelativeAltitude.setChecked(Config.getInstance().useRelativeAltitude);
@@ -120,12 +115,6 @@ public class MenuHelper
                 MapViewHelper.getInstance().imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
                 MapViewHelper.getInstance().setMapCompass();
                 break;
-            case R.id.menu_min_use_tiled_base_layer:
-            case R.id.menu_use_tiled_base_layer:
-                Config.getInstance().useTiledBaseLayer = !Config.getInstance().useTiledBaseLayer;
-                menuUseTiledBaseLayer.setChecked(Config.getInstance().useTiledBaseLayer);
-                LayerManager.getInstance().resetLayers();
-                break;
             case R.id.menu_side_buttons_right:
                 Config.getInstance().sideButtonsRight = !Config.getInstance().sideButtonsRight;
                 menuSideButtonsRight.setChecked(Config.getInstance().sideButtonsRight);
@@ -143,22 +132,21 @@ public class MenuHelper
                     LocationDisplayHelper.instance.stop();
                 }
                 break;
-            case R.id.menu_min_tile_url:
             case R.id.menu_tile_url:
                 DialogHelper.showSetValueDialog(MainActivity.getInstance(),
-                        "设置瓦片地址",
+                        "设置底图地址",
                         "请输入一行一个地址，以行分隔，自动忽略空行",
-                        TextUtils.join("\n\n", Config.getInstance().tileUrls),
+                        TextUtils.join("\n\n", Config.getInstance().baseUrls),
                         InputType.TYPE_TEXT_FLAG_MULTI_LINE,
                         p ->
                         {
-                            Config.getInstance().tileUrls.clear();
+                            Config.getInstance().baseUrls.clear();
                             int count = 0;
                             for (String url : p.split("\n"))
                             {
                                 if (url.length() > 0)
                                 {
-                                    Config.getInstance().tileUrls.add(url);
+                                    Config.getInstance().baseUrls.add(url);
                                     count++;
                                 }
                             }
@@ -167,7 +155,6 @@ public class MenuHelper
                             LayerManager.getInstance().resetLayers();
                         });
                 break;
-            case R.id.menu_min_load_esri_map:
             case R.id.menu_load_esri_map:
                 LayerManager.getInstance().loadEsriLayer();
                 break;

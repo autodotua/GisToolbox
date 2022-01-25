@@ -272,12 +272,6 @@ public class MapViewHelper
         }
     }
 
-
-    /**
-     * 设置定位模式
-     */
-
-
     /**
      * 设置单击地图事件
      */
