@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -56,7 +58,7 @@ public class EditFragment extends Fragment
      * 是否正在分割操作。由于分割操作分两步：选取、画线，因此需要一个变量来确定当前是否处于画线阶段
      */
     public boolean isSpliting = false;
-    public Feature editingFeature=null;
+    public Feature editingFeature = null;
     /**
      * 所有编辑操作的按钮
      */
@@ -108,10 +110,8 @@ public class EditFragment extends Fragment
         control = MainActivity.getInstance().findViewById(R.id.main_fgm_edit);
 
         int[] editBtnIds = {
-                // R.id.btnClip,
                 R.id.edit_btn_delete,
                 R.id.edit_btn_draw,
-                //R.id.btnMove,
                 R.id.edit_btn_union,
                 R.id.edit_btn_split,
         };
@@ -123,8 +123,7 @@ public class EditFragment extends Fragment
         pointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.SQUARE, 0xFFFF0000, 20);
         lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, 0xFFFF8800, 4);
         fillSymbol = new SimpleFillSymbol(SimpleFillSymbol.Style.CROSS, 0x40FFA9A9, lineSymbol);
-//        Button btnSave = instance.findViewById(R.id.btnSave);
-//        btnSave.setOnClickListener(v -> stopEditing());
+
         /**
          * 将所有的按钮注册单击事件
          */
@@ -141,19 +140,9 @@ public class EditFragment extends Fragment
         /**
          * 撤销按钮
          */
-        Button btnUndo = MainActivity.getInstance().findViewById(R.id.edit_btn_undo);
+        ImageButton btnUndo = MainActivity.getInstance().findViewById(R.id.edit_btn_undo);
         btnUndo.setOnClickListener(v ->
         {
-//            if (!isDrawing)
-//            {
-//                if (mapviewHelper.selectedFeatures.size() > 0)
-//                {
-//                    mapviewHelper.selectedFeatures.remove(mapviewHelper.selectedFeatures.size() - 1);
-//                    mapviewHelper.selectFeature();
-//                }
-//            }
-//            else
-//            {
             if (sketchEditor.canUndo())
             {
                 sketchEditor.undo();
@@ -166,7 +155,7 @@ public class EditFragment extends Fragment
 
         });
 
-        Button btnRedo = MainActivity.getInstance().findViewById(R.id.edit_btn_redo);
+        ImageButton btnRedo = MainActivity.getInstance().findViewById(R.id.edit_btn_redo);
         btnRedo.setOnClickListener(v ->
         {
             if (sketchEditor.canRedo())
@@ -235,13 +224,6 @@ public class EditFragment extends Fragment
     private void setButtonsClickEvent(View v)
     {
         resetButtons();
-//        for (Button drawBtn : editButtons)
-//        {
-//            if (drawBtn.equals(v))
-//            {
-//                drawBtn.setBackground(instance.getDrawable(R.drawable.btn_background_pressed));
-//            }
-//        }
 
         switch (v.getId())
         {
@@ -250,7 +232,7 @@ public class EditFragment extends Fragment
                 //如果在正常状态下，则开始画图；否则结束画图
                 if (btn.getText().toString().equals("画图"))
                 {
-                    if(startEditing())
+                    if (startEditing())
                     {
                         btn.setText("完成");
                     }
@@ -415,22 +397,22 @@ public class EditFragment extends Fragment
 
         else if (MapViewHelper.getInstance().getSelectedFeatures().size() == 1)
         {
-            editingFeature=MapViewHelper.getInstance().getSelectedFeatures().get(0);
-            Geometry geometry=editingFeature.getGeometry();
+            editingFeature = MapViewHelper.getInstance().getSelectedFeatures().get(0);
+            Geometry geometry = editingFeature.getGeometry();
             switch (featureTable.getGeometryType())
             {
                 case POINT:
 
-                    sketchEditor.start(geometry,SketchCreationMode.POINT);
+                    sketchEditor.start(geometry, SketchCreationMode.POINT);
                     break;
                 case MULTIPOINT:
-                    sketchEditor.start(geometry,SketchCreationMode.MULTIPOINT);
+                    sketchEditor.start(geometry, SketchCreationMode.MULTIPOINT);
                     break;
                 case POLYLINE:
-                    sketchEditor.start(geometry,SketchCreationMode.POLYLINE);
+                    sketchEditor.start(geometry, SketchCreationMode.POLYLINE);
                     break;
                 case POLYGON:
-                    sketchEditor.start(geometry,SketchCreationMode.POLYGON);
+                    sketchEditor.start(geometry, SketchCreationMode.POLYGON);
                     break;
             }
         }
@@ -512,11 +494,11 @@ public class EditFragment extends Fragment
             {
                 split((Polyline) sketchGeometry);
             }
-            else if(editingFeature!=null)
+            else if (editingFeature != null)
             {
                 editingFeature.setGeometry(sketchGeometry);
                 editingFeature.getFeatureTable().updateFeatureAsync(editingFeature);
-                editingFeature=null;
+                editingFeature = null;
             }
             else
             {
@@ -675,26 +657,19 @@ public class EditFragment extends Fragment
             Toast.makeText(MainActivity.getInstance(), "不可编辑只读图层", Toast.LENGTH_SHORT).show();
             return;
         }
-        //TranslateAnimation translateAnimation = null;
-        if (control.getTranslationX() == 0)//打开
+        if (control.getTranslationY() == 0)//打开
         {
-            ObjectAnimator.ofFloat(control, "translationX", 0, -control.getWidth()).setDuration(Config.getInstance().animationDuration).start();
-            if (FeatureAttributionTableFragment.getInstance().getControl().getTranslationY() == 0)
-            {
-                ObjectAnimator.ofFloat(FeatureAttributionTableFragment.getInstance().getControl(), "translationY", 0, -FeatureAttributionTableFragment.getInstance().getControl().getHeight()).setDuration(Config.getInstance().animationDuration).start();
-            }
-            else if (Config.getInstance().sideButtonsRight)
-            {
-                MainActivity.getInstance().setSideButtonsVisible(false);
-            }
+            ObjectAnimator
+                    .ofFloat(control, "translationY",
+                            ((RelativeLayout.LayoutParams) control.getLayoutParams()).bottomMargin
+                                    - MainActivity.getInstance().findViewById(R.id.main_llt_bottom_buttons).getHeight())
+                    .setDuration(Config.getInstance().animationDuration).start();
+
         }
         else
         {
-            ObjectAnimator.ofFloat(control, "translationX", -control.getWidth(), 0).setDuration(Config.getInstance().animationDuration).start();
-            if (Config.getInstance().sideButtonsRight)
-            {
-                MainActivity.getInstance().setSideButtonsVisible(true);
-            }
+            ObjectAnimator.ofFloat(control, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
+
         }
 
     }

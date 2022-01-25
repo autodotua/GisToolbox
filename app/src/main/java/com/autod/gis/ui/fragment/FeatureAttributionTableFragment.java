@@ -242,10 +242,6 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
         }
         finally
         {
-//            if (instance.frgAttri.getTranslationY() != 0)
-//            {
-//                ObjectAnimator.ofFloat(instance.frgAttri, "translationY", -instance.frgAttri.getHeight(), 0).setDuration(500).start();
-//            }
         }
     }
 
@@ -263,15 +259,8 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
      */
     private void saveAttributes()
     {
-//        FeatureQueryResult result = future.get();
-//        Iterator<Feature> iterator = result.iterator();
         TableLayout tbl = MainActivity.getInstance().findViewById(R.id.attri_table_tbl_attributions);
-        //Feature feature;
-        //  int index = 0;
         Set<Button> existButtons = btnEttMap.keySet();
-//        while (iterator.hasNext())
-//        {
-//            feature = iterator.next();
 
         Map<String, Object> attr = feature.getAttributes();
         Set<String> keys = attr.keySet();
@@ -331,24 +320,11 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
         if (control.getTranslationY() != 0)//打开
         {
             ObjectAnimator.ofFloat(control, "translationY", -control.getHeight(), 0).setDuration(Config.getInstance().animationDuration).start();
-            if (EditFragment.getInstance().getControl().getTranslationX() < 0)
-            {
-                ObjectAnimator.ofFloat(EditFragment.getInstance().getControl(), "translationX", 0, -EditFragment.getInstance().getControl().getHeight()).setDuration(Config.getInstance().animationDuration).start();
-            }
-            else if (Config.getInstance().sideButtonsRight)
-            {
-                MainActivity.getInstance().setSideButtonsVisible(false);
-            }
         }
         else//关闭
         {
             ObjectAnimator.ofFloat(control, "translationY", 0, -control.getHeight()).setDuration(Config.getInstance().animationDuration).start();
-            if (Config.getInstance().sideButtonsRight)
-            {
-                MainActivity.getInstance().setSideButtonsVisible(true);
-            }
         }
-        //btnCloseOrReset.setText("关闭");
     }
 
     /**
@@ -368,18 +344,10 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
                 if (btnCloseOrReset.getText().equals("关闭"))
                 {
                     foldOrUnfold();
-                    //ObjectAnimator.ofFloat(control, "translationY", 0, -control.getHeight()).setDuration(500).start();
-                    // btnCloseOrReset.setText("展开");
                 }
-//                else if (btnCloseOrReset.getText().equals("展开"))
-//                {
-//                    ObjectAnimator.ofFloat(instance.frgAttri, "translationY", -instance.frgAttri.getHeight(), 0).setDuration(500).start();
-//                    btnCloseOrReset.setText("关闭");
-//                }
                 else
                 {
                     showTable();
-                    //btnCloseOrReset.setText("关闭");
                 }
                 break;
             //单击编辑按钮

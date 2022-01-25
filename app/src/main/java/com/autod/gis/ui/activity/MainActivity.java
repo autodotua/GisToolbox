@@ -266,8 +266,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ImageButton btnTable = findViewById(R.id.main_btn_table);
         btnTable.setOnClickListener(this);
-        ImageButton btnBooleanBooleanStatistics = findViewById(R.id.main_btn_statistics);
-        btnBooleanBooleanStatistics.setOnClickListener(this);
 
         tvwScale = instance.findViewById(R.id.main_tvw_scale);
 
@@ -290,9 +288,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             setSideButtonPosition();
         }
-
-
-        //refresh();
     }
 
     public void setSideButtonPosition()

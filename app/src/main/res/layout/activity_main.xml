@@ -25,16 +25,6 @@
         android:layout_marginTop="12dp"
         android:orientation="vertical">
 
-        <!--<TextView-->
-        <!--android:id="@+id/main_tvw_location"-->
-        <!--android:layout_width="144dp"-->
-        <!--android:layout_height="36dp"-->
-        <!--android:shadowColor="#FFFFFF"-->
-        <!--android:shadowDx="0"-->
-        <!--android:shadowDy="0"-->
-        <!--android:shadowRadius="1"-->
-        <!--android:textColor="#222222" />-->
-
         <ImageView
             android:id="@+id/main_img_map_compass"
             android:layout_width="36dp"
@@ -88,7 +78,45 @@
 
     </LinearLayout>
 
+
+    <TextView
+        android:id="@+id/main_tvw_scale"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="72dp"
+        android:textColor="#FFFFFF" />
+
+    <ImageView
+        android:id="@+id/main_img_satellite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_satellite"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        android:contentDescription="@string/main_img_satellite" />
+
+    <fragment
+        android:id="@+id/main_fgm_edit"
+        android:name="com.autod.gis.ui.fragment.EditFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="-48dp"
+        android:layout_alignParentBottom="true" />
+
+    <fragment
+        android:id="@+id/main_fgm_attri"
+        android:name="com.autod.gis.ui.fragment.FeatureAttributionTableFragment"
+        android:layout_width="348dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="48dp" />
+
     <LinearLayout
+        android:id="@+id/main_llt_bottom_buttons"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_alignParentBottom="true"
@@ -154,14 +182,7 @@
             android:visibility="gone"
             app:srcCompat="@drawable/ic_bottom_scale"
             android:contentDescription="@string/main_btn_zoom_to_default" />
-        <ImageButton
-            android:id="@+id/main_btn_statistics"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_bottom_boolean_statistics"
-            android:contentDescription="@string/main_btn_boolean_statistics" />
+
 
         <ImageButton
             android:id="@+id/main_btn_pan"
@@ -171,49 +192,4 @@
             android:src="@drawable/ic_bottom_location"
             android:contentDescription="@string/main_btn_pan" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/main_tvw_scale"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="72dp"
-        android:textColor="#FFFFFF" />
-
-    <ImageView
-        android:id="@+id/main_img_satellite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_satellite"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="8dp"
-        android:visibility="gone"
-        android:contentDescription="@string/main_img_satellite" />
-
-    <fragment
-        android:id="@+id/main_fgm_edit"
-        android:name="com.autod.gis.ui.fragment.EditFragment"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="-180dp" />
-
-    <fragment
-        android:id="@+id/main_fgm_attri"
-        android:name="com.autod.gis.ui.fragment.FeatureAttributionTableFragment"
-        android:layout_width="348dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="48dp" />
-
-    <fragment
-        android:id="@+id/main_fgm_domain"
-        android:name="com.autod.gis.ui.fragment.AttributeDomainFragment"
-        android:layout_width="320dp"
-        android:layout_height="320dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="-320dp" />
 </RelativeLayout>
