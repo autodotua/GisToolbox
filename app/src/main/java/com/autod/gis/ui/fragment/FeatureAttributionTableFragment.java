@@ -64,13 +64,6 @@ public class FeatureAttributionTableFragment extends Fragment
 
     private Button btnCloseOrReset;
 
-    private static FeatureAttributionTableFragment instance;
-
-    public static FeatureAttributionTableFragment getInstance()
-    {
-        return instance;
-    }
-
     private View control;
 
     public View getControl()
@@ -81,9 +74,6 @@ public class FeatureAttributionTableFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        instance = this;
-
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_attri_table, container, false);
     }
 

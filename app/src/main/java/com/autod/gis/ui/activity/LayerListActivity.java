@@ -90,48 +90,12 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
     {
         switch (view.getId())
         {
-//            case R.id.btnOpenSavedLayers:
-//                break;
-            //单击保存工程文件按钮
             case R.id.layer_btn_save:
                 save();
-//                final EditText editText = new EditText(this);
-//                AlertDialog.Builder inputDialog =new AlertDialog.Builder(this);
-//                inputDialog.setTitle("请选择文件名").setView(editText);
-//                inputDialog.setPositiveButton("确定",(dialog, which) -> {
-//                    String name=editText.getText().toString();
-//                    if(!isValidFileName(name))
-//                    {
-//                        Toast.makeText(LayerListActivity.this, "文件名不合法，未保存", Toast.LENGTH_SHORT).show();
-//                    }
-//                    else
-//                    {
-//                        try
-//                        {
-//                            String path = Environment.getExternalStorageDirectory().toString() + "/Gis/" + name + ".mmxd";
-//                            //DataAnalysis.saveLayers(path);
-//                            Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
-//                        }
-//                        catch (Exception ex)
-//                        {
-//                            Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                }).show();
                 break;
             case R.id.layer_btn_save_as:
                 saveAs();
                 break;
-//            case R.id.btnResetLayers:
-//               LayerManager.getInstance().resetLayers();
-//                new Handler().postDelayed(new Runnable()
-//                {
-//                    public void run()
-//                    {
-//                        layerListActivity.finish();
-//                    }
-//                }, 573);
-//                break;
 
             case R.id.layer_btn_open:
                 open();

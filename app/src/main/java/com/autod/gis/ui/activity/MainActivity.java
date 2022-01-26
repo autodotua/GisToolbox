@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
 
 import com.autod.gis.data.Config;
 import com.autod.gis.layer.BaseLayerHelper;
@@ -246,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).initialize(this);
 
-        FeatureAttributionTableFragment.getInstance().Initialize(this);
+        ((FeatureAttributionTableFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).Initialize(this);
 
 
         ImageButton btnZoomToLayer = findViewById(R.id.main_btn_zoom_to_layer);
@@ -409,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.main_btn_table:
-                FeatureAttributionTableFragment.getInstance().foldOrUnfold();
+                ((FeatureAttributionTableFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).foldOrUnfold();
                 break;
             case R.id.main_btn_edit:
                 ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).foldOrUnfold(this);

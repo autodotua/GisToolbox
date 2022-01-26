@@ -141,15 +141,7 @@ public class MapViewHelper
      */
     public void setMapCompass()
     {
-//        int screenDegree = getScreenDegree();
-//        RotateAnimation ra = new RotateAnimation(currentDegree - 45 - screenDegree,
-//                -(float)angle - 45 - screenDegree, Animation.RELATIVE_TO_SELF,
-//                0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-//
-//        ra.setDuration(200);
-//        imgMapCompass.startAnimation(ra);
         imgMapCompass.setRotation(-45 - (float) mapView.getMapRotation());
-        //currentDegree = -(float)angle;
     }
 
     /**
@@ -240,9 +232,12 @@ public class MapViewHelper
                                 try
                                 {
                                     selectFeature(((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).isMultiSelect(), feature);
-                                    FeatureAttributionTableFragment.getInstance().loadTable(activity, featureTable, feature);
+                                    ((FeatureAttributionTableFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).loadTable(activity, featureTable, feature);
                                     //设置当前状态
-                                    ((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).setSelectStatus(true);
+                                    if (onSelectionStatusChangedEventListener != null)
+                                    {
+                                        onSelectionStatusChangedEventListener.onEvent(true);
+                                    }
 
                                 }
 
@@ -438,7 +433,6 @@ public class MapViewHelper
         {
             onSelectionStatusChangedEventListener.onEvent(false);
         }
-        //((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).setSelectStatus(false);
     }
 
     public List<Feature> getSelectedFeatures()
