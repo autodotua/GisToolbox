@@ -2,6 +2,8 @@ package com.autod.gis.ui.fragment;
 
 
 import android.animation.ObjectAnimator;
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -105,9 +107,9 @@ public class EditFragment extends Fragment
     /**
      * 初始化Fragment
      */
-    public void Initialize()
+    public void Initialize(Activity activity)
     {
-        control = MainActivity.getInstance().findViewById(R.id.main_fgm_edit);
+        control = activity.findViewById(R.id.main_fgm_edit);
 
         int[] editBtnIds = {
                 R.id.edit_btn_delete,
@@ -129,18 +131,18 @@ public class EditFragment extends Fragment
          */
         for (int btnId : editBtnIds)
         {
-            Button btn = MainActivity.getInstance().findViewById(btnId);
+            Button btn = activity.findViewById(btnId);
             editButtons.add(btn);
-            btn.setOnClickListener(this::setButtonsClickEvent);
+            btn.setOnClickListener(v -> setButtonsClickEvent(activity,v));
         }
 
 
-        btnClearSelection = MainActivity.getInstance().findViewById(R.id.edit_btn_clear_selection);
+        btnClearSelection = activity.findViewById(R.id.edit_btn_clear_selection);
         btnClearSelection.setOnClickListener(v -> MapViewHelper.getInstance().stopSelect());
         /**
          * 撤销按钮
          */
-        ImageButton btnUndo = MainActivity.getInstance().findViewById(R.id.edit_btn_undo);
+        ImageButton btnUndo = activity.findViewById(R.id.edit_btn_undo);
         btnUndo.setOnClickListener(v ->
         {
             if (sketchEditor.canUndo())
@@ -149,13 +151,13 @@ public class EditFragment extends Fragment
             }
             else
             {
-                Toast.makeText(MainActivity.getInstance(), "无法撤销", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "无法撤销", Toast.LENGTH_SHORT).show();
             }
 //            }
 
         });
 
-        ImageButton btnRedo = MainActivity.getInstance().findViewById(R.id.edit_btn_redo);
+        ImageButton btnRedo =activity.findViewById(R.id.edit_btn_redo);
         btnRedo.setOnClickListener(v ->
         {
             if (sketchEditor.canRedo())
@@ -164,14 +166,14 @@ public class EditFragment extends Fragment
             }
             else
             {
-                Toast.makeText(MainActivity.getInstance(), "无法重做", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "无法重做", Toast.LENGTH_SHORT).show();
             }
         });
 
         /**
          * 多选单选切换按钮
          */
-        btnMutiSelect = MainActivity.getInstance().findViewById(R.id.edit_tbtn_multi_select);
+        btnMutiSelect = activity.findViewById(R.id.edit_tbtn_multi_select);
         btnMutiSelect.setOnCheckedChangeListener((compoundButton, b) ->
         {
             if (b)
@@ -221,7 +223,7 @@ public class EditFragment extends Fragment
      *
      * @param v
      */
-    private void setButtonsClickEvent(View v)
+    private void setButtonsClickEvent(Activity activity, View v)
     {
         resetButtons();
 
@@ -232,7 +234,7 @@ public class EditFragment extends Fragment
                 //如果在正常状态下，则开始画图；否则结束画图
                 if (btn.getText().toString().equals("画图"))
                 {
-                    if (startEditing())
+                    if (startEditing(activity))
                     {
                         btn.setText("完成");
                     }
@@ -250,20 +252,20 @@ public class EditFragment extends Fragment
                     //检查是否选取了1+个面
                     if (MapViewHelper.getInstance().getSelectedFeatures().size() == 0)
                     {
-                        Toast.makeText(MainActivity.getInstance(), "还未选择面", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "还未选择面", Toast.LENGTH_SHORT).show();
                         break;
                     }
                     else
                     {
-                        Toast.makeText(MainActivity.getInstance(), "请画线", Toast.LENGTH_SHORT).show();
-                        prepareSplit();
+                        Toast.makeText(activity, "请画线", Toast.LENGTH_SHORT).show();
+                        prepareSplit(activity);
                     }
                 }
                 else
                 {
                     stopEditing();
                     isSpliting = false;
-                    Button btnSplit = MainActivity.getInstance().findViewById(R.id.edit_btn_split);
+                    Button btnSplit = activity.findViewById(R.id.edit_btn_split);
                     btnSplit.setText("分割");
                 }
                 break;
@@ -271,7 +273,7 @@ public class EditFragment extends Fragment
                 //合并操作
                 if (MapViewHelper.getInstance().getSelectedFeatures().size() == 0)
                 {
-                    Toast.makeText(MainActivity.getInstance(), "还未选择面", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "还未选择面", Toast.LENGTH_SHORT).show();
                     resetButtons();
                     break;
                 }
@@ -284,7 +286,7 @@ public class EditFragment extends Fragment
                 //删除操作
                 if (MapViewHelper.getInstance().getSelectedFeatures().size() == 0)
                 {
-                    Toast.makeText(MainActivity.getInstance(), "还未选择面", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "还未选择面", Toast.LENGTH_SHORT).show();
                     resetButtons();
                     break;
                 }
@@ -340,9 +342,9 @@ public class EditFragment extends Fragment
     /**
      * 准备分割，开始画线
      */
-    public void prepareSplit()
+    public void prepareSplit(Activity activity)
     {
-        Button btnSplit = MainActivity.getInstance().findViewById(R.id.edit_btn_split);
+        Button btnSplit = activity.findViewById(R.id.edit_btn_split);
         isSpliting = true;
         try
         {
@@ -352,7 +354,7 @@ public class EditFragment extends Fragment
         }
         catch (Exception ignored)
         {
-            Toast.makeText(MainActivity.getInstance(), "开始画线失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "开始画线失败", Toast.LENGTH_SHORT).show();
             resetButtons();
         }
 
@@ -385,13 +387,13 @@ public class EditFragment extends Fragment
     /**
      * 开始绘制（点、线、面的草图）
      */
-    private boolean startEditing()
+    private boolean startEditing(Context context)
     {
         FeatureTable featureTable = ((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable();
 
         if (MapViewHelper.getInstance().getSelectedFeatures().size() > 1)
         {
-            Toast.makeText(MainActivity.getInstance(), "选择的要素超过一个，不可编辑", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "选择的要素超过一个，不可编辑", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -545,14 +547,14 @@ public class EditFragment extends Fragment
                 {
                     addGeometryToFeatureTable(geo, feature.getAttributes());
                 }
-                //Toast.makeText(MainActivity.getInstance(),String.valueOf(parts.size()),Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context,String.valueOf(parts.size()),Toast.LENGTH_SHORT).show();
 
                 featureTable.deleteFeatureAsync(feature);
             }
         }
 //        if (partsCount <= mapviewHelper.selectedFeatures.size())
 //        {
-//            Toast.makeText(MainActivity.getInstance(), "切割失败", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "切割失败", Toast.LENGTH_SHORT).show();
 //        }
 //        else
 //        {
@@ -597,7 +599,7 @@ public class EditFragment extends Fragment
                 }
                 catch (Exception ex)
                 {
-                    //  Toast.makeText(MainActivity.getInstance(), key ,Toast.LENGTH_SHORT).show();
+                    //  Toast.makeText(context, key ,Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -623,7 +625,7 @@ public class EditFragment extends Fragment
             }
             catch (ExecutionException executionException)
             {
-                Toast.makeText(MainActivity.getInstance(), executionException.toString(), Toast.LENGTH_LONG).show();
+
             }
         });
 
@@ -640,21 +642,21 @@ public class EditFragment extends Fragment
         return ((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable();
     }
 
-    public void foldOrUnfold()
+    public void foldOrUnfold(Activity activity)
     {
         if (MapViewHelper.getInstance().getMap() == null || LayerManager.getInstance().currentLayer == null)
         {
-            Toast.makeText(MainActivity.getInstance(), "没有选择当前图层", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "没有选择当前图层", Toast.LENGTH_SHORT).show();
             return;
         }
         if (!(LayerManager.getInstance().currentLayer instanceof FeatureLayer))
         {
-            Toast.makeText(MainActivity.getInstance(), "只有矢量图形可以编辑", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "只有矢量图形可以编辑", Toast.LENGTH_SHORT).show();
             return;
         }
         if (!((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable().isEditable())
         {
-            Toast.makeText(MainActivity.getInstance(), "不可编辑只读图层", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "不可编辑只读图层", Toast.LENGTH_SHORT).show();
             return;
         }
         if (control.getTranslationY() == 0)//打开
@@ -662,7 +664,7 @@ public class EditFragment extends Fragment
             ObjectAnimator
                     .ofFloat(control, "translationY",
                             ((RelativeLayout.LayoutParams) control.getLayoutParams()).bottomMargin
-                                    - MainActivity.getInstance().findViewById(R.id.main_llt_bottom_buttons).getHeight())
+                                    - activity.findViewById(R.id.main_llt_bottom_buttons).getHeight())
                     .setDuration(Config.getInstance().animationDuration).start();
 
         }

@@ -120,7 +120,7 @@ public class MenuHelper
             case R.id.menu_side_buttons_right:
                 Config.getInstance().sideButtonsRight = !Config.getInstance().sideButtonsRight;
                 menuSideButtonsRight.setChecked(Config.getInstance().sideButtonsRight);
-                MainActivity.getInstance().setSideButtonPosition();
+                ((MainActivity)context).setSideButtonPosition();
                 break;
             case R.id.menu_location_display:
                 Config.getInstance().location = !Config.getInstance().location;
@@ -135,7 +135,7 @@ public class MenuHelper
                 }
                 break;
             case R.id.menu_tile_url:
-                DialogHelper.showSetValueDialog(MainActivity.getInstance(),
+                DialogHelper.showSetValueDialog(context,
                         "设置底图地址",
                         "请输入一行一个地址，以行分隔，自动忽略空行",
                         TextUtils.join("\n\n", Config.getInstance().baseUrls),
@@ -153,30 +153,30 @@ public class MenuHelper
                                 }
                             }
                             Config.getInstance().save();
-                            Toast.makeText(MainActivity.getInstance(), "成功获取" + count + "条瓦片地址", Toast.LENGTH_SHORT).show();
-                            LayerManager.getInstance().resetLayers();
+                            Toast.makeText(context, "成功获取" + count + "条瓦片地址", Toast.LENGTH_SHORT).show();
+                            LayerManager.getInstance().resetLayers(context);
                         });
                 break;
             case R.id.menu_load_esri_map:
-                LayerManager.getInstance().loadEsriLayer();
+                LayerManager.getInstance().loadEsriLayer(context);
                 break;
             case R.id.menu_create_feature_layer:
-                LayerManager.getInstance().createFeatureLayer();
+                LayerManager.getInstance().createFeatureLayer(context);
                 break;
             case R.id.menu_about:
-                new AlertDialog.Builder(MainActivity.getInstance())
+                new AlertDialog.Builder(context)
                         .setTitle("关于")
                         .setPositiveButton("确定", (dialog, which) -> {
                         })
                         .setMessage(new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)))
                         .create().show();
-//                Toast.makeText(MainActivity.getInstance(), new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
 
                 break;
             case R.id.menu_default_scale:
 
-//                Toast.makeText(MainActivity.getInstance(), new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
-                showSetValueDialog(MainActivity.getInstance(), "默认比例尺",
+//                Toast.makeText(context, new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
+                showSetValueDialog(context, "默认比例尺",
                         "地图默认的比例尺",
                         String.valueOf(Config.getInstance().gpsMinTime), InputType.TYPE_CLASS_NUMBER, p ->
                         {
@@ -185,22 +185,22 @@ public class MenuHelper
                                 double scale = Double.parseDouble(p);
                                 if (scale <= 0)
                                 {
-                                    Toast.makeText(MainActivity.getInstance(), "比例尺不可小于0", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "比例尺不可小于0", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 Config.getInstance().defaultScale = scale;
                                 Config.getInstance().save();
-                                Toast.makeText(MainActivity.getInstance(), "设置成功", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
 
                             }
                             catch (Exception ex)
                             {
-                                Toast.makeText(MainActivity.getInstance(), "设置失败", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
             case R.id.menu_gps_min_time:
-                showSetValueDialog(MainActivity.getInstance(), "GPS最小更新时间",
+                showSetValueDialog(context, "GPS最小更新时间",
                         "设置GPS最小更新的时间间隔，当位置更新时，获取两个位置之间的最小时间。单位为毫秒",
                         String.valueOf(Config.getInstance().gpsMinTime), InputType.TYPE_CLASS_NUMBER, p ->
                         {
@@ -209,21 +209,21 @@ public class MenuHelper
                                 int time = Integer.parseInt(p);
                                 if (time <= 0)
                                 {
-                                    Toast.makeText(MainActivity.getInstance(), "最小时间不可小于1", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "最小时间不可小于1", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 Config.getInstance().gpsMinTime = time;
                                 Config.getInstance().save();
-                                Toast.makeText(MainActivity.getInstance(), "设置成功", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
                             }
                             catch (Exception ex)
                             {
-                                Toast.makeText(MainActivity.getInstance(), "设置失败", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
             case R.id.menu_gps_min_distance:
-                showSetValueDialog(MainActivity.getInstance(), "GPS最小更新距离",
+                showSetValueDialog(context, "GPS最小更新距离",
                         "设置GPS最小更新的距离间隔，当位置更新时，仅当于上一个点距离超过该值时才会更新",
                         String.valueOf(Config.getInstance().gpsMinDistance), InputType.TYPE_CLASS_NUMBER, p ->
                         {
@@ -232,16 +232,16 @@ public class MenuHelper
                                 int time = Integer.parseInt(p);
                                 if (time <= 0)
                                 {
-                                    Toast.makeText(MainActivity.getInstance(), "最小距离不可小于1米", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "最小距离不可小于1米", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 Config.getInstance().gpsMinDistance = time;
                                 Config.getInstance().save();
-                                Toast.makeText(MainActivity.getInstance(), "设置成功", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
                             }
                             catch (Exception ex)
                             {
-                                Toast.makeText(MainActivity.getInstance(), "设置失败", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;

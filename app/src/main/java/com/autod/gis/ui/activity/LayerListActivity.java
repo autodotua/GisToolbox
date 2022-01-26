@@ -82,14 +82,7 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
     protected void onPause()
     {
         super.onPause();
-        Config.getInstance().trySave(this);
-//        int baseLayerCount = BaseLayerHelper.baseLayerCount;  //获取基础图层的数量
-//        for (int i=baseLayerCount-1;i<LayerManager.getInstance().getLayers().size();i++)   //zj 增加基础图层，4为0-4，五个基础图层
-//        {
-//            Layer layer=LayerManager.getInstance().getLayer(i);
-//            //LayerManager.getInstance().layerLayerProperties.get(layer).opacity=layer.getOpacity();
-//            DataAnalysis.SaveLayerProperty(layer);
-//        }
+        Config.getInstance().trySave();
     }
 
     @Override
@@ -174,24 +167,17 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
 
         //列表对话框；
         builder.setItems(configNameArray, (dialog, which) -> {
-try
-{
-//            boolean normal = BuildConfig.BUILD_TYPE.equals("normal");
-    Config.setInstance(configNames.get(which));
-    LayerManager.getInstance().resetLayers();
-//            if ((!normal &&  BuildConfig.BUILD_TYPE.equals("normal")) || normal && ! BuildConfig.BUILD_TYPE.equals("normal"))
-//            {
-//                Toast.makeText(layerListActivity, "模式切换，部分设置需要重启才能生效", Toast.LENGTH_SHORT).show();
+            try
+            {
+                Config.setInstance(configNames.get(which));
+                LayerManager.getInstance().resetLayers(this);
+                MenuHelper.getInstance().resetValues();
 //            }
-//            else
-//            {
-    MenuHelper.getInstance().resetValues();
-//            }
-}
-catch (Exception ex)
-{
-    UIHelper.showSimpleErrorDialog(this,"打开失败：\n"+ex.getMessage());
-}
+            }
+            catch (Exception ex)
+            {
+                UIHelper.showSimpleErrorDialog(this, "打开失败：\n" + ex.getMessage());
+            }
             finish();
         });
 
@@ -210,7 +196,7 @@ catch (Exception ex)
         }
         catch (Exception ex)
         {
-            UIHelper.showSimpleErrorDialog(this,"保存失败：\n"+ex.getMessage());
+            UIHelper.showSimpleErrorDialog(this, "保存失败：\n" + ex.getMessage());
         }
     }
 
@@ -240,13 +226,13 @@ catch (Exception ex)
 //                        Config.getInstance().layerVisible.put(path, layer.isVisible());
 //                        //}
 //                    }
-                    Config.getInstance().save(name,true);
+                    Config.getInstance().save(name, true);
                     Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
                 }
                 catch (Exception ex)
                 {
 
-                    UIHelper.showSimpleErrorDialog(this,"保存失败：\n"+ex.getMessage());
+                    UIHelper.showSimpleErrorDialog(this, "保存失败：\n" + ex.getMessage());
                 }
             }
         }).show();

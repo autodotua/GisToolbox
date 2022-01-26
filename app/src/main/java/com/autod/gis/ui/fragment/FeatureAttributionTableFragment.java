@@ -2,7 +2,9 @@ package com.autod.gis.ui.fragment;
 
 
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.InputType;
@@ -50,7 +52,7 @@ import java.util.Set;
  * 单要素属性表Fragment
  * A simple {@link Fragment} subclass.
  */
-public class FeatureAttributionTableFragment extends Fragment implements View.OnClickListener
+public class FeatureAttributionTableFragment extends Fragment
 {
 
 
@@ -88,13 +90,13 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
     /**
      * 初始化面板
      */
-    public void Initialize()
+    public void Initialize(Activity activity)
     {
-        control = MainActivity.getInstance().findViewById(R.id.main_fgm_attri);
-        btnCloseOrReset = MainActivity.getInstance().findViewById(R.id.attri_table_btn_close);
-        btnCloseOrReset.setOnClickListener(this);
-        btnEdit = MainActivity.getInstance().findViewById(R.id.attri_table_btn_edit);
-        btnEdit.setOnClickListener(this);
+        control = activity.findViewById(R.id.main_fgm_attri);
+        btnCloseOrReset = activity.findViewById(R.id.attri_table_btn_close);
+        btnCloseOrReset.setOnClickListener(v -> onButtonClick(activity, v));
+        btnEdit = activity.findViewById(R.id.attri_table_btn_edit);
+        btnEdit.setOnClickListener(v -> onButtonClick(activity, v));
         control.post(() -> control.setTranslationY(-control.getHeight()));
 
     }
@@ -108,10 +110,10 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
      * @param featureTable
      * @param feature
      */
-    public void loadTable(FeatureTable featureTable, Feature feature)
+    public void loadTable(Activity activity, FeatureTable featureTable, Feature feature)
     {
         this.featureTable = featureTable;
-        TextView tvwFeatureArea = MainActivity.getInstance().findViewById(R.id.attri_table_tvw_area);
+        TextView tvwFeatureArea = activity.findViewById(R.id.attri_table_tvw_area);
         // tvwFeatureArea = instance.findViewById(R.id.tvwArea);
         Geometry geometry = feature.getGeometry();
         if (geometry.getGeometryType() == GeometryType.POLYGON)
@@ -133,7 +135,7 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
 
         // add done loading listener to fire when the selection returns
         this.feature = feature;
-        showTable();
+        showTable(activity);
     }
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -141,7 +143,7 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
     /**
      * 读取属性并显示
      */
-    public void showTable()
+    public void showTable(Activity activity)
     {
 
         if (feature == null)
@@ -150,12 +152,8 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
         }
         try
         {
-//            FeatureQueryResult result = future.get();
-//            Iterator<Feature> iterator = result.iterator();
-            TableLayout tbl = MainActivity.getInstance().findViewById(R.id.attri_table_tbl_attributions);
+            TableLayout tbl = activity.findViewById(R.id.attri_table_tbl_attributions);
             tbl.removeAllViews();
-            //Feature feature==null;
-            //boolean first = true;
 
             Map<String, Object> attr = feature.getAttributes();
             Set<String> keys = attr.keySet();
@@ -165,18 +163,18 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
                 final Object value = attr.get(key);
 
                 //属性表表格布局
-                TableRow row = new TableRow(MainActivity.getInstance());
+                TableRow row = new TableRow(activity);
                 row.setGravity(Gravity.CENTER_VERTICAL);
                 TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT);
                 row.setLayoutParams(lp);
                 final float scale = getContext().getResources().getDisplayMetrics().density;
                 //字段名称按钮
-                Button btnName = new Button(MainActivity.getInstance());
+                Button btnName = new Button(activity);
                 btnName.setWidth((int) (96 * scale));
                 btnName.setText(key);
 
                 //属性值编辑框
-                EditText ettValue = new EditText(MainActivity.getInstance());
+                EditText ettValue = new EditText(activity);
                 btnEttMap.put(btnName, ettValue);
                 //在还未开始编辑时，不允许编辑
                 setEditTextEditable(ettValue, false);
@@ -191,7 +189,7 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
                 ettValue.setWidth((int) (220 * scale));
 
                 ///字段类型文本框
-                TextView tvwType = new TextView(MainActivity.getInstance());
+                TextView tvwType = new TextView(activity);
                 try
                 {
                     //List<Field> fs=  featureTable.getFields();
@@ -211,8 +209,7 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
                     }
 
                     fieldEttMap.put(field, ettValue);
-                    btnName.setOnClickListener(v -> showDomain(field, value));
-                    //tvwType.setText(type.toString());
+                    btnName.setOnClickListener(v -> showDomain(activity, field, value));
 
                     ettValue.setTag(type);
                 }
@@ -238,7 +235,7 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
         }
         catch (Exception e)
         {
-            Toast.makeText(MainActivity.getInstance(), "加载要素属性错误", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, "加载要素属性错误", Toast.LENGTH_SHORT).show();
         }
         finally
         {
@@ -257,9 +254,9 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
     /**
      * 保存属性
      */
-    private void saveAttributes()
+    private void saveAttributes(Activity activity)
     {
-        TableLayout tbl = MainActivity.getInstance().findViewById(R.id.attri_table_tbl_attributions);
+        TableLayout tbl = activity.findViewById(R.id.attri_table_tbl_attributions);
         Set<Button> existButtons = btnEttMap.keySet();
 
         Map<String, Object> attr = feature.getAttributes();
@@ -332,8 +329,7 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
      */
     private boolean isEditing = false;
 
-    @Override
-    public void onClick(View view)
+    public void onButtonClick(Activity activity, View view)
     {
         switch (view.getId())
         {
@@ -347,14 +343,14 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
                 }
                 else
                 {
-                    showTable();
+                    showTable(activity);
                 }
                 break;
             //单击编辑按钮
             case R.id.attri_table_btn_edit:
 //                if(featureTable==null)
 //                {
-//                    Toast.makeText(MainActivity.getInstance(), "当前图层不可编辑", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, "当前图层不可编辑", Toast.LENGTH_SHORT).show();
 //                    return;
 //                }
                 if (btnEdit.getText().equals("编辑"))
@@ -373,12 +369,12 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
                     try
                     {
 
-                        saveAttributes();
-                        Toast.makeText(MainActivity.getInstance(), "保存成功", Toast.LENGTH_SHORT).show();
+                        saveAttributes(activity);
+                        Toast.makeText(activity, "保存成功", Toast.LENGTH_SHORT).show();
                     }
                     catch (Exception ex)
                     {
-                        Toast.makeText(MainActivity.getInstance(), "保存失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "保存失败", Toast.LENGTH_SHORT).show();
                     }
                     finally
                     {
@@ -399,14 +395,14 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
      * @param field
      * @param value
      */
-    public void showDomain(Field field, Object value)
+    public void showDomain(Context context, Field field, Object value)
     {
 
-        //Toast.makeText(MainActivity.getInstance(), String.valueOf(field.getDomain()==null), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(context, String.valueOf(field.getDomain()==null), Toast.LENGTH_SHORT).show();
         //判断是否正在编辑
         if (!isEditing)
         {
-            Toast.makeText(MainActivity.getInstance(), "只可在编辑时使用", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "只可在编辑时使用", Toast.LENGTH_SHORT).show();
             return;
         }
         //attributeDominFragment.Show(type)
@@ -414,14 +410,14 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
         Object[] objValues = getAllValues(field);
         if (objValues.length == 0)
         {
-            Toast.makeText(MainActivity.getInstance(), "没有集合", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "没有集合", Toast.LENGTH_SHORT).show();
             return;
         }
         //如果是文本，则使用选取的方式，把所有值放入列表对话框
         if (field.getFieldType() == Field.Type.TEXT)
         {
             String[] valueArray = Arrays.copyOf(objValues, objValues.length, String[].class);
-            AlertDialog.Builder listDialog = new AlertDialog.Builder(MainActivity.getInstance());
+            AlertDialog.Builder listDialog = new AlertDialog.Builder(context);
             listDialog.setTitle("选择数据（共" + valueArray.length + "个）");
             listDialog.setItems(valueArray, (DialogInterface dialog, int which) ->
                     FeatureAttributionTableFragment.this.fieldEttMap.get(field).setText(valueArray[which]));
@@ -445,9 +441,9 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
                 }
 
             }
-            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.getInstance());
+            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
             dialog.setTitle("设置数据");
-            NumberPicker picker = new NumberPicker(MainActivity.getInstance());
+            NumberPicker picker = new NumberPicker(context);
             picker.setMinValue(min);
             picker.setMaxValue(max);
             picker.setValue((int) value);
@@ -475,16 +471,16 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
                 }
 
             }
-            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.getInstance());
+            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
             dialog.setTitle("设置数据");
-            LinearLayout layout = new LinearLayout(MainActivity.getInstance());
+            LinearLayout layout = new LinearLayout(context);
             layout.setOrientation(LinearLayout.VERTICAL);
-            TextView tvw = new TextView(MainActivity.getInstance());
+            TextView tvw = new TextView(context);
             tvw.setText(min + "~" + max);
             tvw.setTextSize(24);
             tvw.setGravity(Gravity.CENTER_HORIZONTAL);
             layout.addView(tvw);
-            EditText ett = new EditText(MainActivity.getInstance());
+            EditText ett = new EditText(context);
             ett.setText(String.valueOf(value));
             ett.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
             ett.selectAll();
@@ -497,7 +493,7 @@ public class FeatureAttributionTableFragment extends Fragment implements View.On
         }
         else
         {
-            Toast.makeText(MainActivity.getInstance(), "没有适合的属性域", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "没有适合的属性域", Toast.LENGTH_SHORT).show();
         }
     }
 

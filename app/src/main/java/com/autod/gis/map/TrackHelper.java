@@ -70,7 +70,7 @@ public class TrackHelper
 
     private Date startTime;
 
-    public boolean start( )
+    public boolean start(Context context )
     {
         try
         {
@@ -78,7 +78,7 @@ public class TrackHelper
             length = 0;
             count = 0;
             startTime = new Date(System.currentTimeMillis());
-            initializeGpx();
+            initializeGpx(context);
             overlay = new GraphicsOverlay();
             //SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.parseColor("#64B5F6"), 8);
             SimpleLineSymbol symbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#54A5F6"), 6f);
@@ -86,34 +86,34 @@ public class TrackHelper
             MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(overlay);
 
 
-            MainActivity.getInstance().startService(new Intent(MainActivity.getInstance(), LocationService.class));
+            context.startService(new Intent(context, LocationService.class));
 
             usePressureAltitude = false;
             if (Config.getInstance().useBarometer)
             {
-                if (SensorHelper.getInstance().start())
+                if (SensorHelper.getInstance().start(context))
                 {
                     usePressureAltitude = true;
                 }
             }
 
             status = Status.Running;
-            Toast.makeText(MainActivity.getInstance(), "开始记录轨迹", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "开始记录轨迹", Toast.LENGTH_SHORT).show();
 
             return true;
         }
         catch (Exception ex)
         {
-            Toast.makeText(MainActivity.getInstance(), "开启轨迹记录服务失败：n" + ex.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "开启轨迹记录服务失败：n" + ex.getMessage(), Toast.LENGTH_SHORT).show();
             return false;
         }
     }
 
-    private void initializeGpx()
+    private void initializeGpx(Context context)
     {
         String name = getTimeBasedFileName(startTime) + "Track";
         String time = getGpxTime(startTime);
-        gpxString = new StringBuilder().append(MainActivity.getInstance().getResources()
+        gpxString = new StringBuilder().append(context.getResources()
                 .getString(R.string.gpx_head, name, time
 
 
@@ -131,9 +131,9 @@ public class TrackHelper
 
     private static boolean usePressureAltitude = false;
 
-    private void addGpxPoint(Location location)
+    private void addGpxPoint(Context context, Location location)
     {
-        gpxString.append(MainActivity.getInstance().getResources()
+        gpxString.append(context.getResources()
                 .getString(R.string.gpx_point,
                         location.getLatitude(),
                         location.getLongitude(),
@@ -143,10 +143,10 @@ public class TrackHelper
         );
     }
 
-    private void saveGpx()
+    private void saveGpx(Context context)
     {
         FileHelper.writeTextToFile(FileHelper.getGpxTrackFilePath(getTimeBasedFileName(startTime) + ".gpx"),
-                gpxString.toString() + MainActivity.getInstance().getResources().getString(R.string.gpx_foot));
+                gpxString.toString() + context.getResources().getString(R.string.gpx_foot));
     }
 
     public void locationChanged(Context context, Location location)
@@ -160,7 +160,7 @@ public class TrackHelper
                 location.getLatitude(),
                 //location.getAltitude(),
                 SpatialReferences.getWgs84());
-        addGpxPoint(location);
+        addGpxPoint(context, location);
 
         locationPoints.add(point);
         if ((++count) >= 2)
@@ -187,7 +187,7 @@ public class TrackHelper
 
         if (count % 10 == 0)
         {
-            saveGpx();
+            saveGpx(context);
         }
 
     }
@@ -203,13 +203,13 @@ public class TrackHelper
         {
 
             case Running:
-                text = MainActivity.getInstance().getString(R.string.track_notification_title_running);
+                text = context.getString(R.string.track_notification_title_running);
                 break;
             case NotRunning:
                 text = "";
                 break;
             case Pausing:
-                MainActivity.getInstance().getString(R.string.track_notification_title_pausing);
+                context.getString(R.string.track_notification_title_pausing);
                 break;
         }
         LocationService.updateNotification(text, context.getString(R.string.track_notification_message, h, m, s, length));
@@ -232,7 +232,7 @@ public class TrackHelper
         updateNotification(context);
         if (Config.getInstance().useBarometer)
         {
-            SensorHelper.getInstance().start();
+            SensorHelper.getInstance().start(context);
         }
     }
 
@@ -240,7 +240,7 @@ public class TrackHelper
     {
         status = Status.NotRunning;
         //LocationService.getInstance().stopUpdate();
-        context.stopService(new Intent(MainActivity.getInstance(), LocationService.class));
+        context.stopService(new Intent(context, LocationService.class));
         if (Config.getInstance().useBarometer)
         {
             SensorHelper.getInstance().stop();
@@ -248,23 +248,20 @@ public class TrackHelper
 
         MapViewHelper.getInstance().mapView.getGraphicsOverlays().remove(overlay);
 
-        saveGpx();
+        saveGpx(context);
 
-        final String polylineFile = getShapefile();
+        final String polylineFile = getShapefile(context);
 
         if (polylineFile == null)
         {
             return;
         }
-//        pointFeatureTable.deleteFeaturesAsync(features).addDoneListener(() ->
-//               LayerManager.getInstance().getLayers().remove(pointFeatureTable.getFeatureLayer()));
-
         if (locationPoints.size() <= 1)
         {
-            Toast.makeText(MainActivity.getInstance(), "记录的点太少，无法生成图形", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "记录的点太少，无法生成图形", Toast.LENGTH_SHORT).show();
             return;
         }
-        Toast.makeText(MainActivity.getInstance(), "轨迹记录停止", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "轨迹记录停止", Toast.LENGTH_SHORT).show();
 
         new Thread(() -> {
             if (polylineTable != null && polylineTable.getFeatureLayer() != null)
@@ -289,14 +286,14 @@ public class TrackHelper
                         Feature feature = polylineTable.createFeature(map, line);
                         polylineTable.addFeatureAsync(feature).addDoneListener(() -> {
                             polylineTable.close();
-                            LayerManager.getInstance().addLayer(polylineFile);
+                            LayerManager.getInstance().addLayer(context, polylineFile);
 
                         });
                     }
                     catch (Exception ex)
                     {
                         Looper.prepare();
-                        Toast.makeText(MainActivity.getInstance(), "线图层生成失败\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "线图层生成失败\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
                         Looper.loop();
                     }
                 }
@@ -305,7 +302,7 @@ public class TrackHelper
 
                     String error = "写入线轨迹文件失败\n: " + polylineTable.getLoadError().toString();
                     Looper.prepare();
-                    Toast.makeText(MainActivity.getInstance(), error, Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, error, Toast.LENGTH_LONG).show();
                     Looper.loop();
 
                 }
@@ -315,13 +312,21 @@ public class TrackHelper
     }
 
 
-    private  String getShapefile()
+    private  String getShapefile(Context context)
     {
         String targetPath = null;
 
         targetPath = FileHelper.getPolylineTrackFilePath(getTimeBasedFileName(startTime));
 
-        return FileHelper.createShapefile(GeometryType.POLYLINE, targetPath);
+        try
+        {
+            return FileHelper.createShapefile( GeometryType.POLYLINE, targetPath);
+        }
+        catch (Exception ex)
+        {
+            return  null;
+        }
+
     }
 
     public enum Status

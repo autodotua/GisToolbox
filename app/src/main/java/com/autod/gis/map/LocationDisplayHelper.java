@@ -1,6 +1,8 @@
 package com.autod.gis.map;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
@@ -59,25 +61,17 @@ public class LocationDisplayHelper
             return true;
         }
         return false;
-//        }
-//        else
-//        {
-//            locationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS_NAVIGATION);
-//        }
     }
 
-    public void showPanModeDialog()
+    public void showPanModeDialog(Context context)
     {
         final String[] items = {"普通", "置中", "导航", "指南针"};
         AlertDialog.Builder listDialog =
-                new AlertDialog.Builder(MainActivity.getInstance());
+                new AlertDialog.Builder(context);
         listDialog.setTitle("罗盘模式");
-       //Toast.makeText(MainActivity.getInstance(), String.valueOf(locationDisplay.getAutoPanMode()), Toast.LENGTH_SHORT).show();
 
         listDialog.setItems(items, (DialogInterface dialog, int which) ->
         {
-            // which 下标从0开始
-            // ...To-do
             switch (which)
             {
                 case 0:
@@ -106,10 +100,10 @@ public class LocationDisplayHelper
 
 
     //打开设置页面让用户自己设置
-    private void openGPS()
+    private void openGPS(Activity activity)
     {
         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        MainActivity.getInstance().startActivityForResult(intent, 0);
+        activity.startActivityForResult(intent, 0);
     }
 
 

@@ -233,7 +233,7 @@ public class FileHelper
         }
     }
 
-    public static String createShapefile(GeometryType type,String targetPath)
+    public static String createShapefile(GeometryType type,String targetPath) throws  IOException
     {
         if(targetPath==null)
         {
@@ -266,26 +266,13 @@ public class FileHelper
             File file = new File(filePath);
             if (!file.exists())
             {
-                Toast.makeText(MainActivity.getInstance(), "空文件" + file.getName() + "不存在", Toast.LENGTH_SHORT).show();
-                return null;
+                throw  new IOException("空文件" + file.getName() + "不存在");
             }
         }
-//        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA);
-//        String timeString = formatter.format(startTime);
-//        // File directory = new File(FileHelper.getPointTrajectoryFilePath(null)).getParentFile();
-
-//        if (!directory.exists())
-//        {
-//            directory.mkdirs();
-//        }
         for (String filePath : files)
         {
-
-
-
             if (!FileHelper.copyFile(filePath, targetPath+ "." + filePath.split("\\.")[1]))
             {
-                Toast.makeText(MainActivity.getInstance(), "创建shapefile失败", Toast.LENGTH_SHORT).show();
                 return null;
             }
         }

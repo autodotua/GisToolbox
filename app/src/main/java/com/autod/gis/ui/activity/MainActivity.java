@@ -38,22 +38,14 @@ import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
 import com.autod.gis.ui.part.MenuHelper;
 import com.autod.gis.R;
 import com.autod.gis.map.TrackHelper;
+import com.esri.arcgisruntime.mapping.view.MapScaleChangedEvent;
+import com.esri.arcgisruntime.mapping.view.MapScaleChangedListener;
 
 import java.text.DecimalFormat;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener
 {
-
-
-    private static MainActivity instance;
-
-    public static MainActivity getInstance()
-    {
-        return instance;
-    }
-
-
     //private ImageView imgMapCompass;
 
     private ImageView imgSatellite;
@@ -65,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        instance = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkPermission();
@@ -77,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-     MenuHelper.getInstance().initialize(getMenuInflater(), menu);
+        MenuHelper.getInstance().initialize(getMenuInflater(), menu);
         return true; // true：允许创建的菜单显示出来，false：创建的菜单将无法显示。
 
     }
@@ -89,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item)
     {
 
-        MenuHelper.getInstance().menuClick(this,item);
+        MenuHelper.getInstance().menuClick(this, item);
 
         return true;
     }
@@ -101,13 +92,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void Initialize()
     {
         setTitle("GIS工具箱");
-        MapViewHelper.getInstance().Initialize();
+        MapViewHelper.getInstance().Initialize(this);
         initializeControls();
-
+        MapViewHelper.getInstance().mapView.addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
         //设置地图指南针
         try
         {
-            BaseLayerHelper.loadBaseLayer();
+            BaseLayerHelper.loadBaseLayer(this);
         }
         catch (Exception ex)
         {
@@ -256,9 +247,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MapViewHelper.getInstance().imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
 
 
-        EditFragment.getInstance().Initialize();
+        EditFragment.getInstance().Initialize(this);
 
-        FeatureAttributionTableFragment.getInstance().Initialize();
+        FeatureAttributionTableFragment.getInstance().Initialize(this);
 
 
         ImageButton btnZoomToLayer = findViewById(R.id.main_btn_zoom_to_layer);
@@ -267,15 +258,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton btnTable = findViewById(R.id.main_btn_table);
         btnTable.setOnClickListener(this);
 
-        tvwScale = instance.findViewById(R.id.main_tvw_scale);
+        tvwScale = findViewById(R.id.main_tvw_scale);
 
         ImageButton btnResetMap = findViewById(R.id.main_btn_reset_map);
         btnResetMap.setOnClickListener(this);
-        //btnResetMap.setOnLongClickListener(this);
 
         ImageButton btnZoomToDefault = findViewById((R.id.main_btn_zoom_to_default));
         btnZoomToDefault.setOnClickListener(this);
-        //btnZoomToDefault.setOnLongClickListener(this);
 
         ImageButton btnTrack = findViewById(R.id.main_btn_track);
         btnTrack.setOnClickListener(this);
@@ -314,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             if (requestCode == 1)
             {
-                LayerManager.getInstance().addLayer(data.getData());
+                LayerManager.getInstance().addLayer(this, data.getData());
             }
         }
     }
@@ -327,15 +316,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             case R.id.main_btn_import:
                 Intent intent = new Intent(this, FileListActivity.class);
-                instance.startActivity(intent);
+                startActivity(intent);
                 break;
             case R.id.main_btn_pan:
                 if (!Config.getInstance().location)
                 {
-                    Toast.makeText(MainActivity.getInstance(), "没有开启定位功能", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "没有开启定位功能", Toast.LENGTH_SHORT).show();
                     break;
                 }
-                LocationDisplayHelper.instance.showPanModeDialog();
+                LocationDisplayHelper.instance.showPanModeDialog(this);
                 break;
             case R.id.main_btn_zoom_to_default:
                 MapViewHelper.getInstance().mapView.setViewpointRotationAsync(0);
@@ -344,7 +333,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try
                 {
                     scale = MapViewHelper.getInstance().mapView.getMapScale();
-                    updateScale(0.1);
                     MapViewHelper.getInstance().mapView.setViewpointScaleAsync(scale * 0.1);
                 }
                 catch (Exception ex)
@@ -356,7 +344,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try
                 {
                     scale = MapViewHelper.getInstance().mapView.getMapScale();
-                    updateScale(10);
                     MapViewHelper.getInstance().mapView.setViewpointScaleAsync(scale * 10);
                 }
                 catch (Exception ex)
@@ -378,17 +365,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             case R.id.main_btn_import:
                 intent = new Intent(this, ImportFilesActivity.class);
-                instance.startActivity(intent);
+                startActivity(intent);
                 break;
             case R.id.main_btn_pan:
                 if (!Config.getInstance().location)
                 {
-                    Toast.makeText(MainActivity.getInstance(), "没有开启定位功能", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "没有开启定位功能", Toast.LENGTH_SHORT).show();
                     break;
                 }
                 if (!LocationDisplayHelper.instance.setPan())
                 {
-                    Toast.makeText(MainActivity.getInstance(), "还没有定位", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "还没有定位", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.main_btn_layer:
@@ -399,7 +386,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try
                 {
                     scale = MapViewHelper.getInstance().mapView.getMapScale();
-                    updateScale(0.5);
                     MapViewHelper.getInstance().mapView.setViewpointScaleAsync(scale * 0.5);
                 }
                 catch (Exception ignored)
@@ -411,7 +397,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try
                 {
                     scale = MapViewHelper.getInstance().mapView.getMapScale();
-                    updateScale(2);
                     MapViewHelper.getInstance().mapView.setViewpointScaleAsync(scale * 2);
                 }
                 catch (Exception ex)
@@ -423,24 +408,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 MapViewHelper.getInstance().mapView.setViewpointRotationAsync(0);
                 break;
             case R.id.main_btn_zoom_to_layer:
-                MapViewHelper.getInstance().zoomToLayer(false);
+                MapViewHelper.getInstance().zoomToLayer(this, false);
 
                 break;
             case R.id.main_btn_table:
                 FeatureAttributionTableFragment.getInstance().foldOrUnfold();
                 break;
             case R.id.main_btn_edit:
-                EditFragment.getInstance().foldOrUnfold();
+                EditFragment.getInstance().foldOrUnfold(this);
                 break;
             case R.id.main_btn_reset_map:
-                LayerManager.getInstance().resetLayers();
+                LayerManager.getInstance().resetLayers(this);
                 break;
             case R.id.main_btn_zoom_to_default:
                 if (eggClickTimes++ == 20)
                 {
-                    Toast.makeText(MainActivity.getInstance(), new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
                 }
-                MapViewHelper.getInstance().mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> instance.setScaleText(Config.getInstance().defaultScale));
+                MapViewHelper.getInstance().mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> MainActivity.this.setScaleText(Config.getInstance().defaultScale));
                 break;
             case R.id.main_btn_track:
                 changeTrackStatus();
@@ -458,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.NotRunning)
         {
-            if (TrackHelper.getInstance().start())
+            if (TrackHelper.getInstance().start(this))
             {
                 imgSatellite.setVisibility(View.VISIBLE);
                 imgSatellite.setAnimation(ani);
@@ -544,13 +529,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void updateScale(double multi)
+    private void updateScale()
     {
         try
         {
-
             DecimalFormat formatter = new DecimalFormat("0.0");
-            double value = MapViewHelper.getInstance().mapView.getMapScale() * multi;
+            double value = MapViewHelper.getInstance().mapView.getMapScale();
             if (value > 10000)
             {
                 tvwScale.setText("1:" + formatter.format(value / 10000) + "万");

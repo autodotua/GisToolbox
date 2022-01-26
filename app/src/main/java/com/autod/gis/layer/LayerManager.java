@@ -1,6 +1,7 @@
 package com.autod.gis.layer;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -67,39 +68,15 @@ public class LayerManager
     /**
      * 加载图层，已隐藏入口
      */
-    public void loadEsriLayer()
+    public void loadEsriLayer(Context context)
     {
-        AlertDialog.Builder listDialog = new AlertDialog.Builder(MainActivity.getInstance());
+        AlertDialog.Builder listDialog = new AlertDialog.Builder(context);
         listDialog.setTitle("加载地图");
         listDialog.setItems(names(), (DialogInterface dialog, int which) ->
         {
             Intent intent;
             map = new ArcGISMap(Basemap.Type.values()[which], 30, 120, 8);
             MapViewHelper.getInstance().mapView.setMap(map);
-      /*
-            switch (which)
-            {
-                case 0:
-                    map = new ArcGISMap(Basemap.Type.TOPOGRAPHIC, 30, 120, 8);
-                    mapView.setMap(map);
-                    break;
-                case 1:
-                    //ArcGISMap map = new ArcGISMap(Basemap.createImagery());
-                    map = new ArcGISMap(Basemap.Type.IMAGERY, 30, 120, 8);
-                    mapView.setMap(map);
-                    break;
-                case 2:
-                    intent = new Intent(instance, FileListActivity.class);
-                    instance.startActivity(intent);
-                    break;
-             //   case 3:
-                //    ArcGISVectorTiledLayer layer=new ArcGISVectorTiledLayer("http://webst01.is.autonavi.com/appmaptile?style=6&x=13417&y=6499&z=14");
-                  //  map=new ArcGISMap(new Basemap(layer));
-                  //  mapView.setMap(map);
-               //     getLayers().add(layer);
-               //     break;
-            }
-            */
         });
         listDialog.show();
     }
@@ -107,16 +84,16 @@ public class LayerManager
     /**
      * 重置图层
      */
-    public void resetLayers()
+    public void resetLayers(Context context)
     {
         try
         {
-            BaseLayerHelper.loadBaseLayer();
+            BaseLayerHelper.loadBaseLayer(context);
 
         }
         catch (Exception ex)
         {
-            Toast.makeText(MainActivity.getInstance(), "重置失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "重置失败", Toast.LENGTH_SHORT).show();
         }
         if (MapViewHelper.getInstance().mapView.getCallout() != null && MapViewHelper.getInstance().mapView.getCallout().isShowing())
         {
@@ -145,7 +122,7 @@ public class LayerManager
 //                // Make sure a feature table was found in the package
 //                if (geoPackageTable == null)
 //                {
-//                    Toast.makeText(MainActivity.getInstance(), "No feature table found in the package!", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(context, "No feature table found in the package!", Toast.LENGTH_LONG).show();
 //
 //                    return;
 //                }
@@ -158,7 +135,7 @@ public class LayerManager
 //            }
 //            else
 //            {
-//                Toast.makeText(MainActivity.getInstance(), "GeoPackage failed to load! " + geoPackage.getLoadError(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, "GeoPackage failed to load! " + geoPackage.getLoadError(), Toast.LENGTH_LONG).show();
 //
 //            }
 //        });
@@ -169,7 +146,7 @@ public class LayerManager
      *
      * @param path
      */
-    private void loadRasterGeoPackageLayer(String path)
+    private void loadRasterGeoPackageLayer(Context context, String path)
     {
 
         // open the GeoPackage
@@ -184,21 +161,21 @@ public class LayerManager
                     {
                         RasterLayer geoPackageRasterLayer = new RasterLayer(geoPackageRaster);
                         MapViewHelper.getInstance().mapView.getMap().getOperationalLayers().add(geoPackageRasterLayer);
-                        loadComplete(geoPackageRasterLayer, path);
+                        loadComplete(context, geoPackageRasterLayer, path);
                     }
                 }
                 else
                 {
 
                     String emptyMessage = "图层为空!";
-                    Toast.makeText(MainActivity.getInstance(), emptyMessage, Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, emptyMessage, Toast.LENGTH_LONG).show();
 
                 }
             }
             else
             {
                 String error = "打开失败：\n" + geoPackage.getLoadError().toString();
-                Toast.makeText(MainActivity.getInstance(), error, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show();
 
             }
         });
@@ -207,7 +184,7 @@ public class LayerManager
 
 //
 
-    private void loadTileCacheLayer(String path)
+    private void loadTileCacheLayer(Context context, String path)
     {
 
         // open the GeoPackage
@@ -220,19 +197,19 @@ public class LayerManager
                 {
                     ArcGISTiledLayer tiledLayer = new ArcGISTiledLayer(tile);
                     getLayers().add(tiledLayer);
-                    loadComplete(tiledLayer, path);
+                    loadComplete(context, tiledLayer, path);
                 }
                 else
                 {
 
-                    Toast.makeText(MainActivity.getInstance(), "图层为空", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "图层为空", Toast.LENGTH_LONG).show();
 
                 }
             }
             else
             {
                 String error = "打开失败：\n" + tile.getLoadError().toString();
-                Toast.makeText(MainActivity.getInstance(), error, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show();
 
             }
         });
@@ -243,7 +220,7 @@ public class LayerManager
      *
      * @param path
      */
-    private void loadFeatureLayer(String path)
+    private void loadFeatureLayer(Context context, String path)
     {
         ShapefileFeatureTable table = new ShapefileFeatureTable(path);
 
@@ -272,12 +249,12 @@ public class LayerManager
 
                 //defaultFeatureLayerProperty(featureLayer);
                 getLayers().add(layer);
-                loadComplete(layer, path);
+                loadComplete(context, layer, path);
             }
             else
             {
                 String error = "打开失败\n: " + table.getLoadError().toString();
-                Toast.makeText(MainActivity.getInstance(), error, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -287,7 +264,7 @@ public class LayerManager
      *
      * @param path
      */
-    private void loadGeodatabaseLayer(String path)
+    private void loadGeodatabaseLayer(Context context, String path)
     {
 
         if (path.endsWith("gdbf"))
@@ -314,11 +291,11 @@ public class LayerManager
                     {
                         if (featureLayer.getLoadStatus() == LoadStatus.LOADED)
                         {
-                            loadComplete(featureLayer, fPath);
+                            loadComplete(context, featureLayer, fPath);
                         }
                         else
                         {
-                            Toast.makeText(MainActivity.getInstance(), "加载失败\n" + geodatabase.getLoadError().getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "加载失败\n" + geodatabase.getLoadError().getMessage(), Toast.LENGTH_LONG).show();
                         }
                     });
                     // add feature layer to the map
@@ -327,7 +304,7 @@ public class LayerManager
             }
             else
             {
-                Toast.makeText(MainActivity.getInstance(), "加载失败\n" + geodatabase.getLoadError().getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "加载失败\n" + geodatabase.getLoadError().getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -337,7 +314,7 @@ public class LayerManager
      *
      * @param path
      */
-    private void loadRasterLayer(String path)
+    private void loadRasterLayer(Context context, String path)
     {
         // create a raster from a local raster file
         Raster raster = new Raster(path);
@@ -350,11 +327,11 @@ public class LayerManager
                     if (rasterLayer.getLoadStatus() == LoadStatus.LOADED)
                     {
                         getLayers().add(rasterLayer);
-                        loadComplete(rasterLayer, path);
+                        loadComplete(context, rasterLayer, path);
                     }
                     else
                     {
-                        Toast.makeText(MainActivity.getInstance(), "打开失败：" + raster.getLoadError().toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "打开失败：" + raster.getLoadError().toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -372,7 +349,7 @@ public class LayerManager
      * @param layer
      * @param path
      */
-    private void loadComplete(Layer layer, String path)
+    private void loadComplete(Context context, Layer layer, String path)
     {
         if (!(layer == null && path == null))
         {
@@ -382,153 +359,78 @@ public class LayerManager
                 LayerStyleHelper.setLayerStyle((FeatureLayer) layer, path);
             }
             currentLayer = layer;
-            //Envelope geometry = layer.getFullExtent();
-//        if (geometry != null)
-//        {
-            //applyLayerProperty(layer, DataAnalysis.getLayerProperty(layer));
-        }
-//        if (needAddedLayers.size() != 0)
-//        {
-//            //因为要保存图层顺序，所以不能一起加入。
-//            String needAddedPath = needAddedLayers.get(0);
-//            needAddedLayers.remove(0);
-//            addLayer(needAddedPath);
-//            if (needAddedLayers.size() == 0)
-//            {
-//                currentLayer = getLayer(0);
-//            }
-//        }
-
-//        if (MainActivity.getInstance().frgAttri.getTranslationY() == 0)
-//        {
-//            MainActivity.getInstance().frgAttri.setTranslationY(-MainActivity.getInstance().frgAttri.getHeight());
-//        }
-        // }
-
-        //MainActivity.getInstance().updateScale(1);
-
-        if (BaseLayerHelper.isLoadingBaseLayers)
-        {
-            if (Config.getInstance().layerVisible.containsKey(path))
+            if (BaseLayerHelper.isLoadingBaseLayers)
             {
-                layer.setVisible(Config.getInstance().layerVisible.get(path));
-            }
-            if ((++BaseLayerHelper.baseLayerIndex) < Config.getInstance().layerPath.size())
-            {
-                addLayer(Config.getInstance().layerPath.get(BaseLayerHelper.baseLayerIndex));
+                if (Config.getInstance().layerVisible.containsKey(path))
+                {
+                    layer.setVisible(Config.getInstance().layerVisible.get(path));
+                }
+                if ((++BaseLayerHelper.baseLayerIndex) < Config.getInstance().layerPath.size())
+                {
+                    addLayer(context, Config.getInstance().layerPath.get(BaseLayerHelper.baseLayerIndex));
 
+                }
+                else
+                {
+                    MapViewHelper.getInstance().zoomToLayer(context,false);
+                    BaseLayerHelper.isLoadingBaseLayers = false;
+                }
             }
             else
             {
-                MapViewHelper.getInstance().zoomToLayer(false);
-                BaseLayerHelper.isLoadingBaseLayers = false;
+                    MapViewHelper.getInstance().zoomToLayer(context,false);
             }
+            Config.getInstance().trySave();
         }
-        else
-        {
-            MapViewHelper.getInstance().zoomToLayer(false);
-        }
-        Config.getInstance().trySave(MainActivity.getInstance());
     }
-
-//    private void defaultFeatureLayerProperty(FeatureLayer layer)
-//    {
-//        // create a new simple renderer for the line feature layer
-//        SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.rgb(0, 128, 0), 1.5f);
-//
-//        FillSymbol symbol = new SimpleFillSymbol(SimpleFillSymbol.Style.SOLID, Color.argb(32, 0, 255, 0), lineSymbol);
-//        SimpleRenderer simpleRenderer = new SimpleRenderer(symbol);
-//        layer.setRenderer(simpleRenderer);
-//    }
-
-    /**
-     * 应用图层样式
-     *
-     * @param layer
-     * @param property
-     */
-//    public void applyLayerProperty(Layer layer, LayerInfo property)
-//    {
-//        layer.setOpacity(property.opacity);
-//
-//        if (layer instanceof FeatureLayer )
-////        if (layer instanceof FeatureLayer && !mmpkLayer.contains(layer))
-//        {
-//            FeatureLayer featureLayer = (FeatureLayer) layer;
-//            FeatureLayerInfo featureLayerInfo = property.featureLayerInfo;
-//            if (featureLayerInfo == null)
-//            {
-//                featureLayerInfo = new FeatureLayerInfo();
-//            }
-//
-//            SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, featureLayerInfo.borderColor, featureLayerInfo.borderThickness);
-//            FillSymbol symbol = new SimpleFillSymbol(SimpleFillSymbol.Style.SOLID, featureLayerInfo.fillColor, lineSymbol);
-//            SimpleRenderer simpleRenderer = new SimpleRenderer(symbol);
-//            featureLayer.setRenderer(simpleRenderer);
-//
-//        }
-//        layerLayerProperties.put(layer, property);
-//    }
-
 
     /**
      * 加入图层
      *
      * @param path
      */
-    public void addLayer(String path)
+    public void addLayer(Context context, String path)
     {
         try
         {
             if (path.endsWith(".gpkg"))
             {
-                loadRasterGeoPackageLayer(path);
+                loadRasterGeoPackageLayer(context, path);
             }
             else if (path.endsWith(".tpk"))
             {
-                loadTileCacheLayer(path);
+                loadTileCacheLayer(context, path);
             }
             else if (path.endsWith(".shp"))
             {
-                loadFeatureLayer(path);
+                loadFeatureLayer(context, path);
             }
             else if (path.endsWith(".gdbf"))
             {
-                loadGeodatabaseLayer(path);
+                loadGeodatabaseLayer(context, path);
             }
             else if (path.endsWith(".tif") || path.endsWith(".jpg") || path.endsWith(".png"))
             {
-                loadRasterLayer(path);
+                loadRasterLayer(context, path);
             }
-//        else if (path.endsWith(".mmxd"))
-//        {
-//            getLayers().clear();
-//            needAddedLayers = DataAnalysis.getSavedLayers(path);
-//            BaseLayerHelper.loadBaseLayer();
-//        }
-//        else if (path.endsWith(".mmpk"))
-//        {
-//            loadMobilePackageMap(path);
-//        }
             else
             {
-                Toast.makeText(MainActivity.getInstance(), "不支持的格式", Toast.LENGTH_SHORT).show();
-                return;
+                Toast.makeText(context, "不支持的格式", Toast.LENGTH_SHORT).show();
             }
         }
         catch (Exception ex)
         {
-            Toast.makeText(MainActivity.getInstance(), "加载图层" + path + "失败，加载终止", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "加载图层" + path + "失败，加载终止", Toast.LENGTH_SHORT).show();
         }
         //Config.getInstance().lastPath = new File(path).getParent();
 
     }
 
-    public void addLayer(Uri uri)
+    public void addLayer(Context context, Uri uri)
     {
 
         String path = Environment.getExternalStorageDirectory() + "/" + uri.getPath().split(":")[1];
-        addLayer(path);
+        addLayer(context, path);
     }
 
     /**
@@ -553,17 +455,17 @@ public class LayerManager
     }
 
 
-    public void createFeatureLayer()
+    public void createFeatureLayer(Context context)
     {
         String[] valueArray = {"点", "线", "面"};
-        new AlertDialog.Builder(MainActivity.getInstance())
+        new AlertDialog.Builder(context)
                 .setTitle("选择矢量图层的类型")
                 .setItems(valueArray, (dialog, which) ->
                 {
-                    final EditText editText = new EditText(MainActivity.getInstance());
+                    final EditText editText = new EditText(context);
                     editText.setSingleLine(true);
                     editText.setText(FileHelper.getTimeBasedFileName(null));
-                    new AlertDialog.Builder(MainActivity.getInstance())
+                    new AlertDialog.Builder(context)
                             .setTitle("输入文件名")
                             .setView(editText)
                             .setPositiveButton("确定", (dialog2, which2) ->
@@ -578,11 +480,18 @@ public class LayerManager
                                         type = GeometryType.POLYGON;
                                         break;
                                 }
-                                String path = FileHelper.createShapefile(type, FileHelper.getProgramPath() + editText.getText().toString());
-
+                                String path = null;
+                                try
+                                {
+                                    path = FileHelper.createShapefile(type, FileHelper.getProgramPath() + editText.getText().toString());
+                                }
+                                catch (Exception ex)
+                                {
+                                    Toast.makeText(context, "创建Shapefile失败：" + ex.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
                                 if (path != null)
                                 {
-                                    addLayer(path);
+                                    addLayer(context, path);
                                 }
                             })
                             .create().show();

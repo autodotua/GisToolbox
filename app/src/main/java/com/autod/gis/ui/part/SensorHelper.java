@@ -1,5 +1,6 @@
 package com.autod.gis.ui.part;
 
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -28,22 +29,30 @@ public class SensorHelper implements SensorEventListener
 
     public SensorHelper()
     {
-        sensorManager = (SensorManager) MainActivity.getInstance().getSystemService(SENSOR_SERVICE);
     }
 
     public void stop()
     {
+        if (sensorManager == null)
+        {
+            return;
+        }
         sensorManager.unregisterListener(this);
     }
 
     private Float initialPressure = null;
 
-    public boolean start()
+    public boolean start(Context context)
     {
+        if (sensorManager == null)
+        {
+
+            sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
+        }
         Sensor pressure = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
         if (pressure == null)
         {
-            Toast.makeText(MainActivity.getInstance(), "该设备不支持气压计", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "该设备不支持气压计", Toast.LENGTH_SHORT).show();
             return false;
         }
         initialPressure = null;

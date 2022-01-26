@@ -24,7 +24,6 @@ public class Config
         {
             setInstance(null);
         }
-
         return instance;
     }
 
@@ -51,7 +50,6 @@ public class Config
             }
             catch (Exception ex)
             {
-                Toast.makeText(MainActivity.getInstance(), "加载配置文件失败", Toast.LENGTH_SHORT).show();
                 instance = new Config();
             }
         }
@@ -149,17 +147,8 @@ public class Config
         }
     }
 
-    public void trySave(Context context)
+    public void trySave()
     {
-        try
-        {
-
-            Config.getInstance().save(true);
-//            Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
-        }
-        catch (Exception ex)
-        {
-            Toast.makeText(context, "配置文件保存失败", Toast.LENGTH_SHORT).show();
-        }
+        Config.getInstance().save(true);
     }
 }

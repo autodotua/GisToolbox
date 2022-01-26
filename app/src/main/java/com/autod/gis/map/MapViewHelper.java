@@ -1,6 +1,7 @@
 package com.autod.gis.map;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.hardware.SensorEvent;
@@ -70,18 +71,16 @@ public class MapViewHelper
         mapView.setMap(null);
     }
 
-    public void Initialize()
+    public void Initialize(Activity activity)
     {
-        mapView = MainActivity.getInstance().findViewById(R.id.main_map);
+        mapView = activity.findViewById(R.id.main_map);
         mapView.setAttributionTextVisible(false);
         linkMapAndMapView();
         mapView.setMagnifierEnabled(true);
         mapView.setCanMagnifierPanMap(true);
-        imgCompass = MainActivity.getInstance().findViewById(R.id.main_img_compass);
-        //tvwLocation = MainActivity.getInstance().findViewById(R.id.main_tvw_location);
-        imgCompass = MainActivity.getInstance().findViewById(R.id.main_img_compass);
-        // mapView.addMapRotationChangedListener(mapRotationChangedEvent -> imgCompass.setRotation(-45 - (float) mapView.getMapRotation()));
-        setTouchMapView();
+        imgCompass = activity.findViewById(R.id.main_img_compass);
+        imgCompass = activity.findViewById(R.id.main_img_compass);
+        setTouchMapView(activity);
     }
 
     /**
@@ -89,30 +88,23 @@ public class MapViewHelper
      *
      * @param motionEvent
      */
-    private void showLocationCallout(MotionEvent motionEvent)
+    private void showLocationCallout(Context context, MotionEvent motionEvent)
     {
         android.graphics.Point screenPoint = new android.graphics.Point(Math.round(motionEvent.getX()), Math.round(motionEvent.getY()));
-        // create a map point from screen point
         Point mapPoint = mapView.screenToLocation(screenPoint);
-        // convert to WGS84 for lat/lon format
         if (mapPoint != null)
         {
             Point wgs84Point = (Point) GeometryEngine.project(mapPoint, SpatialReferences.getWgs84());
 
-            // create a textview for the callout
-            TextView calloutContent = new TextView(MainActivity.getInstance());
+            TextView calloutContent = new TextView(context);
 
             calloutContent.setTextColor(Color.BLACK);
             calloutContent.setLines(2);
-            // format coordinates to 4 decimal places
-            calloutContent.setText(MainActivity.getInstance().getString(R.string.view_location_callout, wgs84Point.getY(), wgs84Point.getY() >= 0 ? "N" : "S", wgs84Point.getX(), wgs84Point.getX() >= 0 ? "E" : "W"));
+            calloutContent.setText(context.getString(R.string.view_location_callout, wgs84Point.getY(), wgs84Point.getY() >= 0 ? "N" : "S", wgs84Point.getX(), wgs84Point.getX() >= 0 ? "E" : "W"));
             Callout callout = mapView.getCallout();
-            // get callout, set content and show
             callout.setLocation(mapPoint);
             callout.setContent(calloutContent);
             callout.show();
-            // center on tapped point
-            // mapView.setViewpointCenterAsync(mapPoint);
             calloutContent.setOnClickListener(v -> mapView.getCallout().dismiss());
         }
     }
@@ -121,53 +113,6 @@ public class MapViewHelper
     {
         return mapView.getMap();
     }
-//    public void setLocationTextTimer()
-//    {
-//        @SuppressLint("HandlerLeak") final Handler handler = new Handler()
-//        {
-//            @Override
-//            public void handleMessage(Message msg)
-//            {
-//                switch (msg.what)
-//                {
-//                    case 0:
-//                        Point wgs84Point = (Point) msg.obj;
-//                        tvwLocation.setText(instance.getString(R.string.main_location, wgs84Point.getY(), wgs84Point.getX()));
-//
-//                        break;
-//                }
-//            }
-//        };
-//
-//
-//        Timer timer = new Timer();
-//        timer.schedule(new TimerTask()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                if (mapView.getMap() == null)
-//                {
-//                    return;
-//                }
-//                Rect outRect1 = new Rect();
-//                instance.getWindow().getDecorView().getWindowVisibleDisplayFrame(outRect1);
-//
-//                Point point = mapView.screenToLocation(new android.graphics.Point(outRect1.width() / 2, outRect1.height() / 2));
-//                if (point != null)
-//                {
-//                    Point wgs84Point = (Point) GeometryEngine.project(point, SpatialReferences.getWgs84());
-//                    Message message = new Message();
-//                    message.what = 0;
-//                    message.obj = wgs84Point;
-//                    handler.sendMessage(message);
-//                }
-//            }
-//        }, 0, 100);
-//
-//
-//    }
-
     /**
      * 当前指南针角度
      */
@@ -178,10 +123,10 @@ public class MapViewHelper
      *
      * @param sensorEvent
      */
-    public void setCompass(SensorEvent sensorEvent)
+    public void setCompass(Context context, SensorEvent sensorEvent)
     {
         float degree = sensorEvent.values[0];
-        int screenDegree = getScreenDegree();
+        int screenDegree = getScreenDegree(context);
         RotateAnimation ra = new RotateAnimation(currentDegree - 45 - screenDegree, -degree - 45 - screenDegree, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         ra.setDuration(200);
         imgCompass.startAnimation(ra);
@@ -209,48 +154,34 @@ public class MapViewHelper
      *
      * @return
      */
-    private int getScreenDegree()
+    private int getScreenDegree(Context context)
     {
 
-        int angle = ((WindowManager) Objects.requireNonNull(MainActivity.getInstance().getSystemService(Context.WINDOW_SERVICE))).getDefaultDisplay().getRotation();
+        int angle = ((WindowManager) Objects.requireNonNull(context.getSystemService(Context.WINDOW_SERVICE))).getDefaultDisplay().getRotation();
         return angle * 90;
-//        switch (angle) {
-//            case Surface.ROTATION_0:
-//                return 0;
-//            case Surface.ROTATION_90:
-//                return 90;
-//            case Surface.ROTATION_180:
-//                return 180;
-//            case Surface.ROTATION_270:
-//                return 270;
-//            default:
-//                return 0;
-
     }
 
     /**
      * 将屏幕缩放到刚好显示完成的图层
      */
-    public void zoomToLayer(boolean toDefaultScale)
+    public void zoomToLayer(Context context, boolean toDefaultScale)
     {
         if (mapView.getMap() == null || LayerManager.getInstance().getLayers().size() == 0)
         {
-            Toast.makeText(MainActivity.getInstance(), "请先加载地图", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "请先加载地图", Toast.LENGTH_SHORT).show();
             return;
         }
         if (LayerManager.getInstance().currentLayer == null)
         {
-            Toast.makeText(MainActivity.getInstance(), "请先选择当前图层", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "请先选择当前图层", Toast.LENGTH_SHORT).show();
             return;
         }
         try
         {
-            //mapView.setViewpointScaleAsync(map.getMaxScale()   );
             Envelope extent = null;
             if (LayerManager.getInstance().currentLayer instanceof FeatureLayer && Config.getInstance().featureLayerQueryExtentEveryTime)
             {
                 extent = ((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable().queryExtentAsync(new QueryParameters()).get();
-                //mapView.setViewpointGeometryAsync(LayerManager.getInstance().currentLayer.getFullExtent()).addDoneListener(() ->
 
             }
             else
@@ -262,7 +193,7 @@ public class MapViewHelper
             {
                 if (toDefaultScale)
                 {
-                    mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> MainActivity.getInstance().setScaleText(Config.getInstance().defaultScale));
+                    mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> ((MainActivity)context).setScaleText(Config.getInstance().defaultScale));
                 }
             });
         }
@@ -276,12 +207,10 @@ public class MapViewHelper
      * 设置单击地图事件
      */
     @SuppressLint("ClickableViewAccessibility")
-    public void setTouchMapView()
+    public void setTouchMapView(Activity activity)
     {
-
-        mapView.setOnTouchListener(new DefaultMapViewOnTouchListener(MainActivity.getInstance(), mapView)
+        mapView.setOnTouchListener(new DefaultMapViewOnTouchListener(activity, mapView)
         {
-
             @SuppressLint("DefaultLocale")
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e)
@@ -301,14 +230,14 @@ public class MapViewHelper
                             getTouchedFuture(e, feature -> {
                                 if (feature == null)
                                 {
-                                    Toast.makeText(MainActivity.getInstance(), "什么也没选到", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, "什么也没选到", Toast.LENGTH_SHORT).show();
 //                                     return super.onSingleTapConfirmed(e);
                                 }
 
                                 try
                                 {
                                     selectFeature(EditFragment.getInstance().isMultiSelect(), feature);
-                                    FeatureAttributionTableFragment.getInstance().loadTable(featureTable, feature);
+                                    FeatureAttributionTableFragment.getInstance().loadTable(activity, featureTable, feature);
                                     //设置当前状态
                                     EditFragment.getInstance().setSelectStatus(true);
 
@@ -316,10 +245,9 @@ public class MapViewHelper
 
                                 catch (Exception ex)
                                 {
-                                    Toast.makeText(MainActivity.getInstance(), ex.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, ex.toString(), Toast.LENGTH_SHORT).show();
                                 }
                             });
-//                            Feature feature = getTouchedFuture(e, featureTable);
                             return super.onSingleTapConfirmed(e);
                         }
                         catch (Exception e1)
@@ -328,39 +256,15 @@ public class MapViewHelper
                         }
 
 
-                        //获取触摸到的要素
-
                     }
                     else
                     {
 
-                        showLocationCallout(e);
+                        showLocationCallout(activity, e);
                     }
                 }
                 return super.onSingleTapConfirmed(e);
             }
-
-            //Feature touchedFeature;
-
-            //            private void identifyTouchedFuture(MotionEvent e, FeatureLayer layer, Runnable complete)
-//            {
-//                android.graphics.Point screenPoint = new android.graphics.Point(Math.round(e.getX()), Math.round(e.getY()));
-//
-//                final ListenableFuture<IdentifyLayerResult> identifyLayerResultListenableFuture = mMapView.identifyLayerAsync(
-//                        layer, screenPoint, 12, false, 1);
-//                identifyLayerResultListenableFuture.addDoneListener(() -> {
-//                    try
-//                    {
-//                        IdentifyLayerResult identifyLayerResult = identifyLayerResultListenableFuture.get();
-//                        touchedFeature = (Feature) identifyLayerResult.getElements().get(0);
-//
-//                        complete.run();
-//                    }
-//                    catch (Exception ex)
-//                    {
-//                    }
-//                });
-//            }
             private void getTouchedFuture(MotionEvent motionEvent, FeatureGot then)
             {
                 if (!(LayerManager.getInstance().currentLayer instanceof FeatureLayer))
@@ -380,7 +284,7 @@ public class MapViewHelper
                     }
                     catch (Exception ex)
                     {
-//                        Toast.makeText(MainActivity.getInstance(), "查询点击区域要素失败\n" + ex.toString(), Toast.LENGTH_SHORT).show();
+
                     }
                 });
 
@@ -404,7 +308,6 @@ public class MapViewHelper
                     double mapTolerance = tolerance * mapView.getUnitsPerDensityIndependentPixel();
                     Envelope envelope = new Envelope(clickPoint.getX() - mapTolerance, clickPoint.getY() - mapTolerance,
                             clickPoint.getX() + mapTolerance, clickPoint.getY() + mapTolerance, mapView.getSpatialReference());
-//envelope=(Envelope)GeometryEngine.project(envelope,featureTable.getSpatialReference());
                     QueryParameters query = new QueryParameters();
                     query.setGeometry(envelope);
                     query.setSpatialRelationship(QueryParameters.SpatialRelationship.INTERSECTS);
@@ -417,13 +320,13 @@ public class MapViewHelper
                     }
                     catch (Exception ex)
                     {
-                        Toast.makeText(MainActivity.getInstance(), "查询点击区域要素失败\n" + ex.toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "查询点击区域要素失败\n" + ex.toString(), Toast.LENGTH_SHORT).show();
                         return null;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Toast.makeText(MainActivity.getInstance(), "点击事件失败\n" + ex.toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "点击事件失败\n" + ex.toString(), Toast.LENGTH_SHORT).show();
                     return null;
                 }
             }
@@ -441,42 +344,26 @@ public class MapViewHelper
             @Override
             public boolean onScale(ScaleGestureDetector detector)
             {
-                MainActivity.getInstance().updateScale(1);
                 return super.onScale(detector);
             }
 
             @Override
             public boolean onDoubleTap(MotionEvent e)
             {
-                MainActivity.getInstance().updateScale(1);
                 return super.onDoubleTap(e);
             }
 
             @Override
             public boolean onDoubleTouchDrag(MotionEvent event)
             {
-                MainActivity.getInstance().updateScale(1);
                 return super.onDoubleTouchDrag(event);
             }
-
-
-            //            @Override
-//            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY)
-//            {
-//                if(pauseMove)
-//                {
-//                    return false;
-//                }
-//                return super.onScroll(e1, e2, distanceX, distanceY);
-//            }
 
 
         });
 
 
     }
-//
-//    public  boolean pauseMove=false;
 
 
     /**

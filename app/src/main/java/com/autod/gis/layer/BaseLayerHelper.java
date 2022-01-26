@@ -1,5 +1,7 @@
 package com.autod.gis.layer;
 
+import android.content.Context;
+
 import com.esri.arcgisruntime.io.RequestConfiguration;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.layers.WebTiledLayer;
@@ -15,13 +17,13 @@ public class BaseLayerHelper
 {
 
 
-    public static void loadBaseLayer()
+    public static void loadBaseLayer(Context context)
     {
-        loadTiledBaseLayer();
+        loadTiledBaseLayer(context);
     }
 
 
-    private static void loadTiledBaseLayer()
+    private static void loadTiledBaseLayer(Context context)
     {
         ArrayList<Layer> layers = new ArrayList<>();
         for (String url : Config.getInstance().baseUrls)
@@ -33,30 +35,25 @@ public class BaseLayerHelper
             layer.setRequestConfiguration(requestConfiguration);
             layers.add(layer);
         }
-        //Basemap basemap = new Basemap(baseLayer);
         Basemap basemap = new Basemap(layers, null);
         basemap.loadAsync();
-        //Basemap basemap = new Basemap(new WebTiledLayer("http://webrd0{subDomain}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=7&x={col}&y={row}&z={level}", new string[] { "1", "2", "3", "4" }));
         basemap.addDoneLoadingListener(() -> {
 
             LayerManager.getInstance().map = new ArcGISMap(basemap);
             MapViewHelper.getInstance().linkMapAndMapView();
 
-            //loadFeatureLayer(0);
-            loadOtherLayers();
+            loadOtherLayers(context);
 
         });
-
-
     }
 
-    private static void loadOtherLayers()
+    private static void loadOtherLayers(Context context)
     {
         if (Config.getInstance().layerPath.size() > 0)
         {
             isLoadingBaseLayers = true;
             baseLayerIndex = 0;
-            LayerManager.getInstance().addLayer(Config.getInstance().layerPath.get(0));
+            LayerManager.getInstance().addLayer( context, Config.getInstance().layerPath.get(0));
         }
     }
 
