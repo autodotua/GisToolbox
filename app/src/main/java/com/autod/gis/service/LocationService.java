@@ -164,7 +164,7 @@ public class LocationService extends Service
         {
 
             // 当GPS定位信息发生改变时，更新定位
-            TrackHelper.locationChanged(location);
+            TrackHelper.getInstance().locationChanged(LocationService.this,location);
         }
 
         @Override

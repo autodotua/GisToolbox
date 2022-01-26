@@ -126,7 +126,7 @@ public class FileHelper
 
     public static String getProgramPath()
     {
-        return Environment.getExternalStorageDirectory().toString() + "/GisToolbox/";
+        return Environment.getExternalStorageDirectory().toString() + "/GIS/";
     }
 
     public static String getVerificationPath()

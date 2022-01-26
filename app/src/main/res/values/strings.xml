@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">GIS工具箱</string>
     <string name="view_location_callout">%1$.6f°%2$s\n%3$.6f°%4$s</string>
-    <string name="track_notification_message">已记录%1$d个点，总长度%2$.2f米</string>
+    <string name="track_notification_message">已记录%1$d:%2$02d:%3$02d，总长度%4$.2f米</string>
     <string name="track_notification_title_running">正在记录轨迹</string>
     <string name="track_notification_title_pausing">暂停记录轨迹</string>
     <string name="import_btn_ftp">打开FTP</string>

@@ -1,5 +1,6 @@
 package com.autod.gis.map;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
@@ -13,7 +14,6 @@ import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.GeometryType;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.PointCollection;
-import com.esri.arcgisruntime.geometry.Polygon;
 import com.esri.arcgisruntime.geometry.Polyline;
 import com.esri.arcgisruntime.geometry.SpatialReferences;
 import com.esri.arcgisruntime.loadable.LoadStatus;
@@ -42,71 +42,51 @@ import static com.autod.gis.data.FileHelper.getTimeBasedFileName;
 
 public class TrackHelper
 {
-    private static ShapefileFeatureTable polylineTable;
-    private static Status status = Status.NotRunning;
-    private static GraphicsOverlay overlay;
-    private static List<Point> locationPoints = new ArrayList<>();
-    private static double length = 0;
-    private static int count = 0;
+    private static TrackHelper instance;
 
-//    private static GPX.Builder gpxBuilder;
-//    private static Track.Builder trackBuilder;
-//    private static TrackSegment.Builder segment;
+    public static TrackHelper getInstance()
+    {
+        if (instance == null)
+        {
+            instance = new TrackHelper();
+        }
+        return instance;
+    }
 
-    private static StringBuilder gpxString;
+    private ShapefileFeatureTable polylineTable;
+    private Status status = Status.NotRunning;
+    private GraphicsOverlay overlay;
+    private List<Point> locationPoints = new ArrayList<>();
+    private double length = 0;
+    private int count = 0;
 
-    public static Status getStatus()
+
+    private StringBuilder gpxString;
+
+    public Status getStatus()
     {
         return status;
     }
 
-    private static Date startTime;
+    private Date startTime;
 
-    public static boolean start()
+    public boolean start( )
     {
-
         try
         {
-            //isFirstPoint = true;
             locationPoints.clear();
             length = 0;
             count = 0;
             startTime = new Date(System.currentTimeMillis());
-            loadGpx();
-            //getShapefile(GeometryType.POINT);
-            if (overlay == null)
-            {
-                overlay = new GraphicsOverlay();
-                //SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.parseColor("#64B5F6"), 8);
-                SimpleLineSymbol symbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#54A5F6"), 6f);
-                overlay.setRenderer(new SimpleRenderer(symbol));
-            }
-            else
-            {
-                overlay.getGraphics().clear();
-            }
+            initializeGpx();
+            overlay = new GraphicsOverlay();
+            //SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.parseColor("#64B5F6"), 8);
+            SimpleLineSymbol symbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#54A5F6"), 6f);
+            overlay.setRenderer(new SimpleRenderer(symbol));
             MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(overlay);
-//
-//            pointFeatureTable = new ShapefileFeatureTable(FileHelper.getPointTrackFilePath("Point.shp"));
-//
-//            pointFeatureTable.loadAsync();
-//            pointFeatureTable.addDoneLoadingListener(() -> {
-//                if (pointFeatureTable.getLoadStatus() == LoadStatus.LOADED)
-//                {
-//                    FeatureLayer featureLayer = new FeatureLayer(pointFeatureTable);
-//                    SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.parseColor("#64B5F6"), 5);
-//                    featureLayer.setRenderer(new SimpleRenderer(symbol));
-//                   LayerManager.getInstance().getLayers().add(featureLayer);
-//                }
-//                else
-//                {
-//                    String error = "打开空白点文件失败\n: " + pointFeatureTable.getLoadError().toString();
-//                    Toast.makeText(MainActivity.getInstance(), error, Toast.LENGTH_LONG).show();
-//                }
-//            });
+
 
             MainActivity.getInstance().startService(new Intent(MainActivity.getInstance(), LocationService.class));
-            //LocationService.getInstance().startUpdate();
 
             usePressureAltitude = false;
             if (Config.getInstance().useBarometer)
@@ -128,29 +108,8 @@ public class TrackHelper
             return false;
         }
     }
-//
-//    private static void clearFeatures(FeatureTable table)
-//    {
-//        Envelope envelope = new Envelope(-Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, SpatialReferences.getWgs84());
-//        QueryParameters query = new QueryParameters();
-//        query.setGeometry(envelope);
-//        query.setSpatialRelationship(QueryParameters.SpatialRelationship.WITHIN);
-////        query.setMaxFeatures(1);
-//        ListenableFuture<FeatureQueryResult> result = table.queryFeaturesAsync(query);
-//        try
-//        {
-//            //虽然会搜索到多个要素，但是这里只取第一个，也就是最有可能的那个
-//            table.deleteFeaturesAsync(result.get());
-//        }
-//        catch (Exception ex)
-//        {
-//
-//        }
-//    }
-//
-//    private static boolean isFirstPoint = true;
 
-    private static void loadGpx()
+    private void initializeGpx()
     {
         String name = getTimeBasedFileName(startTime) + "Track";
         String time = getGpxTime(startTime);
@@ -161,14 +120,9 @@ public class TrackHelper
                 )
         );
 
-        //Toast.makeText(MainActivity.getInstance(), gpxString.toString(), Toast.LENGTH_SHORT).show();
-//        gpxBuilder = GPX.builder().addTrack(Track.builder().build());
-//        trackBuilder = Track.builder().addSegment(TrackSegment.builder().build());
-//        segment = TrackSegment.builder();
-
     }
 
-    private static String getGpxTime(Date time)
+    private String getGpxTime(Date time)
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA);
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
@@ -177,7 +131,7 @@ public class TrackHelper
 
     private static boolean usePressureAltitude = false;
 
-    private static void addGpxPoint(Location location)
+    private void addGpxPoint(Location location)
     {
         gpxString.append(MainActivity.getInstance().getResources()
                 .getString(R.string.gpx_point,
@@ -189,49 +143,26 @@ public class TrackHelper
         );
     }
 
-    private static void saveGpx()
+    private void saveGpx()
     {
-//        trackBuilder.segments().set(0, segment.build());
-//        gpxBuilder.tracks().set(0, trackBuilder.build());
-//        try
-//        {
-//           // gpxBuilder.build().
-//            String path=FileHelper.getGpxTrackFilePath("test.gpx");
-//            //Toast.makeText(MainActivity.getInstance(), gpxBuilder.build()., Toast.LENGTH_SHORT).show();
-//            GPX.write(gpxBuilder.build(),path);
-//            //Toast.makeText(MainActivity.getInstance(), gpxBuilder.build()., Toast.LENGTH_SHORT).show();
-//        }
-//        catch (Exception ex)
-//        {
-//            Toast.makeText(MainActivity.getInstance(), "保存GPX失败\n"+ex.getMessage(), Toast.LENGTH_SHORT).show();
-//        }
         FileHelper.writeTextToFile(FileHelper.getGpxTrackFilePath(getTimeBasedFileName(startTime) + ".gpx"),
                 gpxString.toString() + MainActivity.getInstance().getResources().getString(R.string.gpx_foot));
     }
 
-    public static void locationChanged(Location location)
+    public void locationChanged(Context context, Location location)
     {
         if (status != Status.Running)
         {
             return;
         }
-//        if (pointFeatureTable.getLoadStatus() != LoadStatus.LOADED)
-//        {
-//            return;
-//        }
 
         Point point = new Point(location.getLongitude(),
                 location.getLatitude(),
                 //location.getAltitude(),
                 SpatialReferences.getWgs84());
         addGpxPoint(location);
-        //segment.addPoint(p -> p.lat(point.getY()).lon(point.getX()).ele(point.getZ()));
 
         locationPoints.add(point);
-//        Graphic graphic = new Graphic(point);
-//        SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.parseColor("#4495D6"), 12);
-//        graphic.setSymbol(symbol);
-//        overlay.getGraphics().add(graphic);
         if ((++count) >= 2)
         {
             ArrayList<Point> twoPoints = new ArrayList<Point>()
@@ -246,21 +177,9 @@ public class TrackHelper
             length += GeometryEngine.lengthGeodetic(line, null, GeodeticCurveType.NORMAL_SECTION);
             Graphic graphic = new Graphic(line);
             overlay.getGraphics().add(graphic);
-            //overlay.getGraphics().get(locationPoints.size() - 2).setSymbol(null);
         }
-        LocationService.updateNotification(MainActivity.getInstance().getString(R.string.track_notification_title_running), MainActivity.getInstance().getString(R.string.track_notification_message, count, length));
-//        Feature feature = pointFeatureTable.createFeature();
-//        features.add(feature);
-//        feature.setGeometry(point);
-//        LocationService.updateNotification("已记录" + features.size() + "个点");
-//        pointFeatureTable.addFeatureAsync(feature).addDoneListener(() -> {
-//
-////            if(isFirstPoint)
-////            {
-////                MapViewHelper.getInstance().mapView.setViewpointScaleAsync(10000);
-////                isFirstPoint=false;
-////            }
-//        });
+
+        updateNotification(context);
         if (Config.getInstance().autoCenterWhenRecording)
         {
             MapViewHelper.getInstance().mapView.setViewpointCenterAsync(point);
@@ -271,13 +190,35 @@ public class TrackHelper
             saveGpx();
         }
 
-        // shapefileFeatureTable.updateFeatureAsync(feature);
     }
 
-    public static void pause()
+    private void updateNotification(Context context)
+    {
+        int totalS = (int) ((System.currentTimeMillis() - startTime.getTime()) / 1000);
+        int h = totalS / 3600;
+        int m = (totalS - h * 3600) / 60;
+        int s = totalS % 60;
+        String text = null;
+        switch (status)
+        {
+
+            case Running:
+                text = MainActivity.getInstance().getString(R.string.track_notification_title_running);
+                break;
+            case NotRunning:
+                text = "";
+                break;
+            case Pausing:
+                MainActivity.getInstance().getString(R.string.track_notification_title_pausing);
+                break;
+        }
+        LocationService.updateNotification(text, context.getString(R.string.track_notification_message, h, m, s, length));
+    }
+
+    public void pause(Context context)
     {
         status = Status.Pausing;
-        LocationService.updateNotification(MainActivity.getInstance().getString(R.string.track_notification_title_pausing), MainActivity.getInstance().getString(R.string.track_notification_message, count, length));
+        updateNotification(context);
         if (Config.getInstance().useBarometer)
         {
             SensorHelper.getInstance().stop();
@@ -285,21 +226,21 @@ public class TrackHelper
 
     }
 
-    public static void resume()
+    public void resume(Context context)
     {
         status = Status.Running;
-        LocationService.updateNotification(MainActivity.getInstance().getString(R.string.track_notification_title_running), MainActivity.getInstance().getString(R.string.track_notification_message, count, length));
+        updateNotification(context);
         if (Config.getInstance().useBarometer)
         {
             SensorHelper.getInstance().start();
         }
     }
 
-    public static void stop()
+    public void stop(Context context)
     {
         status = Status.NotRunning;
         //LocationService.getInstance().stopUpdate();
-        MainActivity.getInstance().stopService(new Intent(MainActivity.getInstance(), LocationService.class));
+        context.stopService(new Intent(MainActivity.getInstance(), LocationService.class));
         if (Config.getInstance().useBarometer)
         {
             SensorHelper.getInstance().stop();
@@ -374,7 +315,7 @@ public class TrackHelper
     }
 
 
-    private static String getShapefile( )
+    private  String getShapefile()
     {
         String targetPath = null;
 

@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item)
     {
 
-        MenuHelper.getInstance().menuClick(item);
+        MenuHelper.getInstance().menuClick(this,item);
 
         return true;
     }
@@ -456,25 +456,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ani.setRepeatMode(Animation.REVERSE);
         ani.setRepeatCount(Animation.INFINITE);
 
-        if (TrackHelper.getStatus() == TrackHelper.Status.NotRunning)
+        if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.NotRunning)
         {
-            if (TrackHelper.start())
+            if (TrackHelper.getInstance().start())
             {
                 imgSatellite.setVisibility(View.VISIBLE);
                 imgSatellite.setAnimation(ani);
             }
         }
-        else if (TrackHelper.getStatus() == TrackHelper.Status.Running)
+        else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)
         {
             new AlertDialog.Builder(this)
                     .setTitle("正在记录轨迹")
                     .setPositiveButton("暂停", (dialog, which) -> {
-                        TrackHelper.pause();
+                        TrackHelper.getInstance().pause(this);
                         imgSatellite.clearAnimation();
                         imgSatellite.setVisibility(View.GONE);
                     })
                     .setNegativeButton("停止", (dialog, which) -> {
-                        TrackHelper.stop();
+                        TrackHelper.getInstance().stop(this);
                         imgSatellite.clearAnimation();
                         imgSatellite.setVisibility(View.GONE);
                     })
@@ -482,17 +482,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     }).create().show();
         }
-        else if (TrackHelper.getStatus() == TrackHelper.Status.Pausing)
+        else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Pausing)
         {
             new AlertDialog.Builder(this)
-                    .setTitle("记录轨迹暂停中")
+                    .setTitle("暂停记录轨迹中")
                     .setPositiveButton("继续", (dialog, which) -> {
-                        TrackHelper.resume();
+                        TrackHelper.getInstance().resume(this);
                         imgSatellite.setVisibility(View.VISIBLE);
                         imgSatellite.setAnimation(ani);
                     })
                     .setNegativeButton("停止", (dialog, which) -> {
-                        TrackHelper.stop();
+                        TrackHelper.getInstance().stop(this);
                     })
                     .setNeutralButton("取消", (dialog, which) -> {
 

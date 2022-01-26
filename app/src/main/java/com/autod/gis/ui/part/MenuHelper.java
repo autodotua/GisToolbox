@@ -1,6 +1,8 @@
 package com.autod.gis.ui.part;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -81,7 +83,7 @@ public class MenuHelper
 
     }
 
-    public void menuClick(MenuItem item)
+    public void menuClick(Activity context, MenuItem item)
     {
         switch (item.getItemId())
         {
@@ -244,11 +246,11 @@ public class MenuHelper
                         });
                 break;
             case R.id.menu_exit:
-                if (TrackHelper.getStatus() != TrackHelper.Status.NotRunning)
+                if (TrackHelper.getInstance().getStatus() != TrackHelper.Status.NotRunning)
                 {
-                    TrackHelper.stop();
+                    TrackHelper.getInstance().stop(context);
                 }
-                MainActivity.getInstance().finish();
+                context.finish();
                 break;
             default:
                 break;
