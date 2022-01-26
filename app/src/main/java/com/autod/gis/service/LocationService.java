@@ -57,13 +57,13 @@ public class LocationService extends Service
 
     private static Notification.Builder notificationBuilder;
     private static NotificationManager notificationManager;
-    private   static  final int  NotificationId=1024;
+    private static final int NotificationId = 1024;
 
-    public static void updateNotification(String title,String message)
+    public static void updateNotification(String title, String message)
     {
         notificationBuilder.setContentTitle(title);
         notificationBuilder.setContentText(message);
-        if(notificationManager!=null)
+        if (notificationManager != null)
         {
             notificationManager.notify(NotificationId, notificationBuilder.build());
         }
@@ -82,7 +82,6 @@ public class LocationService extends Service
                 .setSmallIcon(R.drawable.ic_bottom_track) // 设置状态栏内的小图标
                 //.setContentText("要显示的内容") // 设置上下文内容
                 .setWhen(System.currentTimeMillis()); // 设置该通知发生的时间
-
 
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
@@ -131,9 +130,11 @@ public class LocationService extends Service
 
     @Override
     public void onDestroy()
-    {if(notificationManager!=null)
     {
-        notificationManager.cancel(NotificationId);}
+        if (notificationManager != null)
+        {
+            notificationManager.cancel(NotificationId);
+        }
         stopForeground(true);
         super.onDestroy();
 
@@ -161,7 +162,7 @@ public class LocationService extends Service
         public void onLocationChanged(Location location)
         {
             // 当GPS定位信息发生改变时，更新定位
-            TrackHelper.getInstance().locationChanged(LocationService.this,location);
+            TrackHelper.getInstance().locationChanged(LocationService.this, location);
         }
 
         @Override

@@ -27,7 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 
 import com.autod.gis.data.Config;
 import com.autod.gis.layer.BaseLayerHelper;
@@ -45,6 +44,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener
@@ -451,7 +451,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("正在记录轨迹")
-                    .setMessage(getGpsMessage())
+                    .setMessage(getLocationMessage())
                     .setPositiveButton("暂停", (d, which) -> {
                         TrackHelper.getInstance().pause(this);
                         setTrackIcon(false);
@@ -463,28 +463,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setNeutralButton("取消", (d, which) -> {
 
                     }).create();
-            dialog.show();
-
+            showTrackdialog(dialog);
         }
         else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Pausing)
         {
-            new AlertDialog.Builder(this)
+            AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("暂停记录轨迹中")
-                    .setMessage(getGpsMessage())
-                    .setPositiveButton("继续", (dialog, which) -> {
+                    .setMessage(getLocationMessage())
+                    .setPositiveButton("继续", (d, which) -> {
                         TrackHelper.getInstance().resume(this);
                         setTrackIcon(true);
                     })
-                    .setNegativeButton("停止", (dialog, which) -> {
+                    .setNegativeButton("停止", (d, which) -> {
                         TrackHelper.getInstance().stop(this);
                     })
-                    .setNeutralButton("取消", (dialog, which) -> {
+                    .setNeutralButton("取消", (d, which) -> {
 
-                    }).create().show();
+                    }).create();
+            showTrackdialog(dialog);
         }
     }
 
-    private String getGpsMessage()
+    private void showTrackdialog(AlertDialog dialog)
+    {
+        AtomicBoolean showing = new AtomicBoolean(true);
+        Thread t = new Thread(() -> {
+            while (showing.get())
+            {
+                try
+                {
+                    Thread.sleep(1000);
+                }
+                catch (Exception ex)
+                {
+                }
+                runOnUiThread(() -> {
+                            if (dialog.isShowing())
+                            {
+                                dialog.setMessage(getLocationMessage());
+                            }
+                        }
+                );
+            }
+        });
+        dialog.setOnDismissListener(dialog1 -> showing.set(false));
+        t.start();
+        dialog.show();
+    }
+
+    private String getLocationMessage()
     {
         Location loc = TrackHelper.getInstance().getLastLocation();
         if (loc != null)
@@ -499,16 +526,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             double pAlt = SensorHelper.getInstance() == null ? Double.NaN : SensorHelper.getInstance().getCurrentAltitude();
             double speed = loc.getSpeed();
             double hAcc = loc.getAccuracy();
-            double vAcc=Double.NaN;
-            double sAcc=Double.NaN;
+            double vAcc = Double.NaN;
+            double sAcc = Double.NaN;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
             {
-                 vAcc = loc.getVerticalAccuracyMeters();
-                sAcc=loc.getSpeedAccuracyMetersPerSecond();
+                vAcc = loc.getVerticalAccuracyMeters();
+                sAcc = loc.getSpeedAccuracyMetersPerSecond();
             }
-            return getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed,hAcc,vAcc,sAcc);
+            return getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed, hAcc, vAcc, sAcc);
         }
-        return "";
+        return "暂无位置信息";
     }
 
     private void setTrackIcon(boolean on)
@@ -593,23 +620,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
 
         }
-    }
-
-    /*
-    不知道这个方法是干什么的，甚至不知道是不是我写的，暂时在调用的地方注释掉了
-     */
-    public void refresh()
-    {
-//        new Handler().postDelayed(() -> {
-//            if (BaseLayerHelper.baseLayerCount != LayerManager.getInstance().getLayers().size())
-//            {
-//                LayerManager.getInstance().resetLayers();
-//            }
-//            if (BaseLayerHelper.baseLayerCount != LayerManager.getInstance().getLayers().size()
-//                    || BaseLayerHelper.baseLayerCount == 0
-//                    || LayerManager.getInstance().getLayers().size() == 0)
-//                refresh();
-//        }, 573);
     }
 
 
