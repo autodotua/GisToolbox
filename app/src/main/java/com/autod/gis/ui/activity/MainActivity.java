@@ -27,7 +27,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.autod.gis.BuildConfig;
 import com.autod.gis.data.Config;
 import com.autod.gis.layer.BaseLayerHelper;
 import com.autod.gis.layer.LayerManager;
@@ -38,8 +37,6 @@ import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
 import com.autod.gis.ui.part.MenuHelper;
 import com.autod.gis.R;
 import com.autod.gis.map.TrackHelper;
-import com.esri.arcgisruntime.mapping.view.MapScaleChangedEvent;
-import com.esri.arcgisruntime.mapping.view.MapScaleChangedListener;
 
 import java.text.DecimalFormat;
 
@@ -247,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MapViewHelper.getInstance().imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
 
 
-        EditFragment.getInstance().Initialize(this);
+        ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).initialize(this);
 
         FeatureAttributionTableFragment.getInstance().Initialize(this);
 
@@ -415,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 FeatureAttributionTableFragment.getInstance().foldOrUnfold();
                 break;
             case R.id.main_btn_edit:
-                EditFragment.getInstance().foldOrUnfold(this);
+                ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).foldOrUnfold(this);
                 break;
             case R.id.main_btn_reset_map:
                 LayerManager.getInstance().resetLayers(this);

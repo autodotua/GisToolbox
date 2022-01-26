@@ -239,7 +239,6 @@ public class TrackHelper
     public void stop(Context context)
     {
         status = Status.NotRunning;
-        //LocationService.getInstance().stopUpdate();
         context.stopService(new Intent(context, LocationService.class));
         if (Config.getInstance().useBarometer)
         {

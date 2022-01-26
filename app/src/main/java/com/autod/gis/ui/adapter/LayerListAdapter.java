@@ -90,10 +90,6 @@ public class LayerListAdapter extends BaseAdapter
             holder = (ViewHolder) convertView.getTag();
         }
 
-       // int baseLayerCount = BaseLayerHelper.baseLayerCount;  //获取基础图层的数量
-//        int reverseIndex =LayerManager.getInstance().getLayers().size()-1 - index +1;  //zj mmpk中的三个基础图层
-
-//        int reverseIndex =getCount()-1 +(baseLayerCount-1)-index;
         int realIndex = LayerManager.getInstance().getLayers().size() - 1 - index;
         holders.add(holder);
         holder.rbtnCurrentLayer.setChecked(LayerManager.getInstance().currentLayer == LayerManager.getInstance().getLayer(realIndex));
@@ -107,18 +103,9 @@ public class LayerListAdapter extends BaseAdapter
         {
             //String name=LayerManager.getInstance().getLayers().get(reverseIndex).getName();
             String path = new File(LayerManager.getInstance().layerFilePath.get(LayerManager.getInstance().getLayers().get(realIndex))).getName();
-            //if(name!="")
-            //{
-            //    holder.tvwFilePath.setText(name);
-            //}
-            //else if(path!="")
-            //{
+
             holder.tvwFilePath.setText(path);
-            //}
-            //else
-            //{
-            //    holder.tvwFilePath.setText("（无名称）");
-            //}
+
 
         }
         catch (Exception ex)

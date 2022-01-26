@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.FragmentActivity;
+
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureQueryResult;
@@ -113,6 +115,7 @@ public class MapViewHelper
     {
         return mapView.getMap();
     }
+
     /**
      * 当前指南针角度
      */
@@ -193,7 +196,7 @@ public class MapViewHelper
             {
                 if (toDefaultScale)
                 {
-                    mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> ((MainActivity)context).setScaleText(Config.getInstance().defaultScale));
+                    mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> ((MainActivity) context).setScaleText(Config.getInstance().defaultScale));
                 }
             });
         }
@@ -236,10 +239,10 @@ public class MapViewHelper
 
                                 try
                                 {
-                                    selectFeature(EditFragment.getInstance().isMultiSelect(), feature);
+                                    selectFeature(((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).isMultiSelect(), feature);
                                     FeatureAttributionTableFragment.getInstance().loadTable(activity, featureTable, feature);
                                     //设置当前状态
-                                    EditFragment.getInstance().setSelectStatus(true);
+                                    ((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).setSelectStatus(true);
 
                                 }
 
@@ -265,6 +268,7 @@ public class MapViewHelper
                 }
                 return super.onSingleTapConfirmed(e);
             }
+
             private void getTouchedFuture(MotionEvent motionEvent, FeatureGot then)
             {
                 if (!(LayerManager.getInstance().currentLayer instanceof FeatureLayer))
@@ -430,8 +434,11 @@ public class MapViewHelper
             }
             selectedFeatures.clear();
         }
-
-        EditFragment.getInstance().setSelectStatus(false);
+        if (onSelectionStatusChangedEventListener != null)
+        {
+            onSelectionStatusChangedEventListener.onEvent(false);
+        }
+        //((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).setSelectStatus(false);
     }
 
     public List<Feature> getSelectedFeatures()
@@ -439,10 +446,22 @@ public class MapViewHelper
         return selectedFeatures;
     }
 
+    private OnSelectionStatusChangedEventListener onSelectionStatusChangedEventListener;
+
+    public void setOnSelectionStatusChangedEventListener(OnSelectionStatusChangedEventListener onSelectionStatusChangedEventListener)
+    {
+        this.onSelectionStatusChangedEventListener = onSelectionStatusChangedEventListener;
+    }
+
     interface FeatureGot
     {
         void get(Feature result);
+    }
 
+   public interface OnSelectionStatusChangedEventListener
+    {
+        void onEvent(boolean hasSelectedFeatures);
     }
 }
+
 

@@ -66,13 +66,6 @@ public class EditFragment extends Fragment
      */
     private List<Button> editButtons = new ArrayList<>();
 
-    private static EditFragment instance;
-
-    public static EditFragment getInstance()
-    {
-        return instance;
-    }
-
     private View control;
 
     public View getControl()
@@ -99,15 +92,13 @@ public class EditFragment extends Fragment
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        instance = this;
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_edit, container, false);
     }
 
     /**
      * 初始化Fragment
      */
-    public void Initialize(Activity activity)
+    public void initialize(Activity activity)
     {
         control = activity.findViewById(R.id.main_fgm_edit);
 
@@ -125,6 +116,8 @@ public class EditFragment extends Fragment
         pointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.SQUARE, 0xFFFF0000, 20);
         lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, 0xFFFF8800, 4);
         fillSymbol = new SimpleFillSymbol(SimpleFillSymbol.Style.CROSS, 0x40FFA9A9, lineSymbol);
+
+        MapViewHelper.getInstance().setOnSelectionStatusChangedEventListener(this::setSelectStatus);
 
         /**
          * 将所有的按钮注册单击事件
