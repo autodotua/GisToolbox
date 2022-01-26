@@ -150,8 +150,6 @@ public class LocationService extends Service
         {
             Toast.makeText(this, "停止轮询失败", Toast.LENGTH_SHORT).show();
         }
-
-        //Toast.makeText(this, "服务已经停止", Toast.LENGTH_LONG).show();
     }
 
 
@@ -162,7 +160,6 @@ public class LocationService extends Service
         @Override
         public void onLocationChanged(Location location)
         {
-
             // 当GPS定位信息发生改变时，更新定位
             TrackHelper.getInstance().locationChanged(LocationService.this,location);
         }

@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.KeyEvent;
@@ -38,8 +39,12 @@ import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
 import com.autod.gis.ui.part.MenuHelper;
 import com.autod.gis.R;
 import com.autod.gis.map.TrackHelper;
+import com.autod.gis.ui.part.SensorHelper;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener
@@ -434,45 +439,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void changeTrackStatus()
     {
-        Animation ani = new AlphaAnimation(0.1f, 1.0f);
-        ani.setDuration(2000);
-        ani.setRepeatMode(Animation.REVERSE);
-        ani.setRepeatCount(Animation.INFINITE);
-
         if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.NotRunning)
         {
             if (TrackHelper.getInstance().start(this))
             {
-                imgSatellite.setVisibility(View.VISIBLE);
-                imgSatellite.setAnimation(ani);
+                setTrackIcon(true);
             }
         }
         else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)
         {
-            new AlertDialog.Builder(this)
-                    .setTitle("正在记录轨迹")
-                    .setPositiveButton("暂停", (dialog, which) -> {
-                        TrackHelper.getInstance().pause(this);
-                        imgSatellite.clearAnimation();
-                        imgSatellite.setVisibility(View.GONE);
-                    })
-                    .setNegativeButton("停止", (dialog, which) -> {
-                        TrackHelper.getInstance().stop(this);
-                        imgSatellite.clearAnimation();
-                        imgSatellite.setVisibility(View.GONE);
-                    })
-                    .setNeutralButton("取消", (dialog, which) -> {
 
-                    }).create().show();
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("正在记录轨迹")
+                    .setMessage(getGpsMessage())
+                    .setPositiveButton("暂停", (d, which) -> {
+                        TrackHelper.getInstance().pause(this);
+                        setTrackIcon(false);
+                    })
+                    .setNegativeButton("停止", (d, which) -> {
+                        TrackHelper.getInstance().stop(this);
+                        setTrackIcon(false);
+                    })
+                    .setNeutralButton("取消", (d, which) -> {
+
+                    }).create();
+            dialog.show();
+
         }
         else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Pausing)
         {
             new AlertDialog.Builder(this)
                     .setTitle("暂停记录轨迹中")
+                    .setMessage(getGpsMessage())
                     .setPositiveButton("继续", (dialog, which) -> {
                         TrackHelper.getInstance().resume(this);
-                        imgSatellite.setVisibility(View.VISIBLE);
-                        imgSatellite.setAnimation(ani);
+                        setTrackIcon(true);
                     })
                     .setNegativeButton("停止", (dialog, which) -> {
                         TrackHelper.getInstance().stop(this);
@@ -480,6 +481,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setNeutralButton("取消", (dialog, which) -> {
 
                     }).create().show();
+        }
+    }
+
+    private String getGpsMessage()
+    {
+        Location loc = TrackHelper.getInstance().getLastLocation();
+        if (loc != null)
+        {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
+            String time = sdf.format(new Date(loc.getTime()));
+            int count = TrackHelper.getInstance().getCount();
+            double length = TrackHelper.getInstance().getLength();
+            double lng = loc.getLongitude();
+            double lat = loc.getLatitude();
+            double alt = loc.getAltitude();
+            double pAlt = SensorHelper.getInstance() == null ? Double.NaN : SensorHelper.getInstance().getCurrentAltitude();
+            double speed = loc.getSpeed();
+            double hAcc = loc.getAccuracy();
+            double vAcc=Double.NaN;
+            double sAcc=Double.NaN;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+            {
+                 vAcc = loc.getVerticalAccuracyMeters();
+                sAcc=loc.getSpeedAccuracyMetersPerSecond();
+            }
+            return getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed,hAcc,vAcc,sAcc);
+        }
+        return "";
+    }
+
+    private void setTrackIcon(boolean on)
+    {
+        if (on)
+        {
+            Animation ani = new AlphaAnimation(0.1f, 1.0f);
+            ani.setDuration(2000);
+            ani.setRepeatMode(Animation.REVERSE);
+            ani.setRepeatCount(Animation.INFINITE);
+            imgSatellite.setVisibility(View.VISIBLE);
+            imgSatellite.setAnimation(ani);
+        }
+        else
+        {
+            imgSatellite.clearAnimation();
+            imgSatellite.setVisibility(View.GONE);
         }
     }
 

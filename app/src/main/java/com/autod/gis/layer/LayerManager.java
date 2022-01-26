@@ -56,10 +56,6 @@ public class LayerManager
 
     public Map<Layer, String> layerFilePath = new HashMap<>();
 
-//    public List<Layer> mmpkLayer = new ArrayList<>();
-
-    public Map<Layer, LayerInfo> layerLayerProperties = new HashMap<>();
-
     public static String[] names()
     {
         return Arrays.toString(Basemap.Type.values()).replaceAll("^.|.$", "").split(", ");

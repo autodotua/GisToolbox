@@ -70,7 +70,7 @@ public class TrackHelper
 
     private Date startTime;
 
-    public boolean start(Context context )
+    public boolean start(Context context)
     {
         try
         {
@@ -149,16 +149,17 @@ public class TrackHelper
                 gpxString.toString() + context.getResources().getString(R.string.gpx_foot));
     }
 
+    private Location lastLocation = null;
+
     public void locationChanged(Context context, Location location)
     {
         if (status != Status.Running)
         {
             return;
         }
-
+        lastLocation = location;
         Point point = new Point(location.getLongitude(),
                 location.getLatitude(),
-                //location.getAltitude(),
                 SpatialReferences.getWgs84());
         addGpxPoint(context, location);
 
@@ -311,7 +312,7 @@ public class TrackHelper
     }
 
 
-    private  String getShapefile(Context context)
+    private String getShapefile(Context context)
     {
         String targetPath = null;
 
@@ -319,13 +320,25 @@ public class TrackHelper
 
         try
         {
-            return FileHelper.createShapefile( GeometryType.POLYLINE, targetPath);
+            return FileHelper.createShapefile(GeometryType.POLYLINE, targetPath);
         }
         catch (Exception ex)
         {
-            return  null;
+            return null;
         }
 
+    }
+
+    public Location getLastLocation()
+    {
+        return lastLocation;
+    }
+    public  int getCount(){
+        return  count;
+    }
+
+    public  double getLength(){
+        return  length;
     }
 
     public enum Status

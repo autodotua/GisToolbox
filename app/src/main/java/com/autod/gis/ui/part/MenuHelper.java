@@ -170,12 +170,9 @@ public class MenuHelper
                         })
                         .setMessage(new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)))
                         .create().show();
-//                Toast.makeText(context, new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
 
                 break;
             case R.id.menu_default_scale:
-
-//                Toast.makeText(context, new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
                 showSetValueDialog(context, "默认比例尺",
                         "地图默认的比例尺",
                         String.valueOf(Config.getInstance().gpsMinTime), InputType.TYPE_CLASS_NUMBER, p ->

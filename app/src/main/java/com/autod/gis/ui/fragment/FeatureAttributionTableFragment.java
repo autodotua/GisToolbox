@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.Gravity;
@@ -36,12 +37,12 @@ import com.esri.arcgisruntime.geometry.GeometryType;
 import com.esri.arcgisruntime.geometry.Polyline;
 import com.autod.gis.R;
 import com.autod.gis.data.Config;
-import com.autod.gis.ui.activity.MainActivity;
+
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -104,26 +105,18 @@ public class FeatureAttributionTableFragment extends Fragment
     {
         this.featureTable = featureTable;
         TextView tvwFeatureArea = activity.findViewById(R.id.attri_table_tvw_area);
-        // tvwFeatureArea = instance.findViewById(R.id.tvwArea);
         Geometry geometry = feature.getGeometry();
         if (geometry.getGeometryType() == GeometryType.POLYGON)
         {
             tvwFeatureArea.setText(getString(R.string.attri_table_area, GeometryEngine.areaGeodetic(geometry, null, GeodeticCurveType.NORMAL_SECTION), GeometryEngine.lengthGeodetic(geometry, null, GeodeticCurveType.NORMAL_SECTION)));
-//            tvwFeatureArea.setText("面积：" + NumberFormat.getInstance().format(GeometryEngine.areaGeodetic((Polygon) geometry, null, GeodeticCurveType.NORMAL_SECTION)) + "㎡\n周长："
-//                    + NumberFormat.getInstance().format((GeometryEngine.lengthGeodetic(geometry, null, GeodeticCurveType.NORMAL_SECTION))) + "m");
-
         }
         else if (featureTable.getGeometryType() == GeometryType.POLYLINE)
         {
             Polyline line = (Polyline) geometry;
             tvwFeatureArea.setText(getString(R.string.attri_table_length, GeometryEngine.lengthGeodetic(line, null, GeodeticCurveType.NORMAL_SECTION)));
-//            tvwFeatureArea.setText(NumberFormat.getInstance().format(GeometryEngine.lengthGeodetic(line, null, GeodeticCurveType.NORMAL_SECTION)) + "m");
         }
-        btnEttMap.clear();
+        keyValueMap.clear();
         fieldEttMap.clear();
-        // get the point that was clicked and convert it to a point in map coordinates
-
-        // add done loading listener to fire when the selection returns
         this.feature = feature;
         showTable(activity);
     }
@@ -159,13 +152,15 @@ public class FeatureAttributionTableFragment extends Fragment
                 row.setLayoutParams(lp);
                 final float scale = getContext().getResources().getDisplayMetrics().density;
                 //字段名称按钮
-                Button btnName = new Button(activity);
-                btnName.setWidth((int) (96 * scale));
-                btnName.setText(key);
+                TextView tvwKey = new TextView(activity);
+                tvwKey.setTypeface(null, Typeface.BOLD);
+                tvwKey.setWidth((int) (96 * scale));
+                tvwKey.setPadding(12,0,0,0);
+                tvwKey.setText(key);
 
                 //属性值编辑框
                 EditText ettValue = new EditText(activity);
-                btnEttMap.put(btnName, ettValue);
+                keyValueMap.put(tvwKey, ettValue);
                 //在还未开始编辑时，不允许编辑
                 setEditTextEditable(ettValue, false);
                 if (value instanceof Calendar)
@@ -199,7 +194,6 @@ public class FeatureAttributionTableFragment extends Fragment
                     }
 
                     fieldEttMap.put(field, ettValue);
-                    btnName.setOnClickListener(v -> showDomain(activity, field, value));
 
                     ettValue.setTag(type);
                 }
@@ -207,21 +201,11 @@ public class FeatureAttributionTableFragment extends Fragment
                 {
                     tvwType.setText("出错");
                 }
-                //用于
-                //btnName.setTag(index);
-
-                row.addView(btnName);
+                row.addView(tvwKey);
                 row.addView(ettValue);
                 //row.addView(tvwType);
                 tbl.addView(row);
             }
-            // index++;
-            // center the mapview on selected feature
-            //Envelope envelope = feature.getGeometry().getExtent();
-            //mapView.setViewpointGeometryAsync(envelope, 200);
-            // show CallOut
-
-            //}
         }
         catch (Exception e)
         {
@@ -235,7 +219,7 @@ public class FeatureAttributionTableFragment extends Fragment
     /**
      * 根据按钮获得编辑框
      */
-    private Map<Button, EditText> btnEttMap = new HashMap<>();
+    private Map<TextView, EditText> keyValueMap = new HashMap<>();
     /**
      * 根据字段获得编辑框
      */
@@ -247,27 +231,27 @@ public class FeatureAttributionTableFragment extends Fragment
     private void saveAttributes(Activity activity)
     {
         TableLayout tbl = activity.findViewById(R.id.attri_table_tbl_attributions);
-        Set<Button> existButtons = btnEttMap.keySet();
+        Set<TextView> existButtons = keyValueMap.keySet();
 
         Map<String, Object> attr = feature.getAttributes();
         Set<String> keys = attr.keySet();
         for (String key : keys)
         {
-            Button btnName = null;
-            for (Button btnKey : existButtons)
+            TextView tvw = null;
+            for (TextView tvwKey : existButtons)
             {
-                if (btnKey.getText().toString().equals(key))
+                if (tvwKey.getText().toString().equals(key))
                 {
                     //寻找按钮
-                    btnName = btnKey;
+                    tvw = tvwKey;
                     break;
                 }
             }
-            if (btnName == null)
+            if (tvw == null)
             {
                 return;
             }
-            EditText ettValue = btnEttMap.get(btnName);
+            EditText ettValue = keyValueMap.get(tvw);
             String value = ettValue.getText().toString();
             Field.Type type = (Field.Type) ettValue.getTag();
             //保存数据
@@ -345,7 +329,7 @@ public class FeatureAttributionTableFragment extends Fragment
 //                }
                 if (btnEdit.getText().equals("编辑"))
                 {
-                    for (Map.Entry<Button, EditText> edit : btnEttMap.entrySet())
+                    for (Map.Entry<TextView, EditText> edit : keyValueMap.entrySet())
                     {
                         setEditTextEditable(edit.getValue(), true);
                     }
@@ -377,144 +361,6 @@ public class FeatureAttributionTableFragment extends Fragment
                 }
         }
 
-    }
-
-    /**
-     * 单击字段按钮显示属性域（简单）
-     *
-     * @param field
-     * @param value
-     */
-    public void showDomain(Context context, Field field, Object value)
-    {
-
-        //Toast.makeText(context, String.valueOf(field.getDomain()==null), Toast.LENGTH_SHORT).show();
-        //判断是否正在编辑
-        if (!isEditing)
-        {
-            Toast.makeText(context, "只可在编辑时使用", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        //attributeDominFragment.Show(type)
-
-        Object[] objValues = getAllValues(field);
-        if (objValues.length == 0)
-        {
-            Toast.makeText(context, "没有集合", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        //如果是文本，则使用选取的方式，把所有值放入列表对话框
-        if (field.getFieldType() == Field.Type.TEXT)
-        {
-            String[] valueArray = Arrays.copyOf(objValues, objValues.length, String[].class);
-            AlertDialog.Builder listDialog = new AlertDialog.Builder(context);
-            listDialog.setTitle("选择数据（共" + valueArray.length + "个）");
-            listDialog.setItems(valueArray, (DialogInterface dialog, int which) ->
-                    FeatureAttributionTableFragment.this.fieldEttMap.get(field).setText(valueArray[which]));
-            listDialog.show();
-        }
-        //如果是整数，则显示NumberPicker进行选取，并且限制最大最小值
-        else if (field.getFieldType() == Field.Type.INTEGER)
-        {
-            Integer[] valueArray = Arrays.copyOf(objValues, objValues.length, Integer[].class);
-            Integer max = Integer.MIN_VALUE;
-            Integer min = Integer.MAX_VALUE;
-            for (Integer i : valueArray)
-            {
-                if (i > max)
-                {
-                    max = i;
-                }
-                if (i < min)
-                {
-                    min = i;
-                }
-
-            }
-            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-            dialog.setTitle("设置数据");
-            NumberPicker picker = new NumberPicker(context);
-            picker.setMinValue(min);
-            picker.setMaxValue(max);
-            picker.setValue((int) value);
-            dialog.setView(picker);
-            dialog.setPositiveButton("确定", (dialogInterface, i) ->
-                    FeatureAttributionTableFragment.this.fieldEttMap.get(field).setText(String.valueOf(picker.getValue())));
-
-            dialog.show();
-        }
-        //如果是浮点型，只能提示一下了
-        else if (field.getFieldType() == Field.Type.DOUBLE)
-        {
-            Double[] valueArray = Arrays.copyOf(objValues, objValues.length, Double[].class);
-            Double max = -Double.MAX_VALUE;
-            Double min = Double.MAX_VALUE;
-            for (Double i : valueArray)
-            {
-                if (i > max)
-                {
-                    max = i;
-                }
-                if (i < min)
-                {
-                    min = i;
-                }
-
-            }
-            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-            dialog.setTitle("设置数据");
-            LinearLayout layout = new LinearLayout(context);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            TextView tvw = new TextView(context);
-            tvw.setText(min + "~" + max);
-            tvw.setTextSize(24);
-            tvw.setGravity(Gravity.CENTER_HORIZONTAL);
-            layout.addView(tvw);
-            EditText ett = new EditText(context);
-            ett.setText(String.valueOf(value));
-            ett.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
-            ett.selectAll();
-            layout.addView(ett);
-            dialog.setView(layout);
-            dialog.setPositiveButton("确定", (dialogInterface, i) ->
-                    FeatureAttributionTableFragment.this.fieldEttMap.get(field).setText(ett.getText().toString()));
-
-            dialog.show();
-        }
-        else
-        {
-            Toast.makeText(context, "没有适合的属性域", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * 获取某个字段在该属性表上的所有不重复的值
-     *
-     * @param field
-     * @return
-     */
-    private Object[] getAllValues(Field field)
-    {
-        try
-        {
-            Set<Object> valueSet = new HashSet<>();
-            QueryParameters query = new QueryParameters();
-            query.setGeometry(featureTable.getExtent());
-            ListenableFuture<FeatureQueryResult> result = featureTable.queryFeaturesAsync(query);
-            for (Feature currentFeature : result.get())
-            {
-                valueSet.add(currentFeature.getAttributes().get(field.getName()));
-            }
-
-            Object[] valueArray = new Object[valueSet.size()];
-            valueSet.toArray(valueArray);
-            return valueArray;
-        }
-
-        catch (Exception ex)
-        {
-            return new Object[0];
-        }
     }
 
     private static void setEditTextEditable(EditText e, boolean b)

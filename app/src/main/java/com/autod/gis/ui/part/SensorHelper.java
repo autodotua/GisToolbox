@@ -46,7 +46,6 @@ public class SensorHelper implements SensorEventListener
     {
         if (sensorManager == null)
         {
-
             sensorManager = (SensorManager) context.getSystemService(SENSOR_SERVICE);
         }
         Sensor pressure = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
@@ -70,10 +69,6 @@ public class SensorHelper implements SensorEventListener
     @Override
     public void onSensorChanged(SensorEvent event)
     {
-//        if (sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION)
-//        {
-//            mapviewHelper.setCompass(sensorEvent);
-//        }
 
         if (event.sensor.getType() == Sensor.TYPE_PRESSURE)
         {
@@ -95,7 +90,7 @@ public class SensorHelper implements SensorEventListener
         }
     }
 
-    private double currentAltitude = 0;
+    private double currentAltitude = Double.NaN;
 
     public double getCurrentAltitude()
     {
