@@ -186,24 +186,9 @@ public class FileHelper
         return getFilePath("Track/" + name);
     }
 
-    public static String getStylePath(String fileName)
+    public static String getStyleFile(String shapeFileName)
     {
-        return getFilePath("Style/" + fileName);
-    }
-
-    public static String getUniqueValueStyleFile(String shapeFileName)
-    {
-        return getStylePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".uniqueValue.style");
-    }
-
-    public static String getLabelStyleFile(String shapeFileName)
-    {
-        return getStylePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".label.style");
-    }
-
-    public static String getMapInfoStyleFile(String shapeFileName)
-    {
-        return getStylePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".map.style");
+        return getShapefilePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".style", false);
     }
 
     //文件拷贝

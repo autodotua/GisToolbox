@@ -7,13 +7,12 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.autod.gis.model.LayerInfo;
-import com.esri.arcgisruntime.data.FeatureTable;
-import com.esri.arcgisruntime.data.GeoPackage;
-import com.esri.arcgisruntime.data.Geodatabase;
+import com.esri.arcgisruntime.arcgisservices.LabelDefinition;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.data.TileCache;
 import com.esri.arcgisruntime.geometry.GeometryType;
@@ -23,11 +22,11 @@ import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.layers.RasterLayer;
 import com.esri.arcgisruntime.layers.WebTiledLayer;
-import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.raster.Raster;
+import com.esri.arcgisruntime.symbology.Renderer;
 import com.esri.arcgisruntime.symbology.SimpleFillSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleRenderer;
@@ -35,16 +34,18 @@ import com.esri.arcgisruntime.symbology.Symbol;
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
 import com.autod.gis.map.MapViewHelper;
+import com.esri.arcgisruntime.symbology.UniqueValueRenderer;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class LayerManager
 {
+    private  static final String TAG="Layer";
     private static LayerManager instance = new LayerManager();
 
     public static LayerManager getInstance()
@@ -190,7 +191,7 @@ public class LayerManager
         FeatureLayer layer = new FeatureLayer(table);
         layer.setSelectionColor(Color.YELLOW);
         layer.setSelectionWidth(10);
-        LayerStyleHelper.setLayerStyle(layer, new File(path).getName());
+        setFeatureLayerStyle(layer, new File(path).getName());
         if (path.contains("Track"))
         {
             Symbol symbol = null;
@@ -207,7 +208,7 @@ public class LayerManager
         }
         else
         {
-            LayerStyleHelper.setLayerStyle(layer, path);
+            setFeatureLayerStyle(layer, path);
         }
 
         getLayers().add(layer);
@@ -294,6 +295,42 @@ public class LayerManager
                 }).create().show();
 
 
+    }
+    static void setFeatureLayerStyle(FeatureLayer layer, String name)
+    {
+        if (new File(FileHelper.getStyleFile(name)).exists())
+        {
+            try
+            {
+                String jsonStr = FileHelper.readTextFile(FileHelper.getStyleFile(name));
+
+                JSONObject json = new JSONObject(jsonStr);
+
+
+                JSONObject jBasic=    json.getJSONObject("Basic");
+                if(jBasic.has("MinScale"))
+                {
+                    double value = jBasic.getDouble("MinScale");
+                    layer.setMinScale(value);
+                }
+
+                JSONObject jRenderer=  json.getJSONObject("Renderer");
+                UniqueValueRenderer renderer = (UniqueValueRenderer) Renderer.fromJson(jRenderer.toString());
+                layer.setRenderer(renderer);
+
+                JSONArray jLabels=json.getJSONArray("Labels");
+                for(int i=0;i<jLabels.length();i++)
+                {
+                    LabelDefinition label =  LabelDefinition.fromJson(jLabels.getJSONObject(i).toString());
+                    layer.getLabelDefinitions().add(label);
+                }
+                layer.setLabelsEnabled(true);
+            }
+            catch (Exception ex)
+            {
+                Log.e(TAG, ex.getMessage());
+            }
+        }
     }
 
 }
