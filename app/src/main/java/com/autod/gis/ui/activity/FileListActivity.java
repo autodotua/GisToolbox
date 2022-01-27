@@ -12,15 +12,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.autod.gis.layer.LayerManager;
+import com.autod.gis.map.LayerManager;
 import com.autod.gis.ui.adapter.FileListAdapter;
 import com.autod.gis.R;
 
 import java.io.File;
 
-import static com.autod.gis.data.FileHelper.getFilePath;
 import static com.autod.gis.data.FileHelper.getShapefileDirPath;
-import static com.autod.gis.data.FileHelper.getShapefilePath;
 
 /**
  * 文件选取Activity。因导入更加方便，故已被隐藏，需要长按“导入”按钮进行打开。

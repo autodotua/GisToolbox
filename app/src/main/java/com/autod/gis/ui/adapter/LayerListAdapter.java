@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
-import com.autod.gis.layer.LayerManager;
+import com.autod.gis.map.LayerManager;
 import com.autod.gis.R;
 import com.autod.gis.map.MapViewHelper;
 

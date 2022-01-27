@@ -1,19 +1,14 @@
 package com.autod.gis.data;
 
-import android.content.Context;
-import android.widget.Toast;
-
 import com.autod.gis.model.LayerInfo;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.autod.gis.layer.LayerManager;
-import com.autod.gis.ui.activity.MainActivity;
+import com.autod.gis.map.LayerManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Config
 {

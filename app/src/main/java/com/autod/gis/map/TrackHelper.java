@@ -24,9 +24,7 @@ import com.esri.arcgisruntime.symbology.SimpleRenderer;
 import com.autod.gis.R;
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
-import com.autod.gis.layer.LayerManager;
 import com.autod.gis.service.LocationService;
-import com.autod.gis.ui.activity.MainActivity;
 import com.autod.gis.ui.part.SensorHelper;
 
 import java.text.SimpleDateFormat;

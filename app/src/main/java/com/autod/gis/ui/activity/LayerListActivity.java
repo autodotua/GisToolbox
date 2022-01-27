@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
-import com.autod.gis.layer.LayerManager;
+import com.autod.gis.map.LayerManager;
 import com.autod.gis.ui.UIHelper;
 import com.autod.gis.ui.adapter.LayerListAdapter;
 import com.autod.gis.R;

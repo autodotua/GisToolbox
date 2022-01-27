@@ -1,4 +1,4 @@
-package com.autod.gis.layer;
+package com.autod.gis.map;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -22,6 +22,7 @@ import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.layers.RasterLayer;
 import com.esri.arcgisruntime.layers.WebTiledLayer;
+import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.LayerList;
@@ -33,7 +34,6 @@ import com.esri.arcgisruntime.symbology.SimpleRenderer;
 import com.esri.arcgisruntime.symbology.Symbol;
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
-import com.autod.gis.map.MapViewHelper;
 import com.esri.arcgisruntime.symbology.UniqueValueRenderer;
 
 import org.json.JSONArray;
@@ -45,7 +45,7 @@ import java.util.Arrays;
 
 public class LayerManager
 {
-    private  static final String TAG="Layer";
+    private static final String TAG = "Layer";
     private static LayerManager instance = new LayerManager();
 
     public static LayerManager getInstance()
@@ -64,19 +64,39 @@ public class LayerManager
 
     public void initialize(Context context)
     {
-        Basemap basemap = getBaseMap();
-        basemap.addDoneLoadingListener(() -> {
-            LayerManager.getInstance().map = new ArcGISMap(basemap);
-            MapViewHelper.getInstance().linkMapAndMapView();
-            loadLayers();
-        });
+        try
+        {
+            Basemap basemap = getBaseMap();
+            basemap.addDoneLoadingListener(() -> {
+                LayerManager.getInstance().map = new ArcGISMap(basemap);
+                MapViewHelper.getInstance().linkMapAndMapView();
+                loadLayers(context);
+            });
+        }
+        catch (Exception ex)
+        {
+            Toast.makeText(context, "底图加载失败\n" + ex.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private void loadLayers()
+    private void loadLayers(Context context)
     {
-        for (LayerInfo layer : Config.getInstance().layers)
+        for (LayerInfo layerInfo : Config.getInstance().layers)
         {
-            addLayer(layer);
+            try
+            {
+               Layer layer= addLayer(layerInfo);
+                layer.addDoneLoadingListener(()->{
+                    if(layer.getLoadStatus()== LoadStatus.FAILED_TO_LOAD)
+                    {
+                        Toast.makeText(context, "图层" + new File(layerInfo.getPath()).getName() + "加载失败\n" + layer.getLoadError(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Toast.makeText(context, "图层" + new File(layerInfo.getPath()).getName() + "加载失败\n" + ex.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -296,6 +316,7 @@ public class LayerManager
 
 
     }
+
     static void setFeatureLayerStyle(FeatureLayer layer, String name)
     {
         if (new File(FileHelper.getStyleFile(name)).exists())
@@ -307,21 +328,21 @@ public class LayerManager
                 JSONObject json = new JSONObject(jsonStr);
 
 
-                JSONObject jBasic=    json.getJSONObject("Basic");
-                if(jBasic.has("MinScale"))
+                JSONObject jBasic = json.getJSONObject("Basic");
+                if (jBasic.has("MinScale"))
                 {
                     double value = jBasic.getDouble("MinScale");
                     layer.setMinScale(value);
                 }
 
-                JSONObject jRenderer=  json.getJSONObject("Renderer");
+                JSONObject jRenderer = json.getJSONObject("Renderer");
                 UniqueValueRenderer renderer = (UniqueValueRenderer) Renderer.fromJson(jRenderer.toString());
                 layer.setRenderer(renderer);
 
-                JSONArray jLabels=json.getJSONArray("Labels");
-                for(int i=0;i<jLabels.length();i++)
+                JSONArray jLabels = json.getJSONArray("Labels");
+                for (int i = 0; i < jLabels.length(); i++)
                 {
-                    LabelDefinition label =  LabelDefinition.fromJson(jLabels.getJSONObject(i).toString());
+                    LabelDefinition label = LabelDefinition.fromJson(jLabels.getJSONObject(i).toString());
                     layer.getLabelDefinitions().add(label);
                 }
                 layer.setLabelsEnabled(true);

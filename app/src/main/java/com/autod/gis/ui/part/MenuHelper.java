@@ -2,7 +2,6 @@ package com.autod.gis.ui.part;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -14,7 +13,7 @@ import android.widget.Toast;
 
 import com.autod.gis.R;
 import com.autod.gis.data.Config;
-import com.autod.gis.layer.LayerManager;
+import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.map.TrackHelper;

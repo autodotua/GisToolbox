@@ -32,11 +32,8 @@ import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
 import com.esri.arcgisruntime.mapping.view.IdentifyLayerResult;
 import com.esri.arcgisruntime.mapping.view.MapView;
-import com.autod.gis.BuildConfig;
 import com.autod.gis.data.Config;
-import com.autod.gis.layer.LayerManager;
 import com.autod.gis.R;
-import com.autod.gis.ui.activity.MainActivity;
 import com.autod.gis.ui.fragment.EditFragment;
 import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
 

@@ -29,7 +29,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.autod.gis.data.Config;
-import com.autod.gis.layer.LayerManager;
+import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.ui.fragment.EditFragment;
@@ -96,15 +96,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MapViewHelper.getInstance().Initialize(this);
         initializeControls();
         MapViewHelper.getInstance().mapView.addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
-        //设置地图指南针
-        try
-        {
-            LayerManager.getInstance().initialize(this);
-        }
-        catch (Exception ex)
-        {
-            Toast.makeText(this, "地图加载失败\n"+ex.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+
+        LayerManager.getInstance().initialize(this);
         initialized = true;
     }
 

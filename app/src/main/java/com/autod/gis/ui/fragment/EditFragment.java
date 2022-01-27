@@ -42,10 +42,9 @@ import com.esri.arcgisruntime.symbology.SimpleFillSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
 import com.autod.gis.data.Config;
-import com.autod.gis.layer.LayerManager;
+import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.R;
-import com.autod.gis.ui.activity.MainActivity;
 
 /**
  * 编辑功能的Fragment
