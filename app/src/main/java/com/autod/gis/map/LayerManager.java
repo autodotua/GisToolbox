@@ -299,7 +299,7 @@ public class LayerManager
                                 String path = null;
                                 try
                                 {
-                                    path = FileHelper.createShapefile(type, FileHelper.getShapefilePath(editText.getText().toString(), false));
+                                    path = FileHelper.createShapefile(context, type, FileHelper.getShapefilePath(editText.getText().toString(), false));
                                 }
                                 catch (Exception ex)
                                 {

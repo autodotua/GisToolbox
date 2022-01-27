@@ -1,10 +1,10 @@
 package com.autod.gis.data;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.Environment;
-import android.widget.Toast;
 
 import com.esri.arcgisruntime.geometry.GeometryType;
-import com.autod.gis.ui.activity.MainActivity;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.FileAlreadyExistsException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -170,12 +171,6 @@ public class FileHelper
         writeTextToFile(path, json);
     }
 
-    public static String getEmptyShapefilesPath()
-    {
-        return getFilePath("EmptyShapefiles");
-    }
-
-
     public static String getPolylineTrackFilePath(String name)
     {
         return getFilePath("Track/Shapefile/" + name);
@@ -191,43 +186,7 @@ public class FileHelper
         return getShapefilePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".style", false);
     }
 
-    //文件拷贝
-    //要复制的目录下的所有非子目录(文件夹)文件拷贝
-    public static boolean copyFile(String fromFile, String toFile)
-    {
-
-        try
-        {
-            File file = new File(toFile);
-            if (file.exists())
-            {
-                file.delete();
-            }
-            File directory = file.getParentFile();
-            if (!directory.exists())
-            {
-                directory.mkdirs();
-            }
-            InputStream fosfrom = new FileInputStream(fromFile);
-            OutputStream fosto = new FileOutputStream(toFile);
-            byte bt[] = new byte[1024];
-            int c;
-            while ((c = fosfrom.read(bt)) > 0)
-            {
-                fosto.write(bt, 0, c);
-            }
-            fosfrom.close();
-            fosto.close();
-            return true;
-
-        }
-        catch (Exception ex)
-        {
-            return false;
-        }
-    }
-
-    public static String createShapefile(GeometryType type, String targetPath) throws IOException
+    public static String createShapefile(Context context, GeometryType type, String targetPath)
     {
         if (targetPath == null)
         {
@@ -246,31 +205,66 @@ public class FileHelper
                 strType = "Polyline";
                 break;
         }
+
+
         String[] files = new String[]{
-                FileHelper.getEmptyShapefilesPath() + "/" + strType + ".shp",
-                FileHelper.getEmptyShapefilesPath() + "/" + strType + ".prj",
-                FileHelper.getEmptyShapefilesPath() + "/" + strType + ".dbf",
-                FileHelper.getEmptyShapefilesPath() + "/" + strType + ".cpg",
-                FileHelper.getEmptyShapefilesPath() + "/" + strType + ".shx",
+                "EmptyShapefiles/" + strType + ".shp",
+                "EmptyShapefiles/" + strType + ".prj",
+                "EmptyShapefiles/" + strType + ".dbf",
+                "EmptyShapefiles/" + strType + ".cpg",
+                "EmptyShapefiles/" + strType + ".shx",
 
         };
 
         for (String filePath : files)
         {
-            File file = new File(filePath);
-            if (!file.exists())
-            {
-                throw new IOException("空文件" + file.getName() + "不存在");
-            }
-        }
-        for (String filePath : files)
-        {
-            if (!FileHelper.copyFile(filePath, targetPath + "." + filePath.split("\\.")[1]))
-            {
-                return null;
-            }
+            copyAssets(context, filePath, targetPath + "." + filePath.split("\\.")[1]);
         }
         return targetPath.split("\\.")[0] + ".shp";
+    }
+
+    /**
+     * 将assets下的文件放到sd指定目录下
+     *
+     * @param context    上下文
+     * @param assetsPath assets下的路径
+     * @param target     sd卡的路径
+     */
+    public static void copyAssets(Context context, String assetsPath, String target)
+    {
+        AssetManager assetManager = context.getAssets();
+        try
+        {
+            InputStream is = assetManager.open(assetsPath);
+            byte[] buffer = new byte[1024];
+            int length = 0;
+            File file = new File(target);
+            if (!file.exists())
+            {
+                file.getParentFile().mkdirs();
+                // 创建文件
+                file.createNewFile();
+            }
+            else
+            {
+                throw new IOException("文件已存在："+file.getAbsolutePath());
+            }
+
+            FileOutputStream fs = new FileOutputStream(file);
+            while ((length = is.read(buffer)) != -1)
+            {
+                fs.write(buffer, 0, length);
+            }
+
+            fs.flush();
+            is.close();
+            fs.close();
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     public static String getTimeBasedFileName(Date time)
@@ -279,7 +273,7 @@ public class FileHelper
         {
             time = new Date();
         }
-        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA);
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.CHINA);
         return dateTimeFormat.format(time);
     }
 }

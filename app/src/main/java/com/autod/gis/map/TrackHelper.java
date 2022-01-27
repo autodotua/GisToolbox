@@ -318,7 +318,7 @@ public class TrackHelper
 
         try
         {
-            return FileHelper.createShapefile(GeometryType.POLYLINE, targetPath);
+            return FileHelper.createShapefile(context, GeometryType.POLYLINE, targetPath);
         }
         catch (Exception ex)
         {

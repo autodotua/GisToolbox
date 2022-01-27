@@ -58,7 +58,6 @@
                 android:id="@+id/layer_tvw_opacity"
                 android:layout_width="108dp"
                 android:layout_height="wrap_content"
-                android:text="@string/layer_tvw_opacity"
                 android:textSize="16sp" />
 
             <SeekBar
