@@ -85,7 +85,6 @@ public class LayerManager
         try
         {
             BaseLayerHelper.loadBaseLayer(context);
-
         }
         catch (Exception ex)
         {
@@ -97,46 +96,6 @@ public class LayerManager
         }
     }
 
-
-//    private void openGeoPackage()
-//    {
-//
-//        // Get the full path to the local GeoPackage
-//        String geoPackagePath =
-//                Environment.getExternalStorageDirectory() + "/tile.gpkg";
-//
-//
-//        // Open the GeoPackage
-//        GeoPackage geoPackage = new GeoPackage(geoPackagePath);
-//        geoPackage.loadAsync();
-//        geoPackage.addDoneLoadingListener(() -> {
-//            if (geoPackage.getLoadStatus() == LoadStatus.LOADED)
-//            {
-//                // Read the feature tables and get the first one
-//                FeatureTable geoPackageTable = geoPackage.getGeoPackageFeatureTables().get(0);
-//
-//                // Make sure a feature table was found in the package
-//                if (geoPackageTable == null)
-//                {
-//                    Toast.makeText(context, "No feature table found in the package!", Toast.LENGTH_LONG).show();
-//
-//                    return;
-//                }
-//
-//                // Create a layer to show the feature table
-//                FeatureLayer featureLayer = new FeatureLayer(geoPackageTable);
-//
-//                // Add the feature table as a layer to the map (with default symbology)
-//                map.getOperationalLayers().add(featureLayer);
-//            }
-//            else
-//            {
-//                Toast.makeText(context, "GeoPackage failed to load! " + geoPackage.getLoadError(), Toast.LENGTH_LONG).show();
-//
-//            }
-//        });
-//    }
-
     /**
      * 加载栅格GeoPackage图层
      *
@@ -144,8 +103,6 @@ public class LayerManager
      */
     private void loadRasterGeoPackageLayer(Context context, String path)
     {
-
-        // open the GeoPackage
         GeoPackage geoPackage = new GeoPackage(path);
         geoPackage.loadAsync();
         geoPackage.addDoneLoadingListener(() -> {
@@ -182,8 +139,6 @@ public class LayerManager
 
     private void loadTileCacheLayer(Context context, String path)
     {
-
-        // open the GeoPackage
         TileCache tile = new TileCache(path);
         tile.loadAsync();
         tile.addDoneLoadingListener(() -> {

@@ -63,11 +63,6 @@ public class MapViewHelper
         return instance;
     }
 
-    public void linkMapAndMapView()
-    {
-        mapView.setMap(LayerManager.getInstance().map);
-    }
-
     public void unlinkMapAndMapView()
     {
         mapView.setMap(null);
@@ -77,7 +72,7 @@ public class MapViewHelper
     {
         mapView = activity.findViewById(R.id.main_map);
         mapView.setAttributionTextVisible(false);
-        linkMapAndMapView();
+        mapView.setMap(LayerManager.getInstance().map);
         mapView.setMagnifierEnabled(true);
         mapView.setCanMagnifierPanMap(true);
         imgCompass = activity.findViewById(R.id.main_img_compass);
@@ -188,7 +183,7 @@ public class MapViewHelper
             {
                 if (toDefaultScale)
                 {
-                    mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> ((MainActivity) context).setScaleText(Config.getInstance().defaultScale));
+                    mapView.setViewpointScaleAsync(Config.getInstance().defaultScale);
                 }
             });
         }

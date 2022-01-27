@@ -266,9 +266,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton btnResetMap = findViewById(R.id.main_btn_reset_map);
         btnResetMap.setOnClickListener(this);
 
-        ImageButton btnZoomToDefault = findViewById((R.id.main_btn_zoom_to_default));
-        btnZoomToDefault.setOnClickListener(this);
-
         ImageButton btnTrack = findViewById(R.id.main_btn_track);
         btnTrack.setOnClickListener(this);
 
@@ -328,9 +325,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 }
                 LocationDisplayHelper.instance.showPanModeDialog(this);
-                break;
-            case R.id.main_btn_zoom_to_default:
-                MapViewHelper.getInstance().mapView.setViewpointRotationAsync(0);
                 break;
             case R.id.main_btn_zoom_in:
                 try
@@ -411,8 +405,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 MapViewHelper.getInstance().mapView.setViewpointRotationAsync(0);
                 break;
             case R.id.main_btn_zoom_to_layer:
+                if (eggClickTimes++ == 20)
+                {
+                    Toast.makeText(this, new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
+                }
                 MapViewHelper.getInstance().zoomToLayer(this, false);
-
                 break;
             case R.id.main_btn_table:
                 ((FeatureAttributionTableFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).foldOrUnfold();
@@ -422,13 +419,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.main_btn_reset_map:
                 LayerManager.getInstance().resetLayers(this);
-                break;
-            case R.id.main_btn_zoom_to_default:
-                if (eggClickTimes++ == 20)
-                {
-                    Toast.makeText(this, new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
-                }
-                MapViewHelper.getInstance().mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> MainActivity.this.setScaleText(Config.getInstance().defaultScale));
                 break;
             case R.id.main_btn_track:
                 changeTrackStatus();
@@ -525,7 +515,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             double alt = loc.getAltitude();
             double pAlt = SensorHelper.getInstance() == null ? Double.NaN : SensorHelper.getInstance().getCurrentAltitude();
             double speed = loc.getSpeed();
-            double bearing=loc.getBearing();
+            double bearing = loc.getBearing();
             double hAcc = loc.getAccuracy();
             double vAcc = Double.NaN;
             double sAcc = Double.NaN;
@@ -534,7 +524,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 vAcc = loc.getVerticalAccuracyMeters();
                 sAcc = loc.getSpeedAccuracyMetersPerSecond();
             }
-            return getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed,bearing, hAcc, vAcc, sAcc);
+            return getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed, bearing, hAcc, vAcc, sAcc);
         }
         return "暂无位置信息";
     }
@@ -587,33 +577,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void setScaleText(double value)
-    {
-        DecimalFormat formatter = new DecimalFormat("0.0");
-        if (value > 10000)
-        {
-            tvwScale.setText("1:" + formatter.format(value / 10000) + "万");
-        }
-        else
-        {
-            tvwScale.setText("1:" + formatter.format(value));
-
-        }
-    }
-
     private void updateScale()
     {
         try
         {
-            DecimalFormat formatter = new DecimalFormat("0.0");
             double value = MapViewHelper.getInstance().mapView.getMapScale();
             if (value > 10000)
             {
-                tvwScale.setText("1:" + formatter.format(value / 10000) + "万");
+                tvwScale.setText(getResources().getString(R.string.scale_small, value / 10000));
             }
             else
             {
-                tvwScale.setText("1:" + formatter.format(value));
+                tvwScale.setText(getResources().getString(R.string.scale_large, value));
 
             }
         }
