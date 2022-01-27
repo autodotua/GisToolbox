@@ -16,7 +16,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.autod.gis.data.FileHelper.isFileOk;
 
 /**
  * 文件类表适配器
@@ -113,7 +112,7 @@ public class FileListAdapter extends BaseAdapter
                 files.add(file);
             }
             //只有符合拓展名的才会加入
-            else if (isFileOk(file.getAbsolutePath()))
+            else if (file.getName().endsWith(".shp"))
             {
                 files.add(file);
             }

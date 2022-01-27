@@ -42,7 +42,7 @@
     <string name="attri_table_btn_close">关闭</string>
     <string name="layer_btn_to_up">▲</string>
     <string name="layer_btn_to_down">▼</string>
-    <string name="layer_tvw_opacity">透明度：100%</string>
+    <string name="layer_tvw_opacity"></string>
     <string name="layer_btn_menu">设置</string>
     <string name="layer_btn_delete">删除</string>
     <string name="menu_map">地图</string>

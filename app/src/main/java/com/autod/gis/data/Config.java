@@ -3,6 +3,9 @@ package com.autod.gis.data;
 import android.content.Context;
 import android.widget.Toast;
 
+import com.autod.gis.model.LayerInfo;
+import com.esri.arcgisruntime.data.ShapefileFeatureTable;
+import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -55,24 +58,7 @@ public class Config
         }
     }
 
-    public ArrayList<String> layerPath = new ArrayList<String>();
-    public HashMap<String, Boolean> layerVisible = new HashMap<String, Boolean>();
-    public String styleFolder = FileHelper.getProgramPath() + "/Style";
-
-    public String getUniqueValueStyleFile(String shapeFileName)
-    {
-        return styleFolder + "/" + shapeFileName.substring(0, shapeFileName.length() - 4) + ".uniqueValue.style";
-    }
-
-    public String getLabelStyleFile(String shapeFileName)
-    {
-        return styleFolder + "/" + shapeFileName.substring(0, shapeFileName.length() - 4) + ".label.style";
-    }
-
-    public String getMapInfoStyleFile(String shapeFileName)
-    {
-        return styleFolder + "/" + shapeFileName.substring(0, shapeFileName.length() - 4) + ".map.style";
-    }
+    public ArrayList<LayerInfo> layers = new ArrayList<LayerInfo>();
 
     public int animationDuration = 500;
     public boolean canRotate = true;
@@ -109,9 +95,9 @@ public class Config
         save(false);
     }
 
-    public void save(boolean resaveLayer)
+    public void save(boolean includingLayers)
     {
-        if (resaveLayer)
+        if (includingLayers)
         {
             saveLayers();
         }
@@ -137,13 +123,12 @@ public class Config
 
     private void saveLayers()
     {
-        layerPath.clear();
-        layerVisible.clear();
+        layers.clear();
         for (Layer layer : LayerManager.getInstance().getLayers())
         {
-            String path = LayerManager.getInstance().layerFilePath.get(layer);
-            layerPath.add(path);
-            layerVisible.put(path, layer.isVisible());
+            String path = ((ShapefileFeatureTable)((FeatureLayer)layer).getFeatureTable()).getPath();
+            LayerInfo layerInfo=new LayerInfo(path,layer.isVisible(),layer.getOpacity());
+            layers.add(layerInfo);
         }
     }
 

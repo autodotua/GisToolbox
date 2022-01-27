@@ -108,7 +108,7 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
     {
         ArrayList<String> configNames = new ArrayList<>();
         HashMap<String, String> configNamePaths = new HashMap<>();
-        File gisFolder = new File(FileHelper.getProgramPath());
+        File gisFolder = new File(FileHelper.getShapefileDirPath());
         for (File file : gisFolder.listFiles())
         {
             if (file.getPath().endsWith(".json"))

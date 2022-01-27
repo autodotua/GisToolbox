@@ -16,6 +16,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.autod.gis.data.Config;
+import com.autod.gis.data.FileHelper;
 import com.autod.gis.layer.LayerManager;
 import com.autod.gis.ui.adapter.FileListAdapter;
 import com.autod.gis.R;
@@ -34,7 +36,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.autod.gis.data.FileHelper.isFileOk;
 
 
 /**
@@ -84,7 +85,8 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         {
             File clickedFile = adapter.files.get(i);
 
-            LayerManager.getInstance().addLayer(this,clickedFile.getAbsolutePath());
+            LayerManager.getInstance().addLayer(clickedFile.getAbsolutePath());
+            Config.getInstance().trySave();
             Intent intent = new Intent(ImportFilesActivity.this, MainActivity.class);
             startActivity(intent);
         });
@@ -176,7 +178,7 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
      */
     private void searchFiles()
     {
-        File gisDirectory = new File(Environment.getExternalStorageDirectory().toString() + "/Gis");
+        File gisDirectory = new File(FileHelper.getShapefileDirPath());
         if (!gisDirectory.exists())
         {
             if (gisDirectory.mkdir())
@@ -252,7 +254,7 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
             }
             else
             {
-                if (isFileOk(child.getAbsolutePath()))
+                if (child.getName().endsWith(".shp"))
                 {
                     matchedFiles.add(child);
                 }

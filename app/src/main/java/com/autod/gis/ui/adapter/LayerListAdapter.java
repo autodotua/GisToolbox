@@ -14,6 +14,8 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.esri.arcgisruntime.data.ShapefileFeatureTable;
+import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.layers.Layer;
 import com.autod.gis.layer.LayerManager;
 import com.autod.gis.R;
@@ -98,15 +100,14 @@ public class LayerListAdapter extends BaseAdapter
             lastCheckedButton = holder.rbtnCurrentLayer;
         }
         holder.chkVisible.setChecked(LayerManager.getInstance().getLayers().get(realIndex).isVisible());
-        holder.skbOpacity.setProgress((int) (LayerManager.getInstance().getLayers().get(realIndex).getOpacity() * 100));
+        int opacity=(int) (LayerManager.getInstance().getLayers().get(realIndex).getOpacity() * 100);
+        holder.skbOpacity.setProgress(opacity);
+        holder.tvwOpacity.setText(opacity+"%");
         try
         {
-            //String name=LayerManager.getInstance().getLayers().get(reverseIndex).getName();
-            String path = new File(LayerManager.getInstance().layerFilePath.get(LayerManager.getInstance().getLayers().get(realIndex))).getName();
-
+            String path = ((ShapefileFeatureTable) ((FeatureLayer) LayerManager.getInstance().getLayers().get(realIndex)).getFeatureTable()).getPath();
+            path = new File(path).getName();
             holder.tvwFilePath.setText(path);
-
-
         }
         catch (Exception ex)
         {
@@ -134,19 +135,8 @@ public class LayerListAdapter extends BaseAdapter
                 {
                     lastCheckedButton.setChecked(false);
                 }
-              
+
                 lastCheckedButton = (RadioButton) v;
-//                        for (int i = 0; i < holders.size(); i++)
-//                        {
-//                            if (i != index && holders.get(i).rbtnCurrentLayer.isChecked())
-//                            {
-//                                holders.get(i).rbtnCurrentLayer.setChecked(false);
-//                            }
-//                            else if (!holders.get(i).rbtnCurrentLayer.isChecked())
-//                            {
-//                                holders.get(i).rbtnCurrentLayer.setChecked(true);
-//                            }
-//                        }
             }
         });
 
@@ -164,7 +154,7 @@ public class LayerListAdapter extends BaseAdapter
         holder.btnDown.setOnClickListener(v ->
         {
             //if (realIndex > baseLayerCount - 1)
-            if (realIndex >=0)
+            if (realIndex >= 0)
             {
                 Layer l = LayerManager.getInstance().getLayer(realIndex);
                 LayerManager.getInstance().getLayers().remove(realIndex);
@@ -176,13 +166,13 @@ public class LayerListAdapter extends BaseAdapter
         {
             Layer currentLayer = LayerManager.getInstance().getLayer(realIndex);
 
-             new AlertDialog.Builder(layerListActivity)
+            new AlertDialog.Builder(layerListActivity)
                     .setTitle("移除图层")
                     .setMessage("确认删除？")
                     .setPositiveButton("确定", (dialogInterface, i)
                             -> LayerManager.getInstance().getLayers().remove(realIndex)
                             .addDoneLoadingListener(this::notifyDataSetChanged))
-                    .setNegativeButton("取消",null)
+                    .setNegativeButton("取消", null)
                     .show();
 
         });
@@ -195,7 +185,7 @@ public class LayerListAdapter extends BaseAdapter
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b)
             {
-                holders.get(index).tvwOpacity.setText("透明度：" + String.valueOf(i) + "%");
+                holders.get(index).tvwOpacity.setText( i + "%");
                 LayerManager.getInstance().getLayer(realIndex).setOpacity((float) seekBar.getProgress() / 100);
             }
 

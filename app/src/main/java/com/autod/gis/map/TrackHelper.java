@@ -286,7 +286,7 @@ public class TrackHelper
                         Feature feature = polylineTable.createFeature(map, line);
                         polylineTable.addFeatureAsync(feature).addDoneListener(() -> {
                             polylineTable.close();
-                            LayerManager.getInstance().addLayer(context, polylineFile);
+                            LayerManager.getInstance().addLayer( polylineFile);
 
                         });
                     }

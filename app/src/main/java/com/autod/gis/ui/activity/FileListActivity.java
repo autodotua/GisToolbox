@@ -18,7 +18,9 @@ import com.autod.gis.R;
 
 import java.io.File;
 
-import static com.autod.gis.data.FileHelper.getProgramPath;
+import static com.autod.gis.data.FileHelper.getFilePath;
+import static com.autod.gis.data.FileHelper.getShapefileDirPath;
+import static com.autod.gis.data.FileHelper.getShapefilePath;
 
 /**
  * 文件选取Activity。因导入更加方便，故已被隐藏，需要长按“导入”按钮进行打开。
@@ -51,7 +53,7 @@ public class FileListActivity extends AppCompatActivity
             file = new File(path);
             if(!file.exists())
             {
-                file=new File(getProgramPath());
+                file=new File(getShapefileDirPath());
             }
         }
         else
@@ -105,10 +107,10 @@ public class FileListActivity extends AppCompatActivity
             }
             else
             {
-                // 若单机的是文件，那么加入图层，并且打开MainActivity。
+                // 若单击的是文件，那么加入图层，并且打开MainActivity。
                 // 由于MainActivity设置了SingleTask，故不会新建实例，
                 // 而是把MainActivity以上的返回栈的打开文件Activity全部出栈
-               LayerManager.getInstance().addLayer(this,clickedFile.getAbsolutePath());
+               LayerManager.getInstance().addLayer(clickedFile.getAbsolutePath());
                 Intent intent = new Intent(FileListActivity.this, MainActivity.class);
                 startActivity(intent);
             }

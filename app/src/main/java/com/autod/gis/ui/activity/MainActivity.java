@@ -29,7 +29,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.autod.gis.data.Config;
-import com.autod.gis.layer.BaseLayerHelper;
 import com.autod.gis.layer.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
@@ -40,7 +39,6 @@ import com.autod.gis.R;
 import com.autod.gis.map.TrackHelper;
 import com.autod.gis.ui.part.SensorHelper;
 
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -101,11 +99,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //设置地图指南针
         try
         {
-            BaseLayerHelper.loadBaseLayer(this);
+            LayerManager.getInstance().initialize(this);
         }
         catch (Exception ex)
         {
-            Toast.makeText(this, "加载底图失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "地图加载失败\n"+ex.getMessage(), Toast.LENGTH_SHORT).show();
         }
         initialized = true;
     }

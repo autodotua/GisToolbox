@@ -24,7 +24,7 @@ public class FileHelper
 {
     public static void writeTextToFile(String path, String value)
     {
-        writeTextToFile(new File(path),value);
+        writeTextToFile(new File(path), value);
     }
 
     /**
@@ -95,53 +95,44 @@ public class FileHelper
         }
     }
 
-    public static boolean isFileOk(String name)
+    public static String getFilePath(String subPath)
     {
-        name = name.toLowerCase();
-//        return (name.endsWith(".shp")
-//                || name.endsWith(".gpkg")
-//                || name.endsWith(".tpk")
-//                || name.endsWith(".geodatabase")
-//                || name.endsWith(".tif")
-//                || name.endsWith(".mmxd")
-//                || name.endsWith(".mmpk"))
-//                &&
-//                !(name.endsWith("云和县影像.gpkg")
-//                        || name.endsWith("云和县重点公益林.mmpk")
-//                        || name.endsWith("云和县重点公益林矢量图.shp")
-//                        || name.endsWith("自动保存.mmxd"));
-
-        return (name.endsWith(".shp")
-                || name.endsWith(".gpkg")
-                || name.endsWith(".tpk")
-                || name.endsWith(".gdbf")
-                || name.endsWith(".tif")
-                || name.endsWith(".jpg")
-                || name.endsWith(".png"))
-//                || name.endsWith(".mmxd")
-//                || name.endsWith(".mmpk"))
-                &&
-                (!name.contains("emptyshapefiles"));
-    }
-
-    public static String getProgramPath()
-    {
-        return Environment.getExternalStorageDirectory().toString() + "/GIS/";
-    }
-
-    public static String getVerificationPath()
-    {
-        return Environment.getExternalStorageDirectory().toString() + "/GisVerification";
+        if (subPath.startsWith("/"))
+        {
+            subPath = subPath.substring(1);
+        }
+        return Environment.getExternalStorageDirectory().toString() + "/GIS/" + subPath;
     }
 
     public static String getConfigPath(String name)
     {
-        return getProgramPath()+name+".json";
+        return getFilePath(name + ".json");
     }
+
+    public static String getShapefileDirPath()
+    {
+        return getShapefilePath("", false);
+    }
+
+    public static String getShapefilePath(String name, boolean addDotShp)
+    {
+        if (addDotShp && !name.endsWith(".shp"))
+        {
+            name = name + ".shp";
+        }
+        return getFilePath("Shapefile/" + name);
+    }
+
+    public static String getBaseLayerPath(String name)
+    {
+        return getFilePath("Base/" + name);
+    }
+
     public static String getConfigPath()
     {
-      return   getConfigPath("config");
+        return getConfigPath("config");
     }
+
     public static String getConfigJson()
     {
         File file = new File(getConfigPath());
@@ -154,6 +145,7 @@ public class FileHelper
             return null;
         }
     }
+
     public static String getConfigJson(String name)
     {
         File file = new File(getConfigPath(name));
@@ -166,35 +158,52 @@ public class FileHelper
             return null;
         }
     }
+
     public static void setConfigJson(String json)
     {
-        writeTextToFile(getConfigPath(),json);
+        writeTextToFile(getConfigPath(), json);
     }
-    public static void setConfigJson(String name,String json)
+
+    public static void setConfigJson(String name, String json)
     {
-        String path=getConfigPath(name);
-        writeTextToFile(path,json);
+        String path = getConfigPath(name);
+        writeTextToFile(path, json);
     }
 
     public static String getEmptyShapefilesPath()
     {
-        return getProgramPath()+ "EmptyShapefiles";
+        return getFilePath("EmptyShapefiles");
     }
 
 
     public static String getPolylineTrackFilePath(String name)
     {
-        return getProgramPath() + "Track/Shapefile/" + name;
+        return getFilePath("Track/Shapefile/" + name);
     }
 
     public static String getGpxTrackFilePath(String name)
     {
-        return getProgramPath() + "Track/" + name;
+        return getFilePath("Track/" + name);
     }
 
     public static String getStylePath(String fileName)
     {
-        return getProgramPath() + "Style/" + fileName;
+        return getFilePath("Style/" + fileName);
+    }
+
+    public static String getUniqueValueStyleFile(String shapeFileName)
+    {
+        return getStylePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".uniqueValue.style");
+    }
+
+    public static String getLabelStyleFile(String shapeFileName)
+    {
+        return getStylePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".label.style");
+    }
+
+    public static String getMapInfoStyleFile(String shapeFileName)
+    {
+        return getStylePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".map.style");
     }
 
     //文件拷贝
@@ -233,11 +242,11 @@ public class FileHelper
         }
     }
 
-    public static String createShapefile(GeometryType type,String targetPath) throws  IOException
+    public static String createShapefile(GeometryType type, String targetPath) throws IOException
     {
-        if(targetPath==null)
+        if (targetPath == null)
         {
-            return  null;
+            return null;
         }
         String strType = "";
         switch (type)
@@ -266,12 +275,12 @@ public class FileHelper
             File file = new File(filePath);
             if (!file.exists())
             {
-                throw  new IOException("空文件" + file.getName() + "不存在");
+                throw new IOException("空文件" + file.getName() + "不存在");
             }
         }
         for (String filePath : files)
         {
-            if (!FileHelper.copyFile(filePath, targetPath+ "." + filePath.split("\\.")[1]))
+            if (!FileHelper.copyFile(filePath, targetPath + "." + filePath.split("\\.")[1]))
             {
                 return null;
             }
@@ -281,9 +290,9 @@ public class FileHelper
 
     public static String getTimeBasedFileName(Date time)
     {
-        if(time==null)
+        if (time == null)
         {
-            time=new Date();
+            time = new Date();
         }
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA);
         return dateTimeFormat.format(time);
