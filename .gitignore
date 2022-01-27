@@ -94,5 +94,5 @@ app/libs/*
 /build
 /captures
 .externalNativeBuild
-*.jks
-*\release*
+/keys/*
+*/release*
