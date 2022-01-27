@@ -88,7 +88,6 @@ public class FeatureAttributionTableFragment extends Fragment
         btnCloseOrReset.setOnClickListener(v -> onButtonClick(activity, v));
         btnEdit = activity.findViewById(R.id.attri_table_btn_edit);
         btnEdit.setOnClickListener(v -> onButtonClick(activity, v));
-        control.post(() -> control.setTranslationY(-control.getHeight()));
 
     }
 
@@ -288,13 +287,13 @@ public class FeatureAttributionTableFragment extends Fragment
     //收缩和展开属性表
     public void foldOrUnfold()
     {
-        if (control.getTranslationY() != 0)//打开
+        if (control.getTranslationX() == 0)//打开
         {
-            ObjectAnimator.ofFloat(control, "translationY", -control.getHeight(), 0).setDuration(Config.getInstance().animationDuration).start();
+            ObjectAnimator.ofFloat(control, "translationX", control.getWidth()).setDuration(Config.getInstance().animationDuration).start();
         }
         else//关闭
         {
-            ObjectAnimator.ofFloat(control, "translationY", 0, -control.getHeight()).setDuration(Config.getInstance().animationDuration).start();
+            ObjectAnimator.ofFloat(control, "translationX", 0).setDuration(Config.getInstance().animationDuration).start();
         }
     }
 

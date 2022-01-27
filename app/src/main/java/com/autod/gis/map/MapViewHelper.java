@@ -452,7 +452,7 @@ public class MapViewHelper
         void get(Feature result);
     }
 
-   public interface OnSelectionStatusChangedEventListener
+    public interface OnSelectionStatusChangedEventListener
     {
         void onEvent(boolean hasSelectedFeatures);
     }

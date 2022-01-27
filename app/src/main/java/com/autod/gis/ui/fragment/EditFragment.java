@@ -422,44 +422,27 @@ public class EditFragment extends Fragment
                     break;
                 case MULTIPOINT:
                     sketchEditor.start(SketchCreationMode.MULTIPOINT);
-//                showSelectDialog(new String[]{"点", "多点"},
-//                        new SketchCreationMode[]{SketchCreationMode.POINT, SketchCreationMode.MULTIPOINT});
                     break;
                 case POLYLINE:
                     sketchEditor.start(SketchCreationMode.POLYLINE);
-//                showSelectDialog(new String[]{"多段线", "自由线"},
-////                        new SketchCreationMode[]{SketchCreationMode.POLYLINE, SketchCreationMode.FREEHAND_LINE});
                     break;
                 case POLYGON:
                     sketchEditor.start(SketchCreationMode.POLYGON);
-//                showSelectDialog(new String[]{"多边形", "自由面"},
-//                        new SketchCreationMode[]{SketchCreationMode.POLYGON, SketchCreationMode.FREEHAND_POLYGON});
                     break;
             }
         }
         return true;
     }
-//
-//    private void showSelectDialog(final String[] items, final SketchCreationMode[] types)
-//    {
-//        AlertDialog.Builder listDialog = new AlertDialog.Builder(instance);
-//        listDialog.setTitle("绘制类型");
-//        listDialog.setItems(items, (DialogInterface dialog, int which) -> sketchEditor.start(types[which]));
-//        listDialog.show();
-//    }
+
 
 
     private void stopEditing()
     {
-        // isDrawing = false;
-        //结束草图绘制
         if (!sketchEditor.isSketchValid())
         {
             sketchEditor.stop();
             return;
         }
-        //resetButtons();
-        // get the geometry from sketch editor
         Geometry sketchGeometry = sketchEditor.getGeometry();
         sketchEditor.stop();
         //如果绘制了东西，那么把绘制的东西加入到图形中
@@ -522,17 +505,11 @@ public class EditFragment extends Fragment
     private void split(Polyline line)
     {
         FeatureTable featureTable = getFeatureTable();
-        int partsCount = 0;
         //遍历每一个选取的面/线
         for (Feature feature : MapViewHelper.getInstance().getSelectedFeatures())
         {
-            //  GeometryType a=feature.getGeometry().getGeometryType();
             Geometry geometry = GeometryEngine.project(feature.getGeometry(), line.getSpatialReference());
-//           int s0=featureTable.getSpatialReference().getWkid();
-//           int s1=geometry.getSpatialReference().getWkid();
-//           int s2=line.getSpatialReference().getWkid();
             List<Geometry> parts = GeometryEngine.cut(geometry, line);
-            partsCount += parts.size();
             if (parts.size() != 0)
             {
                 //如果分割成的部分不为0个，说明线经过了该图形，该图形被分割，则删除原图形并加入分割后的部分
@@ -545,14 +522,7 @@ public class EditFragment extends Fragment
                 featureTable.deleteFeatureAsync(feature);
             }
         }
-//        if (partsCount <= mapviewHelper.selectedFeatures.size())
-//        {
-//            Toast.makeText(context, "切割失败", Toast.LENGTH_SHORT).show();
-//        }
-//        else
-//        {
-//            featureTable.deleteFeaturesAsync(mapviewHelper.selectedFeatures);
-//        }
+
     }
 
     /**

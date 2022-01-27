@@ -68,5 +68,5 @@
     <string name="menu_compass">显示地图指北针</string>
     <string name="menu_use_barometer">优先使用气压计获得相对高度</string>
     <string name="menu_use_relative_altitude">使用相对气压海拔</string>
-    <string name="msg_gps_detail">时间：%1$s\n点数：%2$d\n里程：%3$.0fm\n经度：%4$.6f\n纬度：%5$.6f\n海拔：%6$.0f/%7$.0fm (GPS/BARO)\n速度：%8$.2fm/s\n精度：%9$.1f/%10$.1f/%11$.1fm (H/V/S)\n</string>
+    <string name="msg_gps_detail">时间：%1$s\n点数：%2$d\n里程：%3$.0fm\n经度：%4$.6f\n纬度：%5$.6f\n海拔：%6$.0f/%7$.0fm (GPS/BARO)\n速度：%8$.2fm/s  %9$.0f°\n精度：%10$.1f/%11$.1f/%12$.1fm (H/V/S)</string>
 </resources>

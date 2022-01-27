@@ -49,12 +49,6 @@ public class LocationService extends Service
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-//    @Override
-//    public void onCreate()
-//    {
-//        instance = this;
-//    }
-
     private static Notification.Builder notificationBuilder;
     private static NotificationManager notificationManager;
     private static final int NotificationId = 1024;
@@ -80,7 +74,6 @@ public class LocationService extends Service
                 .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher)) // 设置下拉列表中的图标(大图标)
                 .setContentTitle("正在记录轨迹") // 设置下拉列表里的标题
                 .setSmallIcon(R.drawable.ic_bottom_track) // 设置状态栏内的小图标
-                //.setContentText("要显示的内容") // 设置上下文内容
                 .setWhen(System.currentTimeMillis()); // 设置该通知发生的时间
 
 
@@ -93,7 +86,6 @@ public class LocationService extends Service
             notificationChannel = new NotificationChannel(channelId,
                     channelName, NotificationManager.IMPORTANCE_LOW);
             notificationChannel.enableLights(false);
-            //notificationChannel.setLightColor(Color.RED);
             notificationChannel.setShowBadge(true);
             notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -103,7 +95,6 @@ public class LocationService extends Service
         }
 
         Notification notification = notificationBuilder.build(); // 获取构建好的Notification
-        //notification.defaults = Notification.; //设置为默认的声音
         startForeground(NotificationId, notification);
 
 
@@ -112,8 +103,6 @@ public class LocationService extends Service
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         }
-        // Let it continue running until it is stopped.
-        //Toast.makeText(this, "服务已经启动", Toast.LENGTH_LONG).show();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)

@@ -111,8 +111,9 @@
         android:id="@+id/main_fgm_attri"
         android:name="com.autod.gis.ui.fragment.FeatureAttributionTableFragment"
         android:layout_width="348dp"
+        android:layout_marginStart="-348dp"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
+        android:layout_alignParentStart="true"
         android:layout_marginBottom="48dp" />
 
     <LinearLayout

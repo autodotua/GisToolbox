@@ -525,6 +525,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             double alt = loc.getAltitude();
             double pAlt = SensorHelper.getInstance() == null ? Double.NaN : SensorHelper.getInstance().getCurrentAltitude();
             double speed = loc.getSpeed();
+            double bearing=loc.getBearing();
             double hAcc = loc.getAccuracy();
             double vAcc = Double.NaN;
             double sAcc = Double.NaN;
@@ -533,7 +534,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 vAcc = loc.getVerticalAccuracyMeters();
                 sAcc = loc.getSpeedAccuracyMetersPerSecond();
             }
-            return getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed, hAcc, vAcc, sAcc);
+            return getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed,bearing, hAcc, vAcc, sAcc);
         }
         return "暂无位置信息";
     }
