@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         setTitle("GIS工具箱");
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);//设置透明状态栏
         //getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         //getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         //getWindow().setStatusBarColor(Color.TRANSPARENT);
