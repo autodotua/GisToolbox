@@ -42,6 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
+        android:translationY="64dp"
         android:orientation="vertical">
 
         <ImageButton

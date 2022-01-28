@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="app_theme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
@@ -6,8 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">true</item>
     </style>
-
     <style name="edit_button" parent="Base.TextAppearance.AppCompat.Button">
         <item name="android:background">@drawable/btn_background</item>
         <item name="android:layout_marginLeft">6dp</item>

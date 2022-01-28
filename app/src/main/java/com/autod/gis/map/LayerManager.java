@@ -15,6 +15,7 @@ import com.autod.gis.model.LayerInfo;
 import com.esri.arcgisruntime.arcgisservices.LabelDefinition;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.data.TileCache;
+import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.GeometryType;
 import com.esri.arcgisruntime.io.RequestConfiguration;
 import com.esri.arcgisruntime.layers.ArcGISTiledLayer;
@@ -88,6 +89,17 @@ public class LayerManager
             basemap.addDoneLoadingListener(() -> {
                 LayerManager.getInstance().map = new ArcGISMap(basemap);
                 MapViewHelper.getInstance().linkMapAndMapView();
+                if (!Config.getInstance().lastExtent.equals(""))
+                {
+                    try
+                    {
+                        MapViewHelper.getInstance().mapView.setViewpointGeometryAsync(Geometry.fromJson(Config.getInstance().lastExtent));
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                }
                 loadLayers(context);
             });
         }
@@ -105,27 +117,29 @@ public class LayerManager
         }
     }
 
-   public final  static String[] EsriBaseLayers = new String[]{"无", "OpenStreetMap","卫星影像","带标签卫星影像" ,"街道","亮色","暗色","街道","地貌" ,"地形","海洋"};
-    private ArrayList<Callable<Basemap>> EsriBaseLayersMap=new ArrayList<Callable<Basemap>>(){{
-       add(null);
+    public final static String[] EsriBaseLayers = new String[]{"无", "OpenStreetMap", "卫星影像", "带标签卫星影像", "街道", "亮色", "暗色", "街道", "地貌", "地形", "海洋"};
+    private ArrayList<Callable<Basemap>> EsriBaseLayersMap = new ArrayList<Callable<Basemap>>()
+    {{
+        add(null);
         add(Basemap::createOpenStreetMap);
-       add(Basemap::createImagery);
-       add(Basemap::createImageryWithLabelsVector);
+        add(Basemap::createImagery);
+        add(Basemap::createImageryWithLabelsVector);
         add(Basemap::createStreetsVector);
-       add(Basemap::createLightGrayCanvasVector);
-       add(Basemap::createDarkGrayCanvasVector);
-       add(Basemap::createTopographicVector);
-       add(Basemap::createTerrainWithLabelsVector);
-       add(Basemap::createOceans);
+        add(Basemap::createLightGrayCanvasVector);
+        add(Basemap::createDarkGrayCanvasVector);
+        add(Basemap::createTopographicVector);
+        add(Basemap::createTerrainWithLabelsVector);
+        add(Basemap::createOceans);
     }};
+
     private Basemap getBaseMap(Context context)
     {
         Basemap basemap;
-        if(Config.getInstance().esriBaseLayer>0 && Config.getInstance().esriBaseLayer<EsriBaseLayersMap.size())
+        if (Config.getInstance().esriBaseLayer > 0 && Config.getInstance().esriBaseLayer < EsriBaseLayersMap.size())
         {
             try
             {
-                basemap=EsriBaseLayersMap.get(Config.getInstance().esriBaseLayer).call();
+                basemap = EsriBaseLayersMap.get(Config.getInstance().esriBaseLayer).call();
             }
             catch (Exception e)
             {
@@ -133,7 +147,8 @@ public class LayerManager
                 basemap = new Basemap();
             }
         }
-        else {
+        else
+        {
             basemap = new Basemap();
         }
         for (LayerInfo layerInfo : Config.getInstance().baseLayers)
@@ -233,9 +248,9 @@ public class LayerManager
     {
         try
         {
-            if(!path.startsWith("/"))
+            if (!path.startsWith("/"))
             {
-                path=FileHelper.getShapefilePath(path,false);
+                path = FileHelper.getShapefilePath(path, false);
             }
             ShapefileFeatureTable table = new ShapefileFeatureTable(path);
 

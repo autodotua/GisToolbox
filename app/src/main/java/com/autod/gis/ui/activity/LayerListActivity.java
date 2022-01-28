@@ -130,7 +130,6 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
                 Config.setInstance(configNames.get(which));
                 LayerManager.getInstance().resetLayers(this);
                 MenuHelper.getInstance().resetValues();
-//            }
             }
             catch (Exception ex)
             {

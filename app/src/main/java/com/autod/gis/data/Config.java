@@ -15,8 +15,6 @@ public class Config
 {
     private static Config instance;
 
-    public transient boolean check = false;
-
     public static Config getInstance()
     {
         if (instance == null)
@@ -34,11 +32,6 @@ public class Config
         if (json == null)
         {
             instance = new Config();
-
-            instance.featureLayerQueryExtentEveryTime = true;
-            instance.useBarometer = true;
-            instance.baseLayers.add(new LayerInfo("https://mt1.google.cn/vt/lyrs=s&x={x}&y={y}&z={z}", true, 1f));
-
             FileHelper.setConfigJson(gson.toJson(instance));
         }
         else
@@ -73,13 +66,14 @@ public class Config
 
     public boolean keepLocationBackground = true;
 
-    public boolean featureLayerQueryExtentEveryTime = false;
+    public boolean featureLayerQueryExtentEveryTime = true;
 
     public boolean showMapCompass = false;
 
     public boolean useBarometer = false;
 
     public boolean useRelativeAltitude = false;
+    public String lastExtent="";
 
     public void save()
     {

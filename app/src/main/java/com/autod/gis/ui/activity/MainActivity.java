@@ -46,6 +46,7 @@ import com.autod.gis.ui.MenuHelper;
 import com.autod.gis.R;
 import com.autod.gis.map.TrackHelper;
 import com.autod.gis.map.SensorHelper;
+import com.esri.arcgisruntime.mapping.Viewpoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -161,6 +162,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause()
     {
         super.onPause();
+        Config.getInstance().lastExtent = MapViewHelper.getInstance().mapView.getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY).getTargetGeometry().toJson();
+        Config.getInstance().trySave();
     }
 
 
@@ -384,9 +387,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     }  //收缩和展开属性表
+
     public void foldFeatureAttributionTable()
     {
-        View control=findViewById(R.id.main_fgm_attri);
+        View control = findViewById(R.id.main_fgm_attri);
         if (control.getTranslationX() == 0)//打开
         {
             ObjectAnimator.ofFloat(control, "translationX", control.getWidth()).setDuration(Config.getInstance().animationDuration).start();
@@ -396,7 +400,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ObjectAnimator.ofFloat(control, "translationX", 0).setDuration(Config.getInstance().animationDuration).start();
         }
     }
-    public void foldEditPanel( )
+
+    public void foldEditPanel()
     {
         if (MapViewHelper.getInstance().getMap() == null || LayerManager.getInstance().getCurrentLayer() == null)
         {
@@ -408,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "不可编辑只读图层", Toast.LENGTH_SHORT).show();
             return;
         }
-        View control=findViewById(R.id.main_fgm_edit);
+        View control = findViewById(R.id.main_fgm_edit);
         if (control.getTranslationY() == 0)//打开
         {
             ObjectAnimator
@@ -522,9 +527,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 vAcc = loc.getVerticalAccuracyMeters();
                 sAcc = loc.getSpeedAccuracyMetersPerSecond();
             }
-            return Html.fromHtml( getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed, bearing, hAcc, vAcc, sAcc));
+            return Html.fromHtml(getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed, bearing, hAcc, vAcc, sAcc));
         }
-        return Html.fromHtml( "暂无位置信息");
+        return Html.fromHtml("暂无位置信息");
     }
 
     private void setTrackIcon(boolean on)

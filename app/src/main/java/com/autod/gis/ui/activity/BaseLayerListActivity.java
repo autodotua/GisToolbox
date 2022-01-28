@@ -142,5 +142,6 @@ public class BaseLayerListActivity extends AppCompatActivity
         super.onDestroy();
         adapter.save();
         LayerManager.getInstance().resetLayers(getApplicationContext());
+        Config.getInstance().trySave();
     }
 }
