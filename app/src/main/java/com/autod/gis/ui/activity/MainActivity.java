@@ -1,18 +1,23 @@
 package com.autod.gis.ui.activity;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.graphics.Outline;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewOutlineProvider;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
@@ -21,14 +26,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.autod.gis.data.Config;
 import com.autod.gis.map.LayerManager;
@@ -55,7 +61,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ImageView imgSatellite;
     private TextView tvwScale;
-    private LinearLayout lltSideButtons;
     private boolean initialized = false;
 
     @SuppressLint("ClickableViewAccessibility")
@@ -203,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnImport.setOnClickListener(this);
         btnImport.setOnLongClickListener(this);
 
-
         ImageButton btnLayer = findViewById(R.id.main_btn_layer);
         btnLayer.setOnClickListener(this);
 
@@ -222,11 +226,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MapViewHelper.getInstance().imgMapCompass.setOnClickListener(this);
         MapViewHelper.getInstance().imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
 
-
         ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).initialize(this);
 
         ((FeatureAttributionTableFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).Initialize(this);
-
 
         ImageButton btnZoomToLayer = findViewById(R.id.main_btn_zoom_to_layer);
         btnZoomToLayer.setOnClickListener(this);
@@ -243,9 +245,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnTrack.setOnClickListener(this);
 
         imgSatellite = findViewById(R.id.main_img_satellite);
-
-
-        lltSideButtons = findViewById(R.id.main_llt_side_buttons);
     }
 
     @Override
@@ -363,10 +362,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 MapViewHelper.getInstance().zoomToLayer(this, false);
                 break;
             case R.id.main_btn_table:
-                ((FeatureAttributionTableFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).foldOrUnfold();
+                foldFeatureAttributionTable();
                 break;
             case R.id.main_btn_edit:
-                ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).foldOrUnfold(this);
+                foldEditPanel();
                 break;
             case R.id.main_btn_menu:
                 PopupMenu popup = new PopupMenu(this, view);
@@ -384,6 +383,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
         }
+    }  //收缩和展开属性表
+    public void foldFeatureAttributionTable()
+    {
+        View control=findViewById(R.id.main_fgm_attri);
+        if (control.getTranslationX() == 0)//打开
+        {
+            ObjectAnimator.ofFloat(control, "translationX", control.getWidth()).setDuration(Config.getInstance().animationDuration).start();
+        }
+        else//关闭
+        {
+            ObjectAnimator.ofFloat(control, "translationX", 0).setDuration(Config.getInstance().animationDuration).start();
+        }
+    }
+    public void foldEditPanel( )
+    {
+        if (MapViewHelper.getInstance().getMap() == null || LayerManager.getInstance().getCurrentLayer() == null)
+        {
+            Toast.makeText(this, "没有选择当前图层", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!LayerManager.getInstance().getCurrentLayer().getFeatureTable().isEditable())
+        {
+            Toast.makeText(this, "不可编辑只读图层", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        View control=findViewById(R.id.main_fgm_edit);
+        if (control.getTranslationY() == 0)//打开
+        {
+            ObjectAnimator
+                    .ofFloat(control, "translationY",
+                            ((RelativeLayout.LayoutParams) control.getLayoutParams()).bottomMargin
+                                    - findViewById(R.id.main_llt_bottom_buttons).getHeight())
+                    .setDuration(Config.getInstance().animationDuration).start();
+
+        }
+        else
+        {
+            ObjectAnimator.ofFloat(control, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
+        }
+
     }
 
     private void changeTrackStatus()
@@ -412,7 +451,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setNeutralButton("取消", (d, which) -> {
 
                     }).create();
-            showTrackdialog(dialog);
+            showTrackDialog(dialog);
         }
         else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Pausing)
         {
@@ -429,11 +468,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setNeutralButton("取消", (d, which) -> {
 
                     }).create();
-            showTrackdialog(dialog);
+            showTrackDialog(dialog);
         }
     }
 
-    private void showTrackdialog(AlertDialog dialog)
+    private void showTrackDialog(AlertDialog dialog)
     {
         AtomicBoolean showing = new AtomicBoolean(true);
         Thread t = new Thread(() -> {
@@ -460,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
     }
 
-    private String getLocationMessage()
+    private Spanned getLocationMessage()
     {
         Location loc = TrackHelper.getInstance().getLastLocation();
         if (loc != null)
@@ -483,9 +522,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 vAcc = loc.getVerticalAccuracyMeters();
                 sAcc = loc.getSpeedAccuracyMetersPerSecond();
             }
-            return getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed, bearing, hAcc, vAcc, sAcc);
+            return Html.fromHtml( getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed, bearing, hAcc, vAcc, sAcc));
         }
-        return "暂无位置信息";
+        return Html.fromHtml( "暂无位置信息");
     }
 
     private void setTrackIcon(boolean on)

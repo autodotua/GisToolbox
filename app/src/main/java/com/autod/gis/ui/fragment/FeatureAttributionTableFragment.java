@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.InputType;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -24,6 +25,8 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.autod.gis.ui.activity.MainActivity;
+import com.esri.arcgisruntime.UnitSystem;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureQueryResult;
@@ -34,9 +37,11 @@ import com.esri.arcgisruntime.geometry.GeodeticCurveType;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.GeometryType;
+import com.esri.arcgisruntime.geometry.LinearUnit;
 import com.esri.arcgisruntime.geometry.Polyline;
 import com.autod.gis.R;
 import com.autod.gis.data.Config;
+import com.esri.arcgisruntime.geometry.Unit;
 
 import org.w3c.dom.Text;
 
@@ -65,13 +70,6 @@ public class FeatureAttributionTableFragment extends Fragment
 
     private Button btnCloseOrReset;
 
-    private View control;
-
-    public View getControl()
-    {
-        return control;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -83,7 +81,6 @@ public class FeatureAttributionTableFragment extends Fragment
      */
     public void Initialize(Activity activity)
     {
-        control = activity.findViewById(R.id.main_fgm_attri);
         btnCloseOrReset = activity.findViewById(R.id.attri_table_btn_close);
         btnCloseOrReset.setOnClickListener(v -> onButtonClick(activity, v));
         btnEdit = activity.findViewById(R.id.attri_table_btn_edit);
@@ -107,7 +104,9 @@ public class FeatureAttributionTableFragment extends Fragment
         Geometry geometry = feature.getGeometry();
         if (geometry.getGeometryType() == GeometryType.POLYGON)
         {
-            tvwFeatureArea.setText(getString(R.string.attri_table_area, GeometryEngine.areaGeodetic(geometry, null, GeodeticCurveType.NORMAL_SECTION), GeometryEngine.lengthGeodetic(geometry, null, GeodeticCurveType.NORMAL_SECTION)));
+            tvwFeatureArea.setText(Html.fromHtml(getString(R.string.attri_table_area,
+                    GeometryEngine.areaGeodetic(geometry, null, GeodeticCurveType.NORMAL_SECTION),
+                    GeometryEngine.lengthGeodetic(geometry, null, GeodeticCurveType.NORMAL_SECTION))));
         }
         else if (featureTable.getGeometryType() == GeometryType.POLYLINE)
         {
@@ -284,18 +283,7 @@ public class FeatureAttributionTableFragment extends Fragment
         // }
     }
 
-    //收缩和展开属性表
-    public void foldOrUnfold()
-    {
-        if (control.getTranslationX() == 0)//打开
-        {
-            ObjectAnimator.ofFloat(control, "translationX", control.getWidth()).setDuration(Config.getInstance().animationDuration).start();
-        }
-        else//关闭
-        {
-            ObjectAnimator.ofFloat(control, "translationX", 0).setDuration(Config.getInstance().animationDuration).start();
-        }
-    }
+
 
     /**
      * 是否正在编辑属性
@@ -312,7 +300,7 @@ public class FeatureAttributionTableFragment extends Fragment
                  */
                 if (btnCloseOrReset.getText().equals("关闭"))
                 {
-                    foldOrUnfold();
+                    ObjectAnimator.ofFloat(getView(), "translationX", 0).setDuration(Config.getInstance().animationDuration).start();
                 }
                 else
                 {

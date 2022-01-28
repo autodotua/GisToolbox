@@ -60,14 +60,21 @@
     <string name="menu_side_button_right">在右侧显示按钮</string>
     <string name="menu_ui">界面</string>
     <string name="menu_use_tiled_base_layer">使用瓦片底图</string>
-    <string name="attri_table_area"><b>面积：</b>%1$.2f ㎡\n<b>周长：</b>%2$.2f m</string>
-    <string name="attri_table_length">长度：%1$.2fm</string>
+    <string name="attri_table_area"><![CDATA[<b>面积：</b>%1$.2f ㎡<br><b>周长：</b>%2$.2f m]]></string>
+    <string name="attri_table_length"><b>长度：</b>%1$.2fm</string>
     <string name="menu_gps_min_distance">GPS最小更新距离</string>
     <string name="menu_create_feature_layer">创建矢量图层</string>
     <string name="menu_compass">显示地图指北针</string>
     <string name="menu_use_barometer">优先使用气压计获得相对高度</string>
     <string name="menu_use_relative_altitude">使用相对气压海拔</string>
-    <string name="msg_gps_detail">时间：%1$s\n点数：%2$d\n里程：%3$.0fm\n经度：%4$.6f\n纬度：%5$.6f\n海拔：%6$.0f/%7$.0fm (GPS/BARO)\n速度：%8$.2fm/s  %9$.0f°\n精度：%10$.1f/%11$.1f/%12$.1fm (H/V/S)</string>
+    <string name="msg_gps_detail"><![CDATA[<b>时间：</b>%1$s<br>
+<b>点数：</b>%2$d<br>
+<b>里程：</b>%3$.0fm<br>
+<b>经度：</b>%4$.6f<br>
+<b>纬度：</b>%5$.6f<br>
+<b>海拔：</b>%6$.0f/%7$.0fm (GPS/BARO)<br>
+<b>速度：</b>%8$.2fm/s  %9$.0f°<br>
+<b>精度：</b>%10$.1f/%11$.1f/%12$.1fm (H/V/S)]]></string>
     <string name="scale_large">1:%1$.0f</string>
     <string name="scale_small">1:%1$.2f万</string>
     <string name="base_btn_add">添加</string>

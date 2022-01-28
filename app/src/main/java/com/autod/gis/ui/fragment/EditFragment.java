@@ -604,33 +604,5 @@ public class EditFragment extends Fragment
         return LayerManager.getInstance().getCurrentLayer().getFeatureTable();
     }
 
-    public void foldOrUnfold(Activity activity)
-    {
-        if (MapViewHelper.getInstance().getMap() == null || LayerManager.getInstance().getCurrentLayer() == null)
-        {
-            Toast.makeText(activity, "没有选择当前图层", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!LayerManager.getInstance().getCurrentLayer().getFeatureTable().isEditable())
-        {
-            Toast.makeText(activity, "不可编辑只读图层", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (control.getTranslationY() == 0)//打开
-        {
-            ObjectAnimator
-                    .ofFloat(control, "translationY",
-                            ((RelativeLayout.LayoutParams) control.getLayoutParams()).bottomMargin
-                                    - activity.findViewById(R.id.main_llt_bottom_buttons).getHeight())
-                    .setDuration(Config.getInstance().animationDuration).start();
-
-        }
-        else
-        {
-            ObjectAnimator.ofFloat(control, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
-        }
-
-    }
-
     private SketchEditor sketchEditor;
 }

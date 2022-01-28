@@ -107,15 +107,14 @@
         android:layout_alignParentStart="true"
         android:layout_marginBottom="48dp" />
 
+
     <LinearLayout
         android:id="@+id/main_llt_bottom_buttons"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
+        android:background="#d6d7d7"
         android:layout_alignParentBottom="true"
-        android:background="#D6D7D7"
         android:orientation="horizontal">
-
-
 
         <ImageButton
             android:id="@+id/main_btn_import"
@@ -123,6 +122,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/ic_bottom_import"
+            style="@style/bottom_button"
             android:contentDescription="@string/main_btn_import" />
 
 
@@ -132,6 +132,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/ic_bottom_table"
+            style="@style/bottom_button"
             android:contentDescription="@string/main_btn_table" />
 
 
@@ -141,6 +142,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/ic_bottom_edit"
+            style="@style/bottom_button"
             android:contentDescription="@string/main_btn_edit" />
         <ImageButton
             android:id="@+id/main_btn_menu"
@@ -148,6 +150,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             app:srcCompat="@drawable/ic_bottom_menu"
+            style="@style/bottom_button"
             android:contentDescription="@string/main_btn_menu" />
 
         <ImageButton
@@ -156,6 +159,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/ic_bottom_track"
+            style="@style/bottom_button"
             android:contentDescription="@string/main_btn_track" />
 
         <ImageButton
@@ -164,6 +168,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/ic_bottom_full_screen"
+            style="@style/bottom_button"
             android:contentDescription="@string/main_btn_zoom_to_layer" />
 
 
@@ -173,6 +178,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:src="@drawable/ic_bottom_location"
+            style="@style/bottom_button"
             android:contentDescription="@string/main_btn_pan" />
     </LinearLayout>
 </RelativeLayout>

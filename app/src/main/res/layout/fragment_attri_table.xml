@@ -6,25 +6,6 @@
     android:background="@color/colorWhiteOverlay"
     tools:context="com.autod.gis.ui.fragment.FeatureAttributionTableFragment">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="102dp">
-
-        <TableLayout
-            android:id="@+id/attri_table_tbl_attributions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </ScrollView>
-
-    <TextView
-        android:id="@+id/attri_table_tvw_area"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal"
-        android:layout_marginBottom="48dp" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,4 +27,25 @@
             android:layout_weight="1"
             android:text="@string/attri_table_btn_close" />
     </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="36dp"
+        android:layout_marginBottom="102dp">
+
+        <TableLayout
+            android:id="@+id/attri_table_tbl_attributions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/attri_table_tvw_area"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="112dp"
+        android:layout_marginBottom="48dp"
+        android:gravity="start" />
 </RelativeLayout>
