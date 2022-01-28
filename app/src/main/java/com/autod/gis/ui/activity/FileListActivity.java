@@ -1,5 +1,6 @@
 package com.autod.gis.ui.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
@@ -108,7 +109,7 @@ public class FileListActivity extends AppCompatActivity
                 // 若单击的是文件，那么加入图层，并且打开MainActivity。
                 // 由于MainActivity设置了SingleTask，故不会新建实例，
                 // 而是把MainActivity以上的返回栈的打开文件Activity全部出栈
-               LayerManager.getInstance().addLayer(clickedFile.getAbsolutePath());
+               LayerManager.getInstance().addLayer(this, clickedFile.getAbsolutePath());
                 Intent intent = new Intent(FileListActivity.this, MainActivity.class);
                 startActivity(intent);
             }

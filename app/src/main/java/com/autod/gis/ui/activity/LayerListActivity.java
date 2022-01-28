@@ -18,7 +18,7 @@ import com.autod.gis.map.LayerManager;
 import com.autod.gis.ui.UIHelper;
 import com.autod.gis.ui.adapter.LayerListAdapter;
 import com.autod.gis.R;
-import com.autod.gis.ui.part.MenuHelper;
+import com.autod.gis.ui.MenuHelper;
 
 import java.io.File;
 import java.util.ArrayList;

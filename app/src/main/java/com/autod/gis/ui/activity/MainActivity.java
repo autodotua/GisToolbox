@@ -34,10 +34,10 @@ import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.ui.fragment.EditFragment;
 import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
-import com.autod.gis.ui.part.MenuHelper;
+import com.autod.gis.ui.MenuHelper;
 import com.autod.gis.R;
 import com.autod.gis.map.TrackHelper;
-import com.autod.gis.ui.part.SensorHelper;
+import com.autod.gis.map.SensorHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

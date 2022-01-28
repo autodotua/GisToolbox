@@ -12,12 +12,10 @@ public class CrashApplication extends Application
     public void onCreate()
     {
         super.onCreate();
-       // ArcGISRuntimeEnvironment.
-        //ArcGISRuntimeEnvironment.setLicense("runtimelite,1000,rud7068690343,none,B5H93PJPXJPSPF002209");
-        if (!Debug.isDebuggerConnected())
-        {
+        //if (!Debug.isDebuggerConnected())
+      //  {
             CrashHandler crashHandler = CrashHandler.getInstance();
             crashHandler.init(getApplicationContext());
-        }
+      //  }
     }
 }

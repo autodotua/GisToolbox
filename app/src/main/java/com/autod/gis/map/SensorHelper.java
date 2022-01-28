@@ -1,4 +1,4 @@
-package com.autod.gis.ui.part;
+package com.autod.gis.map;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -8,7 +8,6 @@ import android.hardware.SensorManager;
 import android.widget.Toast;
 
 import com.autod.gis.data.Config;
-import com.autod.gis.ui.activity.MainActivity;
 
 import static android.content.Context.SENSOR_SERVICE;
 

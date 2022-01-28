@@ -11,6 +11,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import android.content.Context;
@@ -23,7 +24,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.autod.gis.BuildConfig;
+import com.autod.gis.data.FileHelper;
 
 /**
  * UncaughtException处理类,当程序发生Uncaught异常的时候,有该类来接管程序,并记录发送错误报告.
@@ -40,12 +41,12 @@ public class CrashHandler implements UncaughtExceptionHandler
     //CrashHandler实例
     private static CrashHandler INSTANCE = new CrashHandler();
     //程序的Context对象
-    private Context mContext;
+    private Context context;
     //用来存储设备信息和异常信息
     private Map<String, String> infos = new HashMap<String, String>();
 
     //用于格式化日期,作为日志文件名的一部分
-    private DateFormat formatter = new SimpleDateFormat("yyyyMMdd-HH-mm-ss");
+    private DateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.CHINA);
 
     /**
      * 保证只有一个CrashHandler实例
@@ -69,7 +70,7 @@ public class CrashHandler implements UncaughtExceptionHandler
      */
     public void init(Context context)
     {
-        mContext = context;
+        this.context = context;
         //获取系统默认的UncaughtException处理器
         mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
         //设置该CrashHandler为程序的默认处理器
@@ -123,12 +124,12 @@ public class CrashHandler implements UncaughtExceptionHandler
             {
                 Looper.prepare();
 
-                Toast.makeText(mContext, "”GIS工具箱“出现异常：\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "”GIS工具箱“出现异常：\n" + ex.getMessage(), Toast.LENGTH_LONG).show();
                 Looper.loop();
             }
         }.start();
         //收集设备参数信息
-        collectDeviceInfo(mContext);
+        collectDeviceInfo(context);
         //保存日志文件
         saveCrashInfo2File(ex);
 
@@ -183,12 +184,12 @@ public class CrashHandler implements UncaughtExceptionHandler
     private String saveCrashInfo2File(Throwable ex)
     {
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : infos.entrySet())
         {
             String key = entry.getKey();
             String value = entry.getValue();
-            sb.append(key + "=" + value + "\n");
+            sb.append(key).append("=").append(value).append("\n");
         }
 
         Writer writer = new StringWriter();
@@ -210,13 +211,13 @@ public class CrashHandler implements UncaughtExceptionHandler
             String fileName = "crash-" + time + "-" + timestamp + ".log";
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
             {
-                String path = Environment.getExternalStorageDirectory().toString() + "/Gis/";
-                File dir = new File(path);
+                String path = FileHelper.getCrashLogPath(fileName);
+                File dir = new File(path).getParentFile();
                 if (!dir.exists())
                 {
                     dir.mkdirs();
                 }
-                FileOutputStream fos = new FileOutputStream(path + fileName);
+                FileOutputStream fos = new FileOutputStream(path );
                 fos.write(sb.toString().getBytes());
                 fos.close();
             }
@@ -224,7 +225,8 @@ public class CrashHandler implements UncaughtExceptionHandler
         }
         catch (Exception e)
         {
-            Log.e(TAG, "an error occured while writing file...", e);
+            Toast.makeText(context, "写入日志文件失败"+e.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "写入日志文件失败", e);
         }
         return null;
     }

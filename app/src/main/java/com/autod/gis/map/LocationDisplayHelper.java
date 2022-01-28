@@ -51,13 +51,9 @@ public class LocationDisplayHelper
     public boolean setPan()
     {
 
-//        if (locationDisplay.getAutoPanMode() == LocationDisplay.AutoPanMode.OFF || locationDisplay.getAutoPanMode() == LocationDisplay.AutoPanMode.COMPASS_NAVIGATION)
-//        {
-
         if (confirmLocationOn())
         {
             locationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.RECENTER);
-            //MapViewHelper.getInstance().mapView.setViewpointScaleAsync(Config.getInstance().defaultScale).addDoneListener(() -> MainActivity.getInstance().setScaleText(Config.getInstance().defaultScale));
             return true;
         }
         return false;
@@ -105,7 +101,4 @@ public class LocationDisplayHelper
         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         activity.startActivityForResult(intent, 0);
     }
-
-
-
 }

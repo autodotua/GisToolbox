@@ -25,7 +25,6 @@ import com.autod.gis.R;
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
 import com.autod.gis.service.LocationService;
-import com.autod.gis.ui.part.SensorHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -274,9 +273,7 @@ public class TrackHelper
                 {
                     try
                     {
-                        //Envelope e = polylineTable.getExtent();
                         PointCollection points = new PointCollection(locationPoints);
-                        // feature.setGeometry(geometry);
                         Map<String, Object> map = new HashMap<>();
                         Polyline line = new Polyline(points);
                         map.put("长度", GeometryEngine.lengthGeodetic(line, null, GeodeticCurveType.NORMAL_SECTION));
@@ -284,8 +281,7 @@ public class TrackHelper
                         Feature feature = polylineTable.createFeature(map, line);
                         polylineTable.addFeatureAsync(feature).addDoneListener(() -> {
                             polylineTable.close();
-                            LayerManager.getInstance().addLayer( polylineFile);
-
+                            LayerManager.getInstance().addLayer(context, polylineFile);
                         });
                     }
                     catch (Exception ex)

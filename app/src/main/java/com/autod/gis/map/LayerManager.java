@@ -53,9 +53,24 @@ public class LayerManager
         return instance;
     }
 
-    public Layer currentLayer = null;
+    public FeatureLayer getCurrentLayer()
+    {
+        return currentLayer;
+    }
 
-    public ArcGISMap map = new ArcGISMap();
+    public void setCurrentLayer(FeatureLayer currentLayer)
+    {
+        this.currentLayer = currentLayer;
+    }
+
+    private FeatureLayer currentLayer = null;
+
+    public ArcGISMap getMap()
+    {
+        return map;
+    }
+
+    private ArcGISMap map = new ArcGISMap();
 
     public static String[] names()
     {
@@ -83,20 +98,7 @@ public class LayerManager
     {
         for (LayerInfo layerInfo : Config.getInstance().layers)
         {
-            try
-            {
-               Layer layer= addLayer(layerInfo);
-                layer.addDoneLoadingListener(()->{
-                    if(layer.getLoadStatus()== LoadStatus.FAILED_TO_LOAD)
-                    {
-                        Toast.makeText(context, "图层" + new File(layerInfo.getPath()).getName() + "加载失败\n" + layer.getLoadError(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                Toast.makeText(context, "图层" + new File(layerInfo.getPath()).getName() + "加载失败\n" + ex.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            addLayer(context, layerInfo);
         }
     }
 
@@ -203,47 +205,63 @@ public class LayerManager
      *
      * @param path
      */
-    public Layer addLayer(String path)
+    public Layer addLayer(Context context, String path)
     {
-        ShapefileFeatureTable table = new ShapefileFeatureTable(path);
-
-        table.loadAsync();
-        FeatureLayer layer = new FeatureLayer(table);
-        layer.setSelectionColor(Color.YELLOW);
-        layer.setSelectionWidth(10);
-        setFeatureLayerStyle(layer, new File(path).getName());
-        if (path.contains("Track"))
+        try
         {
-            Symbol symbol = null;
-            if (table.getGeometryType() == GeometryType.POLYGON)
+            ShapefileFeatureTable table = new ShapefileFeatureTable(path);
+
+            table.loadAsync();
+            FeatureLayer layer = new FeatureLayer(table);
+            layer.setSelectionColor(Color.YELLOW);
+            layer.setSelectionWidth(10);
+            setFeatureLayerStyle(layer, new File(path).getName());
+            if (path.contains("Track"))
             {
-                SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#64B5F6"), 2f);
-                symbol = new SimpleFillSymbol(SimpleFillSymbol.Style.SOLID, Color.LTGRAY, lineSymbol);
+                Symbol symbol = null;
+                if (table.getGeometryType() == GeometryType.POLYGON)
+                {
+                    SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#64B5F6"), 2f);
+                    symbol = new SimpleFillSymbol(SimpleFillSymbol.Style.SOLID, Color.LTGRAY, lineSymbol);
+                }
+                else
+                {
+                    symbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#64B5F6"), 2f);
+                }
+                layer.setRenderer(new SimpleRenderer(symbol));
             }
             else
             {
-                symbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#64B5F6"), 2f);
+                setFeatureLayerStyle(layer, path);
             }
-            layer.setRenderer(new SimpleRenderer(symbol));
-        }
-        else
-        {
-            setFeatureLayerStyle(layer, path);
-        }
 
-        getLayers().add(layer);
-        return layer;
+            getLayers().add(layer);
+
+            layer.addDoneLoadingListener(() -> {
+                if (layer.getLoadStatus() == LoadStatus.FAILED_TO_LOAD)
+                {
+                    Toast.makeText(context, "图层" + new File(path).getName() + "加载失败\n" + layer.getLoadError(), Toast.LENGTH_SHORT).show();
+                }
+            });
+            setCurrentLayer(layer);
+            return layer;
+        }
+        catch (Exception ex)
+        {
+            Toast.makeText(context, "图层" + new File(path).getName() + "加载失败\n" + ex.getMessage(), Toast.LENGTH_SHORT).show();
+            return null;
+        }
     }
 
     public Layer addLayer(Context context, Uri uri)
     {
         String path = Environment.getExternalStorageDirectory() + "/" + uri.getPath().split(":")[1];
-        return addLayer(path);
+        return addLayer(context, path);
     }
 
-    public Layer addLayer(LayerInfo layerInfo)
+    public Layer addLayer(Context context, LayerInfo layerInfo)
     {
-        Layer layer = addLayer(layerInfo.getPath());
+        Layer layer = addLayer(context, layerInfo.getPath());
         layer.setOpacity(layerInfo.getOpacity());
         layer.setVisible(layerInfo.isVisible());
         return layer;
@@ -307,7 +325,7 @@ public class LayerManager
                                 }
                                 if (path != null)
                                 {
-                                    addLayer(path);
+                                    addLayer(context, path);
                                 }
                             })
                             .create().show();

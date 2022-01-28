@@ -108,7 +108,7 @@ public class EditFragment extends Fragment
                 R.id.edit_btn_split,
         };
 
-        graphicsOverlay = new GraphicsOverlay();
+        GraphicsOverlay graphicsOverlay = new GraphicsOverlay();
         MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(graphicsOverlay);
         sketchEditor = new SketchEditor();
         MapViewHelper.getInstance().mapView.setSketchEditor(sketchEditor);
@@ -323,7 +323,7 @@ public class EditFragment extends Fragment
     public void startDelete()
     {
 
-        FeatureTable featureTable = ((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable();
+        FeatureTable featureTable = LayerManager.getInstance().getCurrentLayer().getFeatureTable();
         featureTable.deleteFeaturesAsync(MapViewHelper.getInstance().getSelectedFeatures());
 
         operationComplete();
@@ -381,7 +381,7 @@ public class EditFragment extends Fragment
      */
     private boolean startEditing(Context context)
     {
-        FeatureTable featureTable = ((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable();
+        FeatureTable featureTable = LayerManager.getInstance().getCurrentLayer().getFeatureTable();
 
         if (MapViewHelper.getInstance().getSelectedFeatures().size() > 1)
         {
@@ -601,22 +601,17 @@ public class EditFragment extends Fragment
      */
     FeatureTable getFeatureTable()
     {
-        return ((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable();
+        return LayerManager.getInstance().getCurrentLayer().getFeatureTable();
     }
 
     public void foldOrUnfold(Activity activity)
     {
-        if (MapViewHelper.getInstance().getMap() == null || LayerManager.getInstance().currentLayer == null)
+        if (MapViewHelper.getInstance().getMap() == null || LayerManager.getInstance().getCurrentLayer() == null)
         {
             Toast.makeText(activity, "没有选择当前图层", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!(LayerManager.getInstance().currentLayer instanceof FeatureLayer))
-        {
-            Toast.makeText(activity, "只有矢量图形可以编辑", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable().isEditable())
+        if (!LayerManager.getInstance().getCurrentLayer().getFeatureTable().isEditable())
         {
             Toast.makeText(activity, "不可编辑只读图层", Toast.LENGTH_SHORT).show();
             return;
@@ -633,11 +628,9 @@ public class EditFragment extends Fragment
         else
         {
             ObjectAnimator.ofFloat(control, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
-
         }
 
     }
 
-    private GraphicsOverlay graphicsOverlay;
     private SketchEditor sketchEditor;
 }

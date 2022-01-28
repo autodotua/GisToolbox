@@ -105,6 +105,11 @@ public class FileHelper
         return Environment.getExternalStorageDirectory().toString() + "/GIS/" + subPath;
     }
 
+    public static String getCrashLogPath(String name)
+    {
+        return getFilePath("Logs/"+name);
+    }
+
     public static String getConfigPath(String name)
     {
         return getFilePath(name + ".json");
@@ -247,7 +252,7 @@ public class FileHelper
             }
             else
             {
-                throw new IOException("文件已存在："+file.getAbsolutePath());
+                throw new IOException("文件已存在：" + file.getAbsolutePath());
             }
 
             FileOutputStream fs = new FileOutputStream(file);

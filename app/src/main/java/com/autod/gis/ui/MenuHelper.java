@@ -1,7 +1,8 @@
-package com.autod.gis.ui.part;
+package com.autod.gis.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -9,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.autod.gis.R;
@@ -17,10 +19,8 @@ import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.map.TrackHelper;
+import com.autod.gis.programming.GetString;
 import com.autod.gis.ui.activity.MainActivity;
-import com.autod.gis.ui.dialog.DialogHelper;
-
-import static com.autod.gis.ui.dialog.DialogHelper.showSetValueDialog;
 
 public class MenuHelper
 {
@@ -134,7 +134,7 @@ public class MenuHelper
                 }
                 break;
             case R.id.menu_tile_url:
-                DialogHelper.showSetValueDialog(context,
+                showSetValueDialog(context,
                         "设置底图地址",
                         "请输入一行一个地址，以行分隔，自动忽略空行",
                         TextUtils.join("\n\n", Config.getInstance().baseUrls),
@@ -252,5 +252,19 @@ public class MenuHelper
                 break;
         }
         Config.getInstance().save();
+    }
+
+    public static void showSetValueDialog(Context context, String title, String message, String value, int type, GetString r)
+    {
+        final EditText editText = new EditText(context);
+        editText.setInputType(type);
+        editText.setText(value);
+        editText.setSingleLine(false);
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setView(editText)
+                .setPositiveButton("确定", (dialog, which) -> r.get(editText.getText().toString()))
+                .create().show();
     }
 }

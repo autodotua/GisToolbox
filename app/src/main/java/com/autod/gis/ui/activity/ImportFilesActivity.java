@@ -85,7 +85,7 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         {
             File clickedFile = adapter.files.get(i);
 
-            LayerManager.getInstance().addLayer(clickedFile.getAbsolutePath());
+            LayerManager.getInstance().addLayer(this, clickedFile.getAbsolutePath());
             Config.getInstance().trySave();
             Intent intent = new Intent(ImportFilesActivity.this, MainActivity.class);
             startActivity(intent);

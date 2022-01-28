@@ -62,7 +62,7 @@ public class MapViewHelper
 
     public void linkMapAndMapView()
     {
-        mapView.setMap(LayerManager.getInstance().map);
+        mapView.setMap(LayerManager.getInstance().getMap());
     }
 
     public void unlinkMapAndMapView()
@@ -163,7 +163,7 @@ public class MapViewHelper
             Toast.makeText(context, "请先加载地图", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (LayerManager.getInstance().currentLayer == null)
+        if (LayerManager.getInstance().getCurrentLayer() == null)
         {
             Toast.makeText(context, "请先选择当前图层", Toast.LENGTH_SHORT).show();
             return;
@@ -171,14 +171,14 @@ public class MapViewHelper
         try
         {
             Envelope extent = null;
-            if (LayerManager.getInstance().currentLayer instanceof FeatureLayer && Config.getInstance().featureLayerQueryExtentEveryTime)
+            if (Config.getInstance().featureLayerQueryExtentEveryTime)
             {
-                extent = ((FeatureLayer) LayerManager.getInstance().currentLayer).getFeatureTable().queryExtentAsync(new QueryParameters()).get();
+                extent = ((FeatureLayer) LayerManager.getInstance().getCurrentLayer()).getFeatureTable().queryExtentAsync(new QueryParameters()).get();
 
             }
             else
             {
-                extent = LayerManager.getInstance().currentLayer.getFullExtent();
+                extent = LayerManager.getInstance().getCurrentLayer().getFullExtent();
             }
 
             mapView.setViewpointGeometryAsync(extent, 24).addDoneListener(() ->
@@ -209,65 +209,49 @@ public class MapViewHelper
             {
                 if (mapView.getMap() != null)
                 {
-                    //如果是矢量图层
-                    if (LayerManager.getInstance().currentLayer instanceof FeatureLayer)
+                    FeatureLayer featureLayer = LayerManager.getInstance().getCurrentLayer();
+                    ShapefileFeatureTable featureTable = (ShapefileFeatureTable) featureLayer.getFeatureTable();
+
+                    try
                     {
-                        FeatureLayer featureLayer = ((FeatureLayer) LayerManager.getInstance().currentLayer);
-                        ShapefileFeatureTable featureTable = (ShapefileFeatureTable) featureLayer.getFeatureTable();
+                        getTouchedFuture(e, feature -> {
+                            if (feature == null)
+                            {
+                                Toast.makeText(activity, "什么也没选到", Toast.LENGTH_SHORT).show();
+                            }
 
-                        try
-                        {
-                            final Point point = mapView.screenToLocation(new android.graphics.Point(Math.round(e.getX()), Math.round(e.getY())));
-
-                            getTouchedFuture(e, feature -> {
-                                if (feature == null)
+                            try
+                            {
+                                selectFeature(((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).isMultiSelect(), feature);
+                                ((FeatureAttributionTableFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).loadTable(activity, featureTable, feature);
+                                //设置当前状态
+                                if (onSelectionStatusChangedEventListener != null)
                                 {
-                                    Toast.makeText(activity, "什么也没选到", Toast.LENGTH_SHORT).show();
-//                                     return super.onSingleTapConfirmed(e);
+                                    onSelectionStatusChangedEventListener.onEvent(true);
                                 }
 
-                                try
-                                {
-                                    selectFeature(((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).isMultiSelect(), feature);
-                                    ((FeatureAttributionTableFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).loadTable(activity, featureTable, feature);
-                                    //设置当前状态
-                                    if (onSelectionStatusChangedEventListener != null)
-                                    {
-                                        onSelectionStatusChangedEventListener.onEvent(true);
-                                    }
+                            }
 
-                                }
-
-                                catch (Exception ex)
-                                {
-                                    Toast.makeText(activity, ex.toString(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                            return super.onSingleTapConfirmed(e);
-                        }
-                        catch (Exception e1)
-                        {
-                            e1.printStackTrace();
-                        }
-
-
+                            catch (Exception ex)
+                            {
+                                Toast.makeText(activity, ex.toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        return super.onSingleTapConfirmed(e);
                     }
-                    else
+                    catch (Exception e1)
                     {
-
-                        showLocationCallout(activity, e);
+                        e1.printStackTrace();
                     }
+
+
                 }
                 return super.onSingleTapConfirmed(e);
             }
 
             private void getTouchedFuture(MotionEvent motionEvent, FeatureGot then)
             {
-                if (!(LayerManager.getInstance().currentLayer instanceof FeatureLayer))
-                {
-                    return;
-                }
-                FeatureLayer layer = (FeatureLayer) LayerManager.getInstance().currentLayer;
+                FeatureLayer layer = LayerManager.getInstance().getCurrentLayer();
                 android.graphics.Point position = new android.graphics.Point(Math.round(motionEvent.getX()), Math.round(motionEvent.getY()));
 
                 ListenableFuture<IdentifyLayerResult> identityTask = mMapView.identifyLayerAsync(layer, position, 2, false, 1);
@@ -280,52 +264,13 @@ public class MapViewHelper
                     }
                     catch (Exception ex)
                     {
-
+                        ex.printStackTrace();
                     }
                 });
 
 
             }
 
-            /**
-             * 搜索指定区域的要素
-             *
-             * @param motionEvent
-             * @param featureTable
-             * @return
-             */
-            private Feature getTouchedFuture(MotionEvent motionEvent, FeatureTable featureTable)
-            {
-                try
-                {
-                    final Point clickPoint = mapView.screenToLocation(new android.graphics.Point(Math.round(motionEvent.getX()), Math.round(motionEvent.getY())));
-                    //宽容度，就是搜索半径
-                    double tolerance = 3;
-                    double mapTolerance = tolerance * mapView.getUnitsPerDensityIndependentPixel();
-                    Envelope envelope = new Envelope(clickPoint.getX() - mapTolerance, clickPoint.getY() - mapTolerance,
-                            clickPoint.getX() + mapTolerance, clickPoint.getY() + mapTolerance, mapView.getSpatialReference());
-                    QueryParameters query = new QueryParameters();
-                    query.setGeometry(envelope);
-                    query.setSpatialRelationship(QueryParameters.SpatialRelationship.INTERSECTS);
-//        query.setMaxFeatures(1);
-                    ListenableFuture<FeatureQueryResult> result = featureTable.queryFeaturesAsync(query);
-                    try
-                    {
-                        //虽然会搜索到多个要素，但是这里只取第一个，也就是最有可能的那个
-                        return result.get().iterator().next();
-                    }
-                    catch (Exception ex)
-                    {
-                        Toast.makeText(activity, "查询点击区域要素失败\n" + ex.toString(), Toast.LENGTH_SHORT).show();
-                        return null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Toast.makeText(activity, "点击事件失败\n" + ex.toString(), Toast.LENGTH_SHORT).show();
-                    return null;
-                }
-            }
 
             @Override
             public boolean onRotate(MotionEvent event, double rotationAngle)
@@ -368,13 +313,13 @@ public class MapViewHelper
     private void selectFeature(boolean multiple, Feature feature)
     {
 
-        FeatureLayer layer = (FeatureLayer) LayerManager.getInstance().currentLayer;
+        FeatureLayer layer = LayerManager.getInstance().getCurrentLayer();
         if (multiple)
         {
             boolean reppeated = false;
             for (Feature f : selectedFeatures)
             {
-                if (f.getAttributes().get("FID").equals(feature.getAttributes().get("FID")))
+                if (Objects.equals(f.getAttributes().get("FID"), feature.getAttributes().get("FID")))
                 {
                     reppeated = true;
                     feature = f;
@@ -416,16 +361,12 @@ public class MapViewHelper
      */
     public void stopSelect()
     {
-
-        if (LayerManager.getInstance().currentLayer instanceof FeatureLayer)
+        FeatureLayer featureLayer = (FeatureLayer) LayerManager.getInstance().getCurrentLayer();
+        if (selectedFeatures.size() > 0)
         {
-            FeatureLayer featureLayer = (FeatureLayer) LayerManager.getInstance().currentLayer;
-            if (selectedFeatures.size() > 0)
-            {
-                featureLayer.unselectFeatures(selectedFeatures);
-            }
-            selectedFeatures.clear();
+            featureLayer.unselectFeatures(selectedFeatures);
         }
+        selectedFeatures.clear();
         if (onSelectionStatusChangedEventListener != null)
         {
             onSelectionStatusChangedEventListener.onEvent(false);

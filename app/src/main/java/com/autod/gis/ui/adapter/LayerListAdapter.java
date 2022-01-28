@@ -94,7 +94,7 @@ public class LayerListAdapter extends BaseAdapter
 
         int realIndex = LayerManager.getInstance().getLayers().size() - 1 - index;
         holders.add(holder);
-        holder.rbtnCurrentLayer.setChecked(LayerManager.getInstance().currentLayer == LayerManager.getInstance().getLayer(realIndex));
+        holder.rbtnCurrentLayer.setChecked(LayerManager.getInstance().getCurrentLayer() == LayerManager.getInstance().getLayer(realIndex));
         if (holder.rbtnCurrentLayer.isChecked())
         {
             lastCheckedButton = holder.rbtnCurrentLayer;
@@ -111,7 +111,7 @@ public class LayerListAdapter extends BaseAdapter
         }
         catch (Exception ex)
         {
-            holder.tvwFilePath.setText("（无名称）");
+            holder.tvwFilePath.setText("（未知）");
         }
         holder.chkVisible.setOnClickListener(v ->
         {
@@ -122,14 +122,13 @@ public class LayerListAdapter extends BaseAdapter
             MapViewHelper.getInstance().stopSelect();
             if (realIndex < LayerManager.getInstance().getLayers().size())
             {
-                //Toast.makeText(MainActivity.getInstance(), String.valueOf(((RadioButton) v).isChecked()), Toast.LENGTH_SHORT).show();
-                if (LayerManager.getInstance().currentLayer == LayerManager.getInstance().getLayer(realIndex))
+                if (LayerManager.getInstance().getCurrentLayer() == LayerManager.getInstance().getLayer(realIndex))
                 {
                     ((RadioButton) v).setChecked(false);
-                    LayerManager.getInstance().currentLayer = null;
+                    LayerManager.getInstance().setCurrentLayer( null);
                     return;
                 }
-                LayerManager.getInstance().currentLayer = LayerManager.getInstance().getLayer(realIndex);
+                LayerManager.getInstance().setCurrentLayer((FeatureLayer) LayerManager.getInstance().getLayer(realIndex));
 
                 if (lastCheckedButton != null)
                 {
@@ -153,7 +152,6 @@ public class LayerListAdapter extends BaseAdapter
         });
         holder.btnDown.setOnClickListener(v ->
         {
-            //if (realIndex > baseLayerCount - 1)
             if (realIndex >= 0)
             {
                 Layer l = LayerManager.getInstance().getLayer(realIndex);
@@ -177,9 +175,7 @@ public class LayerListAdapter extends BaseAdapter
 
         });
 
-        /**
-         * 滑动Slider时实时改变图层透明度。但是因为UI线程堵塞的关系，要等结束滑动才能看见效果。
-         */
+       //滑动Slider时实时改变图层透明度。但是因为UI线程堵塞的关系，要等结束滑动才能看见效果。
         holder.skbOpacity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
         {
             @Override
@@ -207,7 +203,7 @@ public class LayerListAdapter extends BaseAdapter
 
     RadioButton lastCheckedButton = null;
 
-    public final class ViewHolder
+    public static final class ViewHolder
     {
         /**
          * 当前图层单选框
