@@ -12,6 +12,10 @@ public class LayerInfo
         this.visible = visible;
         this.opacity = opacity;
     }
+    public LayerInfo(String path)
+    {
+        this(path,true,1f);
+    }
 
     public String getPath()
     {

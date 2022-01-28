@@ -31,12 +31,10 @@ import java.util.HashMap;
 public class LayerListActivity extends AppCompatActivity implements View.OnClickListener
 {
 
-    public static LayerListActivity layerListActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        layerListActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_layer_list);
         setTitle("图层管理");
@@ -48,14 +46,10 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
         adapter = new LayerListAdapter(this);
         lvwLayer.setAdapter(adapter);
 
-//        Button btnImport=findViewById(R.id.btnOpenSavedLayers);
         Button btnSave = findViewById(R.id.layer_btn_save);
         Button btnSaveAs = findViewById(R.id.layer_btn_save_as);
-//        btnImport.setOnClickListener(this);
         btnSave.setOnClickListener(this);
         btnSaveAs.setOnClickListener(this);
-//        Button btnReset = findViewById(R.id.btnResetLayers);
-//        btnReset.setOnClickListener(this);
         Button btnOpen = findViewById(R.id.layer_btn_open);
         btnOpen.setOnClickListener(this);
     }
@@ -156,7 +150,7 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
         {
 
             Config.getInstance().save(true);
-            Toast.makeText(layerListActivity, "保存成功", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
         }
         catch (Exception ex)
         {

@@ -43,7 +43,6 @@ import java.util.Objects;
 
 public class MapViewHelper
 {
-    public ImageView imgCompass;
     public ImageView imgMapCompass;
     public TextView tvwLocation;
     public MapView mapView;
@@ -77,8 +76,6 @@ public class MapViewHelper
         linkMapAndMapView();
         mapView.setMagnifierEnabled(true);
         mapView.setCanMagnifierPanMap(true);
-        imgCompass = activity.findViewById(R.id.main_img_compass);
-        imgCompass = activity.findViewById(R.id.main_img_compass);
         setTouchMapView(activity);
     }
 
@@ -111,26 +108,6 @@ public class MapViewHelper
     public ArcGISMap getMap()
     {
         return mapView.getMap();
-    }
-
-    /**
-     * 当前指南针角度
-     */
-    private float currentDegree = 0;
-
-    /**
-     * 设置指南针
-     *
-     * @param sensorEvent
-     */
-    public void setCompass(Context context, SensorEvent sensorEvent)
-    {
-        float degree = sensorEvent.values[0];
-        int screenDegree = getScreenDegree(context);
-        RotateAnimation ra = new RotateAnimation(currentDegree - 45 - screenDegree, -degree - 45 - screenDegree, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        ra.setDuration(200);
-        imgCompass.startAnimation(ra);
-        currentDegree = -degree;
     }
 
     /**
@@ -210,40 +187,42 @@ public class MapViewHelper
                 if (mapView.getMap() != null)
                 {
                     FeatureLayer featureLayer = LayerManager.getInstance().getCurrentLayer();
-                    ShapefileFeatureTable featureTable = (ShapefileFeatureTable) featureLayer.getFeatureTable();
-
-                    try
+                    if (featureLayer != null)
                     {
-                        getTouchedFuture(e, feature -> {
-                            if (feature == null)
-                            {
-                                Toast.makeText(activity, "什么也没选到", Toast.LENGTH_SHORT).show();
-                            }
+                        ShapefileFeatureTable featureTable = (ShapefileFeatureTable) featureLayer.getFeatureTable();
 
-                            try
-                            {
-                                selectFeature(((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).isMultiSelect(), feature);
-                                ((FeatureAttributionTableFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).loadTable(activity, featureTable, feature);
-                                //设置当前状态
-                                if (onSelectionStatusChangedEventListener != null)
+                        try
+                        {
+                            getTouchedFuture(e, feature -> {
+                                if (feature == null)
                                 {
-                                    onSelectionStatusChangedEventListener.onEvent(true);
+                                    Toast.makeText(activity, "什么也没选到", Toast.LENGTH_SHORT).show();
                                 }
 
-                            }
+                                try
+                                {
+                                    selectFeature(((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).isMultiSelect(), feature);
+                                    ((FeatureAttributionTableFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).loadTable(activity, featureTable, feature);
+                                    //设置当前状态
+                                    if (onSelectionStatusChangedEventListener != null)
+                                    {
+                                        onSelectionStatusChangedEventListener.onEvent(true);
+                                    }
 
-                            catch (Exception ex)
-                            {
-                                Toast.makeText(activity, ex.toString(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                        return super.onSingleTapConfirmed(e);
-                    }
-                    catch (Exception e1)
-                    {
-                        e1.printStackTrace();
-                    }
+                                }
 
+                                catch (Exception ex)
+                                {
+                                    Toast.makeText(activity, ex.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            return super.onSingleTapConfirmed(e);
+                        }
+                        catch (Exception e1)
+                        {
+                            e1.printStackTrace();
+                        }
+                    }
 
                 }
                 return super.onSingleTapConfirmed(e);

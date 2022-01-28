@@ -1,29 +1,31 @@
 package com.autod.gis.ui.activity;
 
 import android.Manifest;
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuItem;
+import android.view.MenuInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -44,6 +46,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.autod.gis.ui.activity.ImportFilesActivity.ImportFilesActivityID;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener
 {
@@ -59,44 +63,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        setTitle("GIS工具箱");
+        //getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        //getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        //getWindow().setStatusBarColor(Color.TRANSPARENT);
         checkPermission();
-        // CrashHandler.getInstance().init(this);
-
     }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        MenuHelper.getInstance().initialize(getMenuInflater(), menu);
-        return true; // true：允许创建的菜单显示出来，false：创建的菜单将无法显示。
-
-    }
-
-    /**
-     * 菜单的点击事件
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-
-        MenuHelper.getInstance().menuClick(this, item);
-
-        return true;
-    }
-
 
     /**
      * 初始化
      */
     private void Initialize()
     {
-        setTitle("GIS工具箱");
+
         MapViewHelper.getInstance().Initialize(this);
         initializeControls();
         MapViewHelper.getInstance().mapView.addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
-
         LayerManager.getInstance().initialize(this);
         initialized = true;
     }
@@ -133,10 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED)
             {
-
                 Initialize();
-                Toast.makeText(this, "重新获取权限后可能要重新启动才能获取全部功能", Toast.LENGTH_SHORT).show();
-
             }
             else
             {
@@ -254,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         tvwScale = findViewById(R.id.main_tvw_scale);
 
-        ImageButton btnResetMap = findViewById(R.id.main_btn_reset_map);
+        ImageButton btnResetMap = findViewById(R.id.main_btn_menu);
         btnResetMap.setOnClickListener(this);
 
         ImageButton btnTrack = findViewById(R.id.main_btn_track);
@@ -264,37 +245,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         lltSideButtons = findViewById(R.id.main_llt_side_buttons);
-        if (Config.getInstance().sideButtonsRight)
-        {
-            setSideButtonPosition();
-        }
-    }
-
-    public void setSideButtonPosition()
-    {
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT);
-        if (Config.getInstance().sideButtonsRight)
-        {
-            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
-        }
-        else
-        {
-            params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-        }
-        params.addRule(RelativeLayout.CENTER_VERTICAL, RelativeLayout.TRUE);
-        lltSideButtons.setLayoutParams(params);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (resultCode == Activity.RESULT_OK)
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK)
         {
-            if (requestCode == 1)
+            if (requestCode == ImportFilesActivityID)
             {
-                LayerManager.getInstance().addLayer(this, data.getData());
+                String path = data.getStringExtra("path");
+                LayerManager.getInstance().addLayer(this, path);
+                Config.getInstance().trySave();
             }
         }
     }
@@ -305,10 +268,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         double scale;
         switch (v.getId())
         {
-            case R.id.main_btn_import:
-                Intent intent = new Intent(this, FileListActivity.class);
-                startActivity(intent);
-                break;
             case R.id.main_btn_pan:
                 if (!Config.getInstance().location)
                 {
@@ -353,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             case R.id.main_btn_import:
                 intent = new Intent(this, ImportFilesActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, ImportFilesActivityID);
                 break;
             case R.id.main_btn_pan:
                 if (!Config.getInstance().location)
@@ -408,8 +367,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.main_btn_edit:
                 ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).foldOrUnfold(this);
                 break;
-            case R.id.main_btn_reset_map:
-                LayerManager.getInstance().resetLayers(this);
+            case R.id.main_btn_menu:
+                PopupMenu popup = new PopupMenu(this, view);
+                MenuInflater inflater = popup.getMenuInflater();
+                Menu menu = popup.getMenu();
+                MenuHelper.getInstance().initialize(inflater, menu);
+                popup.setOnMenuItemClickListener(item -> {
+                    MenuHelper.getInstance().menuClick(MainActivity.this, item);
+                    return true;
+                });
+                popup.show();
                 break;
             case R.id.main_btn_track:
                 changeTrackStatus();
@@ -535,22 +502,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             imgSatellite.clearAnimation();
             imgSatellite.setVisibility(View.GONE);
-        }
-    }
-
-
-    public void setSideButtonsVisible(boolean visiable)
-    {
-        if (Config.getInstance().sideButtonsRight)
-        {
-            if (visiable)
-            {
-                ObjectAnimator.ofFloat(lltSideButtons, "translationX", lltSideButtons.getWidth(), 0).setDuration(Config.getInstance().animationDuration).start();
-            }
-            else
-            {
-                ObjectAnimator.ofFloat(lltSideButtons, "translationX", 0, lltSideButtons.getWidth()).setDuration(Config.getInstance().animationDuration).start();
-            }
         }
     }
 

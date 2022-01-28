@@ -12,10 +12,10 @@ public class CrashApplication extends Application
     public void onCreate()
     {
         super.onCreate();
-        //if (!Debug.isDebuggerConnected())
-      //  {
+        if (!Debug.isDebuggerConnected())
+        {
             CrashHandler crashHandler = CrashHandler.getInstance();
             crashHandler.init(getApplicationContext());
-      //  }
+        }
     }
 }

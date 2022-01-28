@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.autod.gis.map.LayerManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Config
@@ -36,7 +37,7 @@ public class Config
 
             instance.featureLayerQueryExtentEveryTime = true;
             instance.useBarometer = true;
-            instance.baseUrls.add("https://mt1.google.cn/vt/lyrs=s&x={x}&y={y}&z={z}");
+            instance.baseLayers.add(new LayerInfo("https://mt1.google.cn/vt/lyrs=s&x={x}&y={y}&z={z}", true, 1f));
 
             FileHelper.setConfigJson(gson.toJson(instance));
         }
@@ -53,12 +54,12 @@ public class Config
         }
     }
 
-    public ArrayList<LayerInfo> layers = new ArrayList<LayerInfo>();
+    public ArrayList<LayerInfo> layers = new ArrayList<>();
 
     public int animationDuration = 500;
     public boolean canRotate = true;
-
-    public ArrayList<String> baseUrls = new ArrayList<>();
+    public ArrayList<LayerInfo> baseLayers = new ArrayList<>();
+    public int esriBaseLayer = 1;
 
     public double defaultScale = 10000;
 
@@ -74,16 +75,11 @@ public class Config
 
     public boolean featureLayerQueryExtentEveryTime = false;
 
-    public boolean sideButtonsRight = true;
-
     public boolean showMapCompass = false;
 
     public boolean useBarometer = false;
 
     public boolean useRelativeAltitude = false;
-
-    public String lastRegionalStatisticLayerPath = "";
-    public String lastRegionalStatisticAttributeName = "";
 
     public void save()
     {
@@ -121,8 +117,17 @@ public class Config
         layers.clear();
         for (Layer layer : LayerManager.getInstance().getLayers())
         {
-            String path = ((ShapefileFeatureTable)((FeatureLayer)layer).getFeatureTable()).getPath();
-            LayerInfo layerInfo=new LayerInfo(path,layer.isVisible(),layer.getOpacity());
+            String path = ((ShapefileFeatureTable) ((FeatureLayer) layer).getFeatureTable()).getPath();
+            try
+            {
+                path = FileHelper.getRelativePath(path, FileHelper.getShapefileDirPath());
+            }
+            catch (IOException e)
+            {
+                assert false;
+                e.printStackTrace();
+            }
+            LayerInfo layerInfo = new LayerInfo(path, layer.isVisible(), layer.getOpacity());
             layers.add(layerInfo);
         }
     }

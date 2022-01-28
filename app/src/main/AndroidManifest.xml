@@ -19,7 +19,6 @@
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -32,6 +31,10 @@
         <activity
             android:name="com.autod.gis.ui.activity.ImportFilesActivity"
             android:launchMode="singleTask" />
+        <activity
+            android:name="com.autod.gis.ui.activity.BaseLayerListActivity"
+            android:launchMode="singleTask" />
+
         <service
             android:name="com.autod.gis.service.LocationService"
             android:enabled="true"

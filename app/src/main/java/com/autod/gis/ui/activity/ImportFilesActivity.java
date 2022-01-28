@@ -33,9 +33,11 @@ import org.apache.ftpserver.usermanager.impl.ConcurrentLoginPermission;
 import org.apache.ftpserver.usermanager.impl.WritePermission;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
 
 
 /**
@@ -43,18 +45,21 @@ import java.util.List;
  */
 public class ImportFilesActivity extends AppCompatActivity implements View.OnClickListener
 {
+    public final static int ImportFilesActivityID = ImportFilesActivity.class.getName().hashCode() % Short.MAX_VALUE;
     /**
      * 文件列表适配器
      */
     FileListAdapter adapter;
     Button btnFtp;
+    private boolean forBaseLayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_import_files);
-
+        Bundle extra = getIntent().getExtras();
+        forBaseLayer = extra != null && extra.containsKey("base");
         if (!InitializeFtpServer())
         {
             Toast.makeText(this, "初始化FTP服务器失败", Toast.LENGTH_SHORT).show();
@@ -69,13 +74,6 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         tvwFtp = findViewById(R.id.import_tvw_ftp);
 
 
-        Bundle extra = getIntent().getExtras();
-        if (extra != null && extra.containsKey("EnableFiles") && !extra.getBoolean("EnableFiles"))
-        {
-            return;
-        }
-
-
         ListView lvwFile = findViewById(R.id.import_lvw_files);
         adapter = new FileListAdapter(this);
         lvwFile.setAdapter(adapter);
@@ -84,19 +82,40 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         lvwFile.setOnItemClickListener((adapterView, view, i, l) ->
         {
             File clickedFile = adapter.files.get(i);
-
-            LayerManager.getInstance().addLayer(this, clickedFile.getAbsolutePath());
-            Config.getInstance().trySave();
-            Intent intent = new Intent(ImportFilesActivity.this, MainActivity.class);
-            startActivity(intent);
+            Intent data = new Intent();
+            String path = clickedFile.getAbsolutePath();
+            try
+            {
+                if (forBaseLayer)
+                {
+                    path = FileHelper.getRelativePath(path, FileHelper.getBaseLayerDirPath());
+                }
+                else
+                {
+                    path = FileHelper.getRelativePath(path, FileHelper.getShapefileDirPath());
+                }
+            }
+            catch (IOException e)
+            {
+                assert false;
+                e.printStackTrace();
+            }
+            data.putExtra("path", path);
+            setResult(RESULT_OK, data);
+            finish();
+//            LayerManager.getInstance().addLayer(this, clickedFile.getAbsolutePath());
+//            Config.getInstance().trySave();
+//            Intent intent = new Intent(ImportFilesActivity.this, MainActivity.class);
+//            startActivity(intent);
         });
 
         lvwFile.setOnItemLongClickListener((parent, view, i, id) -> {
-
             File clickedFile = adapter.files.get(i);
             Toast.makeText(this, clickedFile.getAbsolutePath(), Toast.LENGTH_SHORT).show();
             return true;
         });
+
+
         searchFiles();
     }
 
@@ -178,22 +197,18 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
      */
     private void searchFiles()
     {
-        File gisDirectory = new File(FileHelper.getShapefileDirPath());
+        File gisDirectory = new File(forBaseLayer ? FileHelper.getBaseLayerPath("") : FileHelper.getShapefileDirPath());
         if (!gisDirectory.exists())
         {
-            if (gisDirectory.mkdir())
-            {
-                Toast.makeText(this, "文件夹为空", Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
-                Toast.makeText(this, "文件夹不存在且创建失败", Toast.LENGTH_SHORT).show();
-            }
+            Toast.makeText(this, "文件夹为空", Toast.LENGTH_SHORT).show();
             return;
         }
 
         matchedFiles.clear();
-        listMatchedFiles(gisDirectory);
+        List<String> extensions;
+        extensions = forBaseLayer ? FileHelper.SupportedBaseLayerExtensions : new ArrayList<>(Collections.singletonList("shp"));
+
+        listMatchedFiles(gisDirectory, extensions);
 
         adapter.loadFiles(matchedFiles);
         adapter.notifyDataSetChanged();
@@ -244,20 +259,25 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
      *
      * @param parent
      */
-    private void listMatchedFiles(File parent)
+    private void listMatchedFiles(File parent, List<String> extensions)
     {
         for (File child : parent.listFiles())
         {
             if (child.isDirectory())
             {
-                listMatchedFiles(child);
+                listMatchedFiles(child, extensions);
             }
             else
             {
-                if (child.getName().endsWith(".shp"))
+                for (String extension : extensions)
                 {
-                    matchedFiles.add(child);
+                    if (child.getName().endsWith("." + extension))
+                    {
+                        matchedFiles.add(child);
+                        break;
+                    }
                 }
+
             }
         }
     }

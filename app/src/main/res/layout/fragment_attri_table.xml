@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal"
-        android:layout_marginBottom="64dp" />
+        android:layout_marginBottom="48dp" />
 
     <LinearLayout
         android:layout_width="match_parent"

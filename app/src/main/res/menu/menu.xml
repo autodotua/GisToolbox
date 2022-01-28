@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:title="@string/menu_map">
         <menu>
             <item
-                android:id="@+id/menu_load_esri_map"
-                android:title="@string/menu_load_esri_map" />
-            <item
                 android:id="@+id/menu_tile_url"
-                android:title="@string/menu_base_urls" />
+                android:title="@string/menu_base_layer" />
             <item
                 android:id="@+id/menu_rotate"
                 android:checkable="true"
@@ -59,10 +56,6 @@
     </item>
     <item android:title="@string/menu_ui">
         <menu>
-            <item
-                android:id="@+id/menu_side_buttons_right"
-                android:checkable="true"
-                android:title="@string/menu_side_button_right" />
             <item
                 android:id="@+id/menu_compass"
                 android:checkable="true"

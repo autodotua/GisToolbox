@@ -25,6 +25,7 @@ import com.esri.arcgisruntime.layers.WebTiledLayer;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.raster.Raster;
 import com.esri.arcgisruntime.symbology.Renderer;
@@ -42,6 +43,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 public class LayerManager
 {
@@ -81,7 +84,7 @@ public class LayerManager
     {
         try
         {
-            Basemap basemap = getBaseMap();
+            Basemap basemap = getBaseMap(context);
             basemap.addDoneLoadingListener(() -> {
                 LayerManager.getInstance().map = new ArcGISMap(basemap);
                 MapViewHelper.getInstance().linkMapAndMapView();
@@ -102,11 +105,40 @@ public class LayerManager
         }
     }
 
-    private Basemap getBaseMap()
+   public final  static String[] EsriBaseLayers = new String[]{"无", "OpenStreetMap","卫星影像","带标签卫星影像" ,"街道","亮色","暗色","街道","地貌" ,"地形","海洋"};
+    private ArrayList<Callable<Basemap>> EsriBaseLayersMap=new ArrayList<Callable<Basemap>>(){{
+       add(null);
+        add(Basemap::createOpenStreetMap);
+       add(Basemap::createImagery);
+       add(Basemap::createImageryWithLabelsVector);
+        add(Basemap::createStreetsVector);
+       add(Basemap::createLightGrayCanvasVector);
+       add(Basemap::createDarkGrayCanvasVector);
+       add(Basemap::createTopographicVector);
+       add(Basemap::createTerrainWithLabelsVector);
+       add(Basemap::createOceans);
+    }};
+    private Basemap getBaseMap(Context context)
     {
-        ArrayList<Layer> layers = new ArrayList<>();
-        for (String url : Config.getInstance().baseUrls)
+        Basemap basemap;
+        if(Config.getInstance().esriBaseLayer>0 && Config.getInstance().esriBaseLayer<EsriBaseLayersMap.size())
         {
+            try
+            {
+                basemap=EsriBaseLayersMap.get(Config.getInstance().esriBaseLayer).call();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                basemap = new Basemap();
+            }
+        }
+        else {
+            basemap = new Basemap();
+        }
+        for (LayerInfo layerInfo : Config.getInstance().baseLayers)
+        {
+            String url = layerInfo.getPath();
             Layer layer = null;
             if (url.startsWith("http://") || url.startsWith("https://"))
             {
@@ -123,29 +155,21 @@ public class LayerManager
                     || url.endsWith("png")
             )
             {
-
                 layer = getRasterLayer(FileHelper.getBaseLayerPath(url));
             }
-            layers.add(layer);
+            Layer finalLayer = layer;
+            layer.addDoneLoadingListener(() -> {
+                if (finalLayer.getLoadStatus() == LoadStatus.FAILED_TO_LOAD)
+                {
+                    Toast.makeText(context, "加载底图" + url + "失败\n" + finalLayer.getLoadError(), Toast.LENGTH_SHORT).show();
+                }
+            });
+            layer.setOpacity(layerInfo.getOpacity());
+            layerInfo.setVisible(layer.isVisible());
+            basemap.getBaseLayers().add(layer);
         }
-        return new Basemap(layers, null);
+        return basemap;
 
-    }
-
-    /**
-     * 加载图层，已隐藏入口
-     */
-    public void loadEsriLayer(Context context)
-    {
-        AlertDialog.Builder listDialog = new AlertDialog.Builder(context);
-        listDialog.setTitle("加载地图");
-        listDialog.setItems(names(), (DialogInterface dialog, int which) ->
-        {
-            Intent intent;
-            map = new ArcGISMap(Basemap.Type.values()[which], 30, 120, 8);
-            MapViewHelper.getInstance().mapView.setMap(map);
-        });
-        listDialog.show();
     }
 
     /**
@@ -209,6 +233,10 @@ public class LayerManager
     {
         try
         {
+            if(!path.startsWith("/"))
+            {
+                path=FileHelper.getShapefilePath(path,false);
+            }
             ShapefileFeatureTable table = new ShapefileFeatureTable(path);
 
             table.loadAsync();
@@ -237,10 +265,11 @@ public class LayerManager
 
             getLayers().add(layer);
 
+            String finalPath = path;
             layer.addDoneLoadingListener(() -> {
                 if (layer.getLoadStatus() == LoadStatus.FAILED_TO_LOAD)
                 {
-                    Toast.makeText(context, "图层" + new File(path).getName() + "加载失败\n" + layer.getLoadError(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "图层" + finalPath + "加载失败\n" + layer.getLoadError(), Toast.LENGTH_SHORT).show();
                 }
             });
             setCurrentLayer(layer);

@@ -18,11 +18,23 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.FileAlreadyExistsException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class FileHelper
 {
+    public static final List<String> SupportedBaseLayerExtensions = new ArrayList<String>()
+    {{
+        add("tpk");
+        add("jpg");
+        add("jpeg");
+        add("tif");
+        add("tiff");
+        add("png");
+    }};
+
     public static void writeTextToFile(String path, String value)
     {
         writeTextToFile(new File(path), value);
@@ -107,7 +119,7 @@ public class FileHelper
 
     public static String getCrashLogPath(String name)
     {
-        return getFilePath("Logs/"+name);
+        return getFilePath("Logs/" + name);
     }
 
     public static String getConfigPath(String name)
@@ -132,6 +144,11 @@ public class FileHelper
     public static String getBaseLayerPath(String name)
     {
         return getFilePath("Base/" + name);
+    }
+
+    public static String getBaseLayerDirPath()
+    {
+        return getBaseLayerPath("");
     }
 
     public static String getConfigPath()
@@ -189,6 +206,20 @@ public class FileHelper
     public static String getStyleFile(String shapeFileName)
     {
         return getShapefilePath(shapeFileName.substring(0, shapeFileName.length() - 4) + ".style", false);
+    }
+
+    public static String getRelativePath(String path, String root) throws IOException
+    {
+        if (!path.startsWith(root))
+        {
+            throw new IOException(root + "非" + path + "的父目录");
+        }
+        path = path.substring(root.length());
+        if (path.startsWith("/"))
+        {
+            path = path.substring(1);
+        }
+        return path;
     }
 
     public static String createShapefile(Context context, GeometryType type, String targetPath)

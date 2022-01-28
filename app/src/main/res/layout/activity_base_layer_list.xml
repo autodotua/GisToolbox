@@ -5,10 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginBottom="12dp"
-    tools:context="com.autod.gis.ui.activity.LayerListActivity">
+    android:orientation="vertical"
+    tools:context="com.autod.gis.ui.activity.BaseLayerListActivity">
 
     <ListView
-        android:id="@+id/layer_lvw_list"
+        android:id="@+id/base_lvw_layers"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:descendantFocusability="blocksDescendants"
@@ -20,25 +21,27 @@
         android:layout_alignParentBottom="true">
 
         <Button
-            android:id="@+id/layer_btn_open"
+            android:id="@+id/base_btn_add"
             style="@style/normal_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/layer_btn_open" />
+            android:text="@string/base_btn_add" />
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/layer_btn_save"
+            android:id="@+id/base_btn_browse"
             style="@style/normal_button"
-            android:text="@string/layer_btn_save"/>
+            android:text="@string/base_btn_browse"/>
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:id="@+id/layer_btn_save_as"
+            android:id="@+id/base_btn_esri"
             style="@style/normal_button"
-            android:text="@string/layer_btn_save_as"/>
+            android:text="@string/base_btn_esri"/>
+
     </LinearLayout>
+
 </RelativeLayout>

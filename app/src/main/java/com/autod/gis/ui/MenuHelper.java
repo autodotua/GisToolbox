@@ -3,6 +3,7 @@ package com.autod.gis.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -20,6 +21,8 @@ import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.map.TrackHelper;
 import com.autod.gis.programming.GetString;
+import com.autod.gis.ui.activity.BaseLayerListActivity;
+import com.autod.gis.ui.activity.FileListActivity;
 import com.autod.gis.ui.activity.MainActivity;
 
 public class MenuHelper
@@ -31,7 +34,6 @@ public class MenuHelper
     private MenuItem menuCenterWhenRecording;
     private MenuItem menuKeepLocationBackground;
     private MenuItem menuFeatureLayerQueryExtentEveryTime;
-    private MenuItem menuSideButtonsRight;
     private MenuItem menuMapCompass;
     private MenuItem menuUseBarometer;
     private MenuItem menuUseRelativeAltitude;
@@ -57,8 +59,6 @@ public class MenuHelper
 
         menuFeatureLayerQueryExtentEveryTime = menu.findItem(R.id.menu_feature_layer_query_extent_every_time);
 
-        menuSideButtonsRight = menu.findItem(R.id.menu_side_buttons_right);
-
         menuMapCompass = menu.findItem(R.id.menu_compass);
 
         menuUseBarometer = menu.findItem(R.id.menu_use_barometer);
@@ -75,7 +75,6 @@ public class MenuHelper
         menuCenterWhenRecording.setChecked(Config.getInstance().autoCenterWhenRecording);
         menuKeepLocationBackground.setChecked(Config.getInstance().keepLocationBackground);
         menuFeatureLayerQueryExtentEveryTime.setChecked(Config.getInstance().featureLayerQueryExtentEveryTime);
-        menuSideButtonsRight.setChecked(Config.getInstance().sideButtonsRight);
         menuMapCompass.setChecked(Config.getInstance().showMapCompass);
         menuUseBarometer.setChecked(Config.getInstance().useBarometer);
         menuUseRelativeAltitude.setChecked(Config.getInstance().useRelativeAltitude);
@@ -116,11 +115,6 @@ public class MenuHelper
                 MapViewHelper.getInstance().imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
                 MapViewHelper.getInstance().setMapCompass();
                 break;
-            case R.id.menu_side_buttons_right:
-                Config.getInstance().sideButtonsRight = !Config.getInstance().sideButtonsRight;
-                menuSideButtonsRight.setChecked(Config.getInstance().sideButtonsRight);
-                ((MainActivity)context).setSideButtonPosition();
-                break;
             case R.id.menu_location_display:
                 Config.getInstance().location = !Config.getInstance().location;
                 menuLocation.setChecked(Config.getInstance().location);
@@ -134,30 +128,7 @@ public class MenuHelper
                 }
                 break;
             case R.id.menu_tile_url:
-                showSetValueDialog(context,
-                        "设置底图地址",
-                        "请输入一行一个地址，以行分隔，自动忽略空行",
-                        TextUtils.join("\n\n", Config.getInstance().baseUrls),
-                        InputType.TYPE_TEXT_FLAG_MULTI_LINE,
-                        p ->
-                        {
-                            Config.getInstance().baseUrls.clear();
-                            int count = 0;
-                            for (String url : p.split("\n"))
-                            {
-                                if (url.length() > 0)
-                                {
-                                    Config.getInstance().baseUrls.add(url);
-                                    count++;
-                                }
-                            }
-                            Config.getInstance().save();
-                            Toast.makeText(context, "成功获取" + count + "条瓦片地址", Toast.LENGTH_SHORT).show();
-                            LayerManager.getInstance().resetLayers(context);
-                        });
-                break;
-            case R.id.menu_load_esri_map:
-                LayerManager.getInstance().loadEsriLayer(context);
+                context.startActivity(new Intent(context, BaseLayerListActivity.class));
                 break;
             case R.id.menu_create_feature_layer:
                 LayerManager.getInstance().createFeatureLayer(context);

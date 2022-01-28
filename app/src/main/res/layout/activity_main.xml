@@ -29,20 +29,10 @@
             android:id="@+id/main_img_map_compass"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="30dp"
             android:rotation="-45"
             android:src="@drawable/ic_map_compass"
             android:contentDescription="@string/main_img_map_compass" />
-
-        <ImageView
-            android:id="@+id/main_img_compass"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
-            android:src="@drawable/ic_compass"
-            android:visibility="invisible"
-            android:contentDescription="@string/main_img_compass" />
     </LinearLayout>
 
 
@@ -50,7 +40,7 @@
         android:id="@+id/main_llt_side_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:orientation="vertical">
 
@@ -95,7 +85,8 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_satellite"
         android:layout_alignParentEnd="true"
-        android:layout_margin="8dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="8dp"
         android:visibility="gone"
         android:contentDescription="@string/main_img_satellite" />
 
@@ -125,13 +116,6 @@
         android:orientation="horizontal">
 
 
-        <ImageButton
-            android:id="@+id/main_btn_reset_map"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            app:srcCompat="@drawable/ic_bottom_map"
-            android:contentDescription="@string/main_btn_reset_map" />
 
         <ImageButton
             android:id="@+id/main_btn_import"
@@ -158,6 +142,13 @@
             android:layout_weight="1"
             android:src="@drawable/ic_bottom_edit"
             android:contentDescription="@string/main_btn_edit" />
+        <ImageButton
+            android:id="@+id/main_btn_menu"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/ic_bottom_menu"
+            android:contentDescription="@string/main_btn_menu" />
 
         <ImageButton
             android:id="@+id/main_btn_track"

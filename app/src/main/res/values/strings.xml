@@ -51,7 +51,7 @@
     <string name="menu_keep_location_display_background">后台保持定位</string>
     <string name="menu_feature_layer_query_extent_every_time">矢量图层重算范围</string>
     <string name="menu_location">位置</string>
-    <string name="menu_base_urls">底图地址</string>
+    <string name="menu_base_layer">底图设置</string>
     <string name="menu_default_scale">默认比例尺</string>
     <string name="menu_gps_min_time">GPS最小更新时间</string>
     <string name="menu_load_esri_map">加载Esri底图</string>
@@ -60,7 +60,7 @@
     <string name="menu_side_button_right">在右侧显示按钮</string>
     <string name="menu_ui">界面</string>
     <string name="menu_use_tiled_base_layer">使用瓦片底图</string>
-    <string name="attri_table_area">面积：%1$.2f㎡\n周长：%2$.2fm</string>
+    <string name="attri_table_area"><b>面积：</b>%1$.2f ㎡\n<b>周长：</b>%2$.2f m</string>
     <string name="attri_table_length">长度：%1$.2fm</string>
     <string name="menu_gps_min_distance">GPS最小更新距离</string>
     <string name="menu_create_feature_layer">创建矢量图层</string>
@@ -70,4 +70,8 @@
     <string name="msg_gps_detail">时间：%1$s\n点数：%2$d\n里程：%3$.0fm\n经度：%4$.6f\n纬度：%5$.6f\n海拔：%6$.0f/%7$.0fm (GPS/BARO)\n速度：%8$.2fm/s  %9$.0f°\n精度：%10$.1f/%11$.1f/%12$.1fm (H/V/S)</string>
     <string name="scale_large">1:%1$.0f</string>
     <string name="scale_small">1:%1$.2f万</string>
+    <string name="base_btn_add">添加</string>
+    <string name="base_btn_browse">浏览</string>
+    <string name="main_btn_menu">设置菜单</string>
+    <string name="base_btn_esri">预设底图</string>
 </resources>
