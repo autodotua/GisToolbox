@@ -45,8 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.autod.gis.ui.activity.ImportFilesActivity.ImportFilesActivityID;
-
+import static com.autod.gis.ui.activity.MainActivity.ImportFilesActivityID;
 
 /**
  * FTP远程管理和自动列举合适的文件类
@@ -58,6 +57,7 @@ public class BaseLayerListActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        setResult(RESULT_OK);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_layer_list);
 
@@ -128,8 +128,6 @@ public class BaseLayerListActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    TextView tvwFtp;
-
     @Override
     protected void onStop()
     {
@@ -139,9 +137,7 @@ public class BaseLayerListActivity extends AppCompatActivity
     @Override
     protected void onDestroy()
     {
-        super.onDestroy();
         adapter.save();
-        LayerManager.getInstance().resetLayers(getApplicationContext());
-        Config.getInstance().trySave();
+        super.onDestroy();
     }
 }

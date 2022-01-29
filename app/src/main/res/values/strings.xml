@@ -93,4 +93,5 @@
     <string name="main_tvw_draw_ok">完成</string>
     <string name="main_tvw_draw_cancel">取消</string>
     <string name="main_track_recording"><b>正在记录轨迹</b></string>
+    <string name="menu_reset">重新加载地图</string>
 </resources>

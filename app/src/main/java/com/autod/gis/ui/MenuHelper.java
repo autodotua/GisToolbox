@@ -22,6 +22,8 @@ import com.autod.gis.map.TrackHelper;
 import com.autod.gis.programming.GetString;
 import com.autod.gis.ui.activity.BaseLayerListActivity;
 
+import static com.autod.gis.ui.activity.MainActivity.BaseLayerListActivityID;
+
 public class MenuHelper
 {
 
@@ -124,7 +126,7 @@ public class MenuHelper
                 }
                 break;
             case R.id.menu_tile_url:
-                context.startActivity(new Intent(context, BaseLayerListActivity.class));
+                context.startActivityForResult(new Intent(context, BaseLayerListActivity.class),BaseLayerListActivityID);
                 break;
             case R.id.menu_create_feature_layer:
                 LayerManager.getInstance().createFeatureLayer(context);
@@ -228,6 +230,8 @@ public class MenuHelper
                     context.finish();
                 }
                 break;
+            case R.id.menu_reset:
+                LayerManager.getInstance().resetLayers(context);
             default:
                 break;
         }

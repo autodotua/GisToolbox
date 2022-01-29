@@ -52,7 +52,7 @@ public class Config
     public int animationDuration = 500;
     public boolean canRotate = true;
     public ArrayList<LayerInfo> baseLayers = new ArrayList<>();
-    public int esriBaseLayer = 1;
+    public int esriBaseLayer =2;
 
     public double defaultScale = 10000;
 

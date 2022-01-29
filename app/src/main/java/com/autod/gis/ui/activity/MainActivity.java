@@ -56,8 +56,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.autod.gis.ui.activity.ImportFilesActivity.ImportFilesActivityID;
-
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener
 {
@@ -184,8 +182,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause()
     {
         super.onPause();
-        Config.getInstance().lastExtent = MapViewHelper.getInstance().getMapView().getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY).getTargetGeometry().toJson();
-        Config.getInstance().trySave();
+        if(initialized)
+        {
+            Config.getInstance().lastExtent = MapViewHelper.getInstance().getMapView().getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY).getTargetGeometry().toJson();
+            Config.getInstance().trySave();
+        }
     }
 
 
@@ -267,7 +268,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tvwTrackInfo = findViewById(R.id.main_tvw_track_info);
         topBar = findViewById(R.id.main_llt_top);
     }
-
+    public final static int BaseLayerListActivityID =1;
+    public final static int ImportFilesActivityID =2;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -278,6 +280,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 String path = data.getStringExtra("path");
                 LayerManager.getInstance().addLayer(this, path);
+                Config.getInstance().trySave();
+            }
+            else  if(requestCode==BaseLayerListActivityID)
+            {
+                LayerManager.getInstance().resetLayers(this);
                 Config.getInstance().trySave();
             }
         }

@@ -1,5 +1,6 @@
 package com.autod.gis.map;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,9 +9,12 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.autod.gis.R;
 import com.autod.gis.model.LayerInfo;
 import com.esri.arcgisruntime.arcgisservices.LabelDefinition;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
@@ -37,6 +41,7 @@ import com.esri.arcgisruntime.symbology.Symbol;
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
 import com.esri.arcgisruntime.symbology.UniqueValueRenderer;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -76,10 +81,12 @@ public class LayerManager
 
     private ArcGISMap map = new ArcGISMap();
 
-    public void initialize(Context context)
+    public void initialize(Activity context)
     {
         try
         {
+            Toast toast = Toast.makeText(context, "正在加载地图...", Toast.LENGTH_SHORT);
+            toast.show();
             Basemap basemap = getBaseMap(context);
             basemap.addDoneLoadingListener(() -> {
                 LayerManager.getInstance().map = new ArcGISMap(basemap);
@@ -96,7 +103,14 @@ public class LayerManager
                     }
                 }
                 loadLayers(context);
-                if(TrackHelper.getInstance().getStatus()== TrackHelper.Status.Running)
+                map.addLoadStatusChangedListener(s -> {
+                    if (s.getNewLoadStatus() == LoadStatus.FAILED_TO_LOAD)
+                    {
+                        toast.setText("加载失败，请检查网络和设置");
+                        toast.show();
+                    }
+                });
+                if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)
                 {
                     TrackHelper.getInstance().resumeOverlay();
                     Toast.makeText(context, "轨迹记录继续运行", Toast.LENGTH_SHORT).show();
@@ -190,7 +204,7 @@ public class LayerManager
     /**
      * 重置图层
      */
-    public void resetLayers(Context context)
+    public void resetLayers(Activity context)
     {
         try
         {

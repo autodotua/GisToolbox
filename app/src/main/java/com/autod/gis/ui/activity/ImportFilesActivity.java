@@ -45,12 +45,8 @@ import java.util.List;
  */
 public class ImportFilesActivity extends AppCompatActivity implements View.OnClickListener
 {
-    public final static int ImportFilesActivityID = ImportFilesActivity.class.getName().hashCode() % Short.MAX_VALUE;
-    /**
-     * 文件列表适配器
-     */
-    FileListAdapter adapter;
-    Button btnFtp;
+    private  FileListAdapter adapter;
+    private  Button btnFtp;
     private boolean forBaseLayer;
 
     @Override
