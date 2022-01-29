@@ -67,6 +67,11 @@ public class TrackHelper
         return status;
     }
 
+    public Date getStartTime()
+    {
+        return startTime;
+    }
+
     private Date startTime;
 
     /**
@@ -83,6 +88,7 @@ public class TrackHelper
     {
         try
         {
+            status = Status.Running;
             //初始化字段
             locationPoints.clear();
             length = 0;
@@ -112,7 +118,6 @@ public class TrackHelper
                 }
             }
 
-            status = Status.Running;
             Toast.makeText(context, "开始记录轨迹", Toast.LENGTH_SHORT).show();
 
             return true;
@@ -218,7 +223,6 @@ public class TrackHelper
         String text = null;
         switch (status)
         {
-
             case Running:
                 text = context.getString(R.string.track_notification_title_running);
                 break;
@@ -226,7 +230,7 @@ public class TrackHelper
                 text = "";
                 break;
             case Pausing:
-                context.getString(R.string.track_notification_title_pausing);
+                text =      context.getString(R.string.track_notification_title_pausing);
                 break;
         }
         LocationService.updateNotification(text, context.getString(R.string.track_notification_message, h, m, s, length));

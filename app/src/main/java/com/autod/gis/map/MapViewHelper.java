@@ -42,8 +42,6 @@ import java.util.Objects;
 
 public class MapViewHelper
 {
-    private ImageView imgMapCompass;
-
     public MapView getMapView()
     {
         return mapView;
@@ -87,10 +85,11 @@ public class MapViewHelper
         mapView.setCanMagnifierPanMap(true);
         setTouchMapView(activity);
         mapView.setSketchEditor(new SketchEditor());
-        imgMapCompass = activity.findViewById(R.id.main_img_map_compass);
+        ImageView imgMapCompass = activity.findViewById(R.id.main_img_map_compass);
         imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
         imgMapCompass.setOnClickListener(v -> mapView.setViewpointRotationAsync(0));
-        mapView.addMapRotationChangedListener(mapRotationChangedEvent -> setMapCompass());
+        mapView.addMapRotationChangedListener(mapRotationChangedEvent ->
+                imgMapCompass.setRotation(-45 - (float) mapView.getMapRotation()));
     }
 
     /**
@@ -122,26 +121,6 @@ public class MapViewHelper
     public ArcGISMap getMap()
     {
         return mapView.getMap();
-    }
-
-    /**
-     * 设置地图指南针
-     */
-    public void setMapCompass()
-    {
-        imgMapCompass.setRotation(-45 - (float) mapView.getMapRotation());
-    }
-
-    /**
-     * 获取当前屏幕旋转角度，用于修正指南针
-     *
-     * @return
-     */
-    private int getScreenDegree(Context context)
-    {
-
-        int angle = ((WindowManager) Objects.requireNonNull(context.getSystemService(Context.WINDOW_SERVICE))).getDefaultDisplay().getRotation();
-        return angle * 90;
     }
 
     /**

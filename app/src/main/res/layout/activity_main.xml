@@ -15,25 +15,50 @@
         android:id="@+id/main_map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/main_llt_top"
         android:layout_marginTop="-72dp"
         android:layout_marginBottom="-24dp" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="12dp"
-        android:orientation="vertical">
+        android:id="@+id/main_llt_top"
+        android:layout_width="match_parent"
+        android:background="@color/colorPrimary"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical"
+        android:paddingTop="36dp"
+        android:paddingBottom="12dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:layout_height="0dp">
 
-        <ImageView
-            android:id="@+id/main_img_map_compass"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginTop="30dp"
-            android:rotation="-45"
-            android:src="@drawable/ic_map_compass"
-            android:contentDescription="@string/main_img_map_compass" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:text="@string/main_track_recording"
+            android:textSize="16sp"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:id="@+id/main_tvw_track_info" />
     </LinearLayout>
+
+
+    <ImageView
+        android:id="@+id/main_img_map_compass"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginStart="12dp"
+        android:layout_below="@id/main_llt_top"
+        android:rotation="-45"
+        android:src="@drawable/ic_map_compass"
+
+        android:contentDescription="@string/main_img_map_compass" />
 
 
     <LinearLayout
@@ -79,17 +104,6 @@
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="64dp"
         android:textColor="#FFFFFF" />
-
-    <ImageView
-        android:id="@+id/main_img_satellite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_satellite"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="8dp"
-        android:visibility="gone"
-        android:contentDescription="@string/main_img_satellite" />
 
     <fragment
         android:id="@+id/main_fgm_edit"

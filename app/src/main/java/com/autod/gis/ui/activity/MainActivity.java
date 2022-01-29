@@ -2,6 +2,7 @@ package com.autod.gis.ui.activity;
 
 import android.Manifest;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -11,17 +12,19 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Base64;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -46,8 +49,11 @@ import com.autod.gis.map.SensorHelper;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.autod.gis.ui.activity.ImportFilesActivity.ImportFilesActivityID;
@@ -55,11 +61,11 @@ import static com.autod.gis.ui.activity.ImportFilesActivity.ImportFilesActivityI
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener
 {
-    //private ImageView imgMapCompass;
-
-    private ImageView imgSatellite;
     private TextView tvwScale;
     private boolean initialized = false;
+    private Timer trackInfoTimer = new Timer();
+    private TextView tvwTrackInfo;
+    private View topBar;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -86,8 +92,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initializeControls();
         MapViewHelper.getInstance().getMapView().addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
         LayerManager.getInstance().initialize(this);
-
+        initializeTrack();
         initialized = true;
+    }
+
+    private void initializeTrack()
+    {
+        trackInfoTimer.scheduleAtFixedRate(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                runOnUiThread(() -> {
+                    tvwTrackInfo.setText(getLocationMessage(2));
+                });
+            }
+        }, 0, 1000);
+        if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)
+        {
+            topBarAnimation(1);
+        }
     }
 
 
@@ -240,7 +264,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton btnTrack = findViewById(R.id.main_btn_track);
         btnTrack.setOnClickListener(this);
 
-        imgSatellite = findViewById(R.id.main_img_satellite);
+        tvwTrackInfo = findViewById(R.id.main_tvw_track_info);
+        topBar = findViewById(R.id.main_llt_top);
     }
 
     @Override
@@ -426,7 +451,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             if (TrackHelper.getInstance().start(this))
             {
-                setTrackIcon(true);
+                topBarAnimation(1);
             }
         }
         else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)
@@ -434,14 +459,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("正在记录轨迹")
-                    .setMessage(getLocationMessage())
+                    .setMessage(getLocationMessage(1))
                     .setPositiveButton("暂停", (d, which) -> {
                         TrackHelper.getInstance().pause(this);
-                        setTrackIcon(false);
+                        topBarAnimation(0);
                     })
                     .setNegativeButton("停止", (d, which) -> {
                         TrackHelper.getInstance().stop(this);
-                        setTrackIcon(false);
+                        topBarAnimation(0);
                     })
                     .setNeutralButton("取消", (d, which) -> {
 
@@ -452,10 +477,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle("暂停记录轨迹中")
-                    .setMessage(getLocationMessage())
+                    .setMessage(getLocationMessage(1))
                     .setPositiveButton("继续", (d, which) -> {
                         TrackHelper.getInstance().resume(this);
-                        setTrackIcon(true);
+                        topBarAnimation(1);
                     })
                     .setNegativeButton("停止", (d, which) -> {
                         TrackHelper.getInstance().stop(this);
@@ -483,7 +508,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 runOnUiThread(() -> {
                             if (dialog.isShowing())
                             {
-                                dialog.setMessage(getLocationMessage());
+                                dialog.setMessage(getLocationMessage(1));
                             }
                         }
                 );
@@ -494,21 +519,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
     }
 
-    private Spanned getLocationMessage()
+    private CharSequence getLocationMessage(int type)
     {
         Location loc = TrackHelper.getInstance().getLastLocation();
         if (loc != null)
         {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.CHINA);
+            SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss", Locale.CHINA);
             String time = sdf.format(new Date(loc.getTime()));
+Date diff=new Date(System.currentTimeMillis()-TrackHelper.getInstance().getStartTime().getTime());
+            String duration=sdf.format(diff);
             int count = TrackHelper.getInstance().getCount();
             double length = TrackHelper.getInstance().getLength();
             double lng = loc.getLongitude();
             double lat = loc.getLatitude();
-            double alt = loc.getAltitude();
+            double gpsAlt = loc.getAltitude();
             double pAlt = SensorHelper.getInstance() == null ? Double.NaN : SensorHelper.getInstance().getCurrentAltitude();
+            double alt = Config.getInstance().useBarometer && !Double.isNaN(pAlt) ? pAlt : gpsAlt;
             double speed = loc.getSpeed();
+            double speedKm = speed * 3.6;
             double bearing = loc.getBearing();
+            String bearingDesc = angle2Direction(bearing);
             double hAcc = loc.getAccuracy();
             double vAcc = Double.NaN;
             double sAcc = Double.NaN;
@@ -517,27 +547,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 vAcc = loc.getVerticalAccuracyMeters();
                 sAcc = loc.getSpeedAccuracyMetersPerSecond();
             }
-            return Html.fromHtml(getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, alt, pAlt, speed, bearing, hAcc, vAcc, sAcc));
+            if (type == 1)
+            {
+                return Html.fromHtml(getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, gpsAlt, pAlt, speed, speedKm, bearing, bearingDesc, hAcc, vAcc, sAcc), Html.FROM_HTML_MODE_LEGACY);
+            }
+            else if (type == 2)
+            {
+                return Html.fromHtml(getResources().getString(R.string.msg_gps_detail_bar, duration, length, lng, lat, alt, speed, speedKm, bearing, bearingDesc), Html.FROM_HTML_MODE_LEGACY);
+
+            }
+            else
+            {
+                return "未知";
+            }
         }
-        return Html.fromHtml("暂无位置信息");
+        return Html.fromHtml("暂无位置信息", Html.FROM_HTML_MODE_LEGACY);
     }
 
-    private void setTrackIcon(boolean on)
+    private String angle2Direction(double angle)
     {
-        if (on)
-        {
-            Animation ani = new AlphaAnimation(0.1f, 1.0f);
-            ani.setDuration(2000);
-            ani.setRepeatMode(Animation.REVERSE);
-            ani.setRepeatCount(Animation.INFINITE);
-            imgSatellite.setVisibility(View.VISIBLE);
-            imgSatellite.setAnimation(ani);
-        }
-        else
-        {
-            imgSatellite.clearAnimation();
-            imgSatellite.setVisibility(View.GONE);
-        }
+        angle += 22.5;
+        String[] types = new String[]{"北", "东北", "东", "东南", "南", "西南", "西", "西北"};
+        return types[(int) (angle / 45)];
+    }
+
+    private void topBarAnimation(int direction)
+    {
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 92f, getResources().getDisplayMetrics())
+                + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, getResources().getDisplayMetrics());
+        ValueAnimator anim = ValueAnimator.ofInt(topBar.getMeasuredHeight(), direction * (int) px);
+        anim.addUpdateListener(valueAnimator -> {
+            int val = (Integer) valueAnimator.getAnimatedValue();
+            ViewGroup.LayoutParams layoutParams = topBar.getLayoutParams();
+            layoutParams.height = val;
+            topBar.setLayoutParams(layoutParams);
+        });
+        anim.setDuration(Config.getInstance().animationDuration);
+        anim.start();
     }
 
     int eggClickTimes = 0;
@@ -580,8 +626,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         TextView tvw = rootView.findViewById(R.id.main_tvw_draw);
         TextView btnBarOk = rootView.findViewById(R.id.main_tvw_draw_ok);
-        TextView btnBarCancel =rootView.findViewById(R.id.main_tvw_draw_cancel);
-        View bar=rootView.findViewById(R.id.main_llt_draw_bar);
+        TextView btnBarCancel = rootView.findViewById(R.id.main_tvw_draw_cancel);
+        View bar = rootView.findViewById(R.id.main_llt_draw_bar);
         btnBarOk.setEnabled(true);
         btnBarCancel.setEnabled(true);
         tvw.setText(message);

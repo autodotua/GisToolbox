@@ -109,7 +109,7 @@ public class MenuHelper
             case R.id.menu_compass:
                 Config.getInstance().showMapCompass = !Config.getInstance().showMapCompass;
                 menuMapCompass.setChecked(Config.getInstance().showMapCompass);
-                MapViewHelper.getInstance().setMapCompass();
+                Toast.makeText(context, "设置成功，将在下次启动时应用", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_location_display:
                 Config.getInstance().location = !Config.getInstance().location;

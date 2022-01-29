@@ -68,14 +68,22 @@
     <string name="menu_compass">显示地图指北针</string>
     <string name="menu_use_barometer">优先使用气压计获得相对高度</string>
     <string name="menu_use_relative_altitude">使用相对气压海拔</string>
-    <string name="msg_gps_detail"><![CDATA[<b>时间：</b>%1$s<br>
+    <string name="msg_gps_detail">
+<![CDATA[<b>时间：</b>%1$s<br>
 <b>点数：</b>%2$d<br>
 <b>里程：</b>%3$.0fm<br>
 <b>经度：</b>%4$.6f<br>
 <b>纬度：</b>%5$.6f<br>
-<b>海拔：</b>%6$.0f/%7$.0fm (GPS/BARO)<br>
-<b>速度：</b>%8$.2fm/s  %9$.0f°<br>
-<b>精度：</b>%10$.1f/%11$.1f/%12$.1fm (H/V/S)]]></string>
+<b>海拔：</b>%6$.0f/%7$.0f m (GPS/BARO)<br>
+<b>速度：</b>%8$.2f m/s&nbsp;&nbsp;%9$.2f km/h<br>
+<b>方向：</b>%10$.0f°&nbsp;&nbsp;%11$s<br>
+<b>精度：</b>%12$.1f/%13$.1f/%14$.1f m (H/V/S)]]>
+    </string>
+    <string name="msg_gps_detail_bar">
+<![CDATA[<b>状态：</b>%1$s&nbsp;&nbsp;%2$.0fm<br>
+<b>位置：</b>%3$.6f&nbsp;&nbsp;%4$.6f&nbsp;&nbsp;%5$.0f°<br>
+<b>速度：</b>%6$.2fm/s&nbsp;&nbsp;%7$.2fkm/h&nbsp;&nbsp;%8$.0f°&nbsp;(%9$s)]]>
+    </string>
     <string name="scale_large">1:%1$.0f</string>
     <string name="scale_small">1:%1$.2f万</string>
     <string name="base_btn_add">添加</string>
@@ -84,4 +92,5 @@
     <string name="base_btn_esri">预设底图</string>
     <string name="main_tvw_draw_ok">完成</string>
     <string name="main_tvw_draw_cancel">取消</string>
+    <string name="main_track_recording"><b>正在记录轨迹</b></string>
 </resources>
