@@ -109,7 +109,6 @@ public class MenuHelper
             case R.id.menu_compass:
                 Config.getInstance().showMapCompass = !Config.getInstance().showMapCompass;
                 menuMapCompass.setChecked(Config.getInstance().showMapCompass);
-                MapViewHelper.getInstance().imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
                 MapViewHelper.getInstance().setMapCompass();
                 break;
             case R.id.menu_location_display:

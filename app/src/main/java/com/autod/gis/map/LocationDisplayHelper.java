@@ -25,11 +25,11 @@ public class LocationDisplayHelper
 
     private boolean confirmLocationOn()
     {
-        if (MapViewHelper.getInstance().mapView == null)
+        if (MapViewHelper.getInstance().getMapView() == null)
         {
             return false;
         }
-        locationDisplay = MapViewHelper.getInstance().mapView.getLocationDisplay();
+        locationDisplay = MapViewHelper.getInstance().getMapView().getLocationDisplay();
         locationDisplay.setWanderExtentFactor(0f);//设置Pan为置中时，画面将实时跟随定位点移动
         return true;
     }

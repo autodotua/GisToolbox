@@ -88,7 +88,7 @@ public class LayerManager
                 {
                     try
                     {
-                        MapViewHelper.getInstance().mapView.setViewpointGeometryAsync(Geometry.fromJson(Config.getInstance().lastExtent));
+                        MapViewHelper.getInstance().getMapView().setViewpointGeometryAsync(Geometry.fromJson(Config.getInstance().lastExtent));
                     }
                     catch (Exception ex)
                     {
@@ -200,9 +200,10 @@ public class LayerManager
         {
             Toast.makeText(context, "重置失败", Toast.LENGTH_SHORT).show();
         }
-        if (MapViewHelper.getInstance().mapView.getCallout() != null && MapViewHelper.getInstance().mapView.getCallout().isShowing())
+        if (MapViewHelper.getInstance().getMapView().getCallout() != null
+                && MapViewHelper.getInstance().getMapView().getCallout().isShowing())
         {
-            MapViewHelper.getInstance().mapView.getCallout().dismiss();
+            MapViewHelper.getInstance().getMapView().getCallout().dismiss();
         }
     }
 

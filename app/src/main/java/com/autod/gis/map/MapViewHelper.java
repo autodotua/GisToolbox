@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,6 +27,8 @@ import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.view.Callout;
 import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
 import com.esri.arcgisruntime.mapping.view.IdentifyLayerResult;
+import com.esri.arcgisruntime.mapping.view.MapRotationChangedEvent;
+import com.esri.arcgisruntime.mapping.view.MapRotationChangedListener;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.autod.gis.data.Config;
 import com.autod.gis.R;
@@ -39,8 +42,14 @@ import java.util.Objects;
 
 public class MapViewHelper
 {
-    public ImageView imgMapCompass;
-    public MapView mapView;
+    private ImageView imgMapCompass;
+
+    public MapView getMapView()
+    {
+        return mapView;
+    }
+
+    private MapView mapView;
 
     public MapViewHelper()
     {
@@ -63,7 +72,11 @@ public class MapViewHelper
     {
         mapView.setMap(null);
     }
-    public  SketchEditor getSketchEditor(){return mapView.getSketchEditor();}
+
+    public SketchEditor getSketchEditor()
+    {
+        return mapView.getSketchEditor();
+    }
 
     public void Initialize(Activity activity)
     {
@@ -74,6 +87,10 @@ public class MapViewHelper
         mapView.setCanMagnifierPanMap(true);
         setTouchMapView(activity);
         mapView.setSketchEditor(new SketchEditor());
+        imgMapCompass = activity.findViewById(R.id.main_img_map_compass);
+        imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
+        imgMapCompass.setOnClickListener(v -> mapView.setViewpointRotationAsync(0));
+        mapView.addMapRotationChangedListener(mapRotationChangedEvent -> setMapCompass());
     }
 
     /**
@@ -248,10 +265,6 @@ public class MapViewHelper
             @Override
             public boolean onRotate(MotionEvent event, double rotationAngle)
             {
-                if (Config.getInstance().showMapCompass)
-                {
-                    setMapCompass();
-                }
                 return (!Config.getInstance().canRotate) || super.onRotate(event, rotationAngle);
             }
 

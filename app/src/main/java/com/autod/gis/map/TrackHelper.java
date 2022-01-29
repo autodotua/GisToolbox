@@ -75,8 +75,8 @@ public class TrackHelper
     public void resumeOverlay()
     {
         oldGraphics.remove(overlay);
-        MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(overlay);
-        oldGraphics=MapViewHelper.getInstance().mapView.getGraphicsOverlays();
+        MapViewHelper.getInstance().getMapView().getGraphicsOverlays().add(overlay);
+        oldGraphics=MapViewHelper.getInstance().getMapView().getGraphicsOverlays();
     }
 
     public boolean start(Context context)
@@ -96,8 +96,8 @@ public class TrackHelper
             overlay = new GraphicsOverlay();
             SimpleLineSymbol symbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#54A5F6"), 6f);
             overlay.setRenderer(new SimpleRenderer(symbol));
-            MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(overlay);
-            oldGraphics = MapViewHelper.getInstance().mapView.getGraphicsOverlays();
+            MapViewHelper.getInstance().getMapView().getGraphicsOverlays().add(overlay);
+            oldGraphics = MapViewHelper.getInstance().getMapView().getGraphicsOverlays();
 
             //启动服务
             context.startService(new Intent(context.getApplicationContext(), LocationService.class));
@@ -199,7 +199,7 @@ public class TrackHelper
         updateNotification(context);
         if (Config.getInstance().autoCenterWhenRecording)
         {
-            MapViewHelper.getInstance().mapView.setViewpointCenterAsync(point);
+            MapViewHelper.getInstance().getMapView().setViewpointCenterAsync(point);
         }
 
         if (count % 10 == 0)
@@ -262,7 +262,7 @@ public class TrackHelper
             SensorHelper.getInstance().stop();
         }
 
-        MapViewHelper.getInstance().mapView.getGraphicsOverlays().remove(overlay);
+        MapViewHelper.getInstance().getMapView().getGraphicsOverlays().remove(overlay);
 
         saveGpx(context);
 

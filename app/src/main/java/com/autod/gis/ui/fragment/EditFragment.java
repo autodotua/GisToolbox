@@ -86,7 +86,7 @@ public class EditFragment extends Fragment
         btnSplit = getView().findViewById(R.id.edit_btn_split);
         btnMerge = getView().findViewById(R.id.edit_btn_union);
         GraphicsOverlay graphicsOverlay = new GraphicsOverlay();
-        MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(graphicsOverlay);
+        MapViewHelper.getInstance().getMapView().getGraphicsOverlays().add(graphicsOverlay);
 
         /**
          * 将所有的按钮注册单击事件

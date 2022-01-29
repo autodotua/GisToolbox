@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         MapViewHelper.getInstance().Initialize(this);
         initializeControls();
-        MapViewHelper.getInstance().mapView.addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
+        MapViewHelper.getInstance().getMapView().addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
         LayerManager.getInstance().initialize(this);
 
         initialized = true;
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause()
     {
         super.onPause();
-        Config.getInstance().lastExtent = MapViewHelper.getInstance().mapView.getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY).getTargetGeometry().toJson();
+        Config.getInstance().lastExtent = MapViewHelper.getInstance().getMapView().getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY).getTargetGeometry().toJson();
         Config.getInstance().trySave();
     }
 
@@ -222,10 +222,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton btnEdit = findViewById(R.id.main_btn_edit);
         btnEdit.setOnClickListener(this);
 
-        MapViewHelper.getInstance().imgMapCompass = findViewById(R.id.main_img_map_compass);
-        MapViewHelper.getInstance().imgMapCompass.setOnClickListener(this);
-        MapViewHelper.getInstance().imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
-
         ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).initialize();
 
         ((FeatureAttributionTableFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).Initialize(this);
@@ -279,8 +275,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.main_btn_zoom_in:
                 try
                 {
-                    scale = MapViewHelper.getInstance().mapView.getMapScale();
-                    MapViewHelper.getInstance().mapView.setViewpointScaleAsync(scale * 0.1);
+                    scale = MapViewHelper.getInstance().getMapView().getMapScale();
+                    MapViewHelper.getInstance().getMapView().setViewpointScaleAsync(scale * 0.1);
                 }
                 catch (Exception ex)
                 {
@@ -290,8 +286,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.main_btn_zoom_out:
                 try
                 {
-                    scale = MapViewHelper.getInstance().mapView.getMapScale();
-                    MapViewHelper.getInstance().mapView.setViewpointScaleAsync(scale * 10);
+                    scale = MapViewHelper.getInstance().getMapView().getMapScale();
+                    MapViewHelper.getInstance().getMapView().setViewpointScaleAsync(scale * 10);
                 }
                 catch (Exception ex)
                 {
@@ -332,8 +328,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.main_btn_zoom_in:
                 try
                 {
-                    scale = MapViewHelper.getInstance().mapView.getMapScale();
-                    MapViewHelper.getInstance().mapView.setViewpointScaleAsync(scale * 0.5);
+                    scale = MapViewHelper.getInstance().getMapView().getMapScale();
+                    MapViewHelper.getInstance().getMapView().setViewpointScaleAsync(scale * 0.5);
                 }
                 catch (Exception ignored)
                 {
@@ -343,16 +339,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.main_btn_zoom_out:
                 try
                 {
-                    scale = MapViewHelper.getInstance().mapView.getMapScale();
-                    MapViewHelper.getInstance().mapView.setViewpointScaleAsync(scale * 2);
+                    scale = MapViewHelper.getInstance().getMapView().getMapScale();
+                    MapViewHelper.getInstance().getMapView().setViewpointScaleAsync(scale * 2);
                 }
                 catch (Exception ex)
                 {
 
                 }
-                break;
-            case R.id.main_img_map_compass:
-                MapViewHelper.getInstance().mapView.setViewpointRotationAsync(0);
                 break;
             case R.id.main_btn_zoom_to_layer:
                 if (eggClickTimes++ == 20)
@@ -565,7 +558,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         try
         {
-            double value = MapViewHelper.getInstance().mapView.getMapScale();
+            double value = MapViewHelper.getInstance().getMapView().getMapScale();
             if (value > 10000)
             {
                 tvwScale.setText(getResources().getString(R.string.scale_small, value / 10000));
