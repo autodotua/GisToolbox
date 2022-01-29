@@ -4,12 +4,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.hardware.SensorEvent;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,8 +15,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
-import com.esri.arcgisruntime.data.FeatureQueryResult;
-import com.esri.arcgisruntime.data.FeatureTable;
 import com.esri.arcgisruntime.data.QueryParameters;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.geometry.Envelope;
@@ -36,6 +31,7 @@ import com.autod.gis.data.Config;
 import com.autod.gis.R;
 import com.autod.gis.ui.fragment.EditFragment;
 import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
+import com.esri.arcgisruntime.mapping.view.SketchEditor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +40,6 @@ import java.util.Objects;
 public class MapViewHelper
 {
     public ImageView imgMapCompass;
-    public TextView tvwLocation;
     public MapView mapView;
 
     public MapViewHelper()
@@ -68,6 +63,7 @@ public class MapViewHelper
     {
         mapView.setMap(null);
     }
+    public  SketchEditor getSketchEditor(){return mapView.getSketchEditor();}
 
     public void Initialize(Activity activity)
     {
@@ -77,6 +73,7 @@ public class MapViewHelper
         mapView.setMagnifierEnabled(true);
         mapView.setCanMagnifierPanMap(true);
         setTouchMapView(activity);
+        mapView.setSketchEditor(new SketchEditor());
     }
 
     /**
@@ -204,10 +201,7 @@ public class MapViewHelper
                                     selectFeature(((EditFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).isMultiSelect(), feature);
                                     ((FeatureAttributionTableFragment) ((FragmentActivity) activity).getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).loadTable(activity, featureTable, feature);
                                     //设置当前状态
-                                    if (onSelectionStatusChangedEventListener != null)
-                                    {
-                                        onSelectionStatusChangedEventListener.onEvent(true);
-                                    }
+                                    raiseOnSelectionStatusChangedEvent(true);
 
                                 }
 
@@ -346,10 +340,7 @@ public class MapViewHelper
             featureLayer.unselectFeatures(selectedFeatures);
         }
         selectedFeatures.clear();
-        if (onSelectionStatusChangedEventListener != null)
-        {
-            onSelectionStatusChangedEventListener.onEvent(false);
-        }
+        raiseOnSelectionStatusChangedEvent(false);
     }
 
     public List<Feature> getSelectedFeatures()
@@ -357,11 +348,19 @@ public class MapViewHelper
         return selectedFeatures;
     }
 
-    private OnSelectionStatusChangedEventListener onSelectionStatusChangedEventListener;
+    private List<OnSelectionStatusChangedEventListener> onSelectionStatusChangedEventListeners = new ArrayList<>();
 
-    public void setOnSelectionStatusChangedEventListener(OnSelectionStatusChangedEventListener onSelectionStatusChangedEventListener)
+    private void raiseOnSelectionStatusChangedEvent(boolean selected)
     {
-        this.onSelectionStatusChangedEventListener = onSelectionStatusChangedEventListener;
+        for (OnSelectionStatusChangedEventListener l : onSelectionStatusChangedEventListeners)
+        {
+            l.onEvent(selected);
+        }
+    }
+
+    public void addOnSelectionStatusChangedEventListener(OnSelectionStatusChangedEventListener onSelectionStatusChangedEventListener)
+    {
+        this.onSelectionStatusChangedEventListeners.add(onSelectionStatusChangedEventListener);
     }
 
     interface FeatureGot

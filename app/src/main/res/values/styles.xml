@@ -14,6 +14,7 @@
         <item name="android:layout_marginRight">6dp</item>
         <item name="android:layout_marginTop">8dp</item>
         <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_width">36dp</item>
     </style>
 
     <style name="normal_button" parent="Base.TextAppearance.AppCompat.Button">

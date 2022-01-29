@@ -2,15 +2,13 @@ package com.autod.gis.ui.fragment;
 
 
 import android.animation.ObjectAnimator;
-import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -18,17 +16,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.autod.gis.ui.activity.MainActivity;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.FeatureTable;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.GeometryEngine;
-import com.esri.arcgisruntime.geometry.GeometryType;
 import com.esri.arcgisruntime.geometry.Polyline;
-import com.esri.arcgisruntime.layers.FeatureLayer;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.SketchCreationMode;
-import com.esri.arcgisruntime.mapping.view.SketchEditor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 
-import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.symbology.SimpleFillSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.symbology.SimpleMarkerSymbol;
@@ -55,38 +50,18 @@ public class EditFragment extends Fragment
 
     private Button btnClearSelection;
     private ToggleButton btnMutiSelect;
-    /**
-     * 是否正在分割操作。由于分割操作分两步：选取、画线，因此需要一个变量来确定当前是否处于画线阶段
-     */
-    public boolean isSpliting = false;
+    private Button btnDraw;
+    private Button btnSplit;
+    private Button btnMerge;
+    private Button btnDelete;
+    private ImageButton btnUndo;
+    private ImageButton btnRedo;
+    private boolean isDrawing = false;
     public Feature editingFeature = null;
     /**
      * 所有编辑操作的按钮
      */
     private List<Button> editButtons = new ArrayList<>();
-
-    private View control;
-
-    public View getControl()
-    {
-        return control;
-    }
-
-    /**
-     * 点草图符号
-     */
-    private SimpleMarkerSymbol pointSymbol;
-
-    /**
-     * 线草图符号
-     */
-    private SimpleLineSymbol lineSymbol;
-
-    /**
-     * 面草图符号
-     */
-    private SimpleFillSymbol fillSymbol;
-
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -97,9 +72,8 @@ public class EditFragment extends Fragment
     /**
      * 初始化Fragment
      */
-    public void initialize(Activity activity)
+    public void initialize()
     {
-        control = activity.findViewById(R.id.main_fgm_edit);
 
         int[] editBtnIds = {
                 R.id.edit_btn_delete,
@@ -107,65 +81,60 @@ public class EditFragment extends Fragment
                 R.id.edit_btn_union,
                 R.id.edit_btn_split,
         };
-
+        btnDraw = getView().findViewById(R.id.edit_btn_draw);
+        btnDelete = getView().findViewById(R.id.edit_btn_delete);
+        btnSplit = getView().findViewById(R.id.edit_btn_split);
+        btnMerge = getView().findViewById(R.id.edit_btn_union);
         GraphicsOverlay graphicsOverlay = new GraphicsOverlay();
         MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(graphicsOverlay);
-        sketchEditor = new SketchEditor();
-        MapViewHelper.getInstance().mapView.setSketchEditor(sketchEditor);
-        pointSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.SQUARE, 0xFFFF0000, 20);
-        lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, 0xFFFF8800, 4);
-        fillSymbol = new SimpleFillSymbol(SimpleFillSymbol.Style.CROSS, 0x40FFA9A9, lineSymbol);
-
-        MapViewHelper.getInstance().setOnSelectionStatusChangedEventListener(this::setSelectStatus);
 
         /**
          * 将所有的按钮注册单击事件
          */
         for (int btnId : editBtnIds)
         {
-            Button btn = activity.findViewById(btnId);
+            Button btn = getView().findViewById(btnId);
             editButtons.add(btn);
-            btn.setOnClickListener(v -> setButtonsClickEvent(activity,v));
+            btn.setOnClickListener(v -> setButtonsClickEvent(v));
         }
 
 
-        btnClearSelection = activity.findViewById(R.id.edit_btn_clear_selection);
+        btnClearSelection = getView().findViewById(R.id.edit_btn_clear_selection);
         btnClearSelection.setOnClickListener(v -> MapViewHelper.getInstance().stopSelect());
         /**
          * 撤销按钮
          */
-        ImageButton btnUndo = activity.findViewById(R.id.edit_btn_undo);
+        btnUndo = getView().findViewById(R.id.edit_btn_undo);
         btnUndo.setOnClickListener(v ->
         {
-            if (sketchEditor.canUndo())
+            if (MapViewHelper.getInstance().getSketchEditor().canUndo())
             {
-                sketchEditor.undo();
+                MapViewHelper.getInstance().getSketchEditor().undo();
             }
             else
             {
-                Toast.makeText(activity, "无法撤销", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "无法撤销", Toast.LENGTH_SHORT).show();
             }
-//            }
 
         });
 
-        ImageButton btnRedo =activity.findViewById(R.id.edit_btn_redo);
+        btnRedo = getView().findViewById(R.id.edit_btn_redo);
         btnRedo.setOnClickListener(v ->
         {
-            if (sketchEditor.canRedo())
+            if (MapViewHelper.getInstance().getSketchEditor().canRedo())
             {
-                sketchEditor.redo();
+                MapViewHelper.getInstance().getSketchEditor().redo();
             }
             else
             {
-                Toast.makeText(activity, "无法重做", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "无法重做", Toast.LENGTH_SHORT).show();
             }
         });
 
         /**
          * 多选单选切换按钮
          */
-        btnMutiSelect = activity.findViewById(R.id.edit_tbtn_multi_select);
+        btnMutiSelect = getView().findViewById(R.id.edit_tbtn_multi_select);
         btnMutiSelect.setOnCheckedChangeListener((compoundButton, b) ->
         {
             if (b)
@@ -178,6 +147,45 @@ public class EditFragment extends Fragment
 
             }
         });
+        updateButtonsEnable();
+        MapViewHelper.getInstance().addOnSelectionStatusChangedEventListener(hasSelectedFeatures -> updateButtonsEnable());
+    }
+
+    private void updateButtonsEnable()
+    {
+        int count = MapViewHelper.getInstance().getSelectedFeatures().size();
+        if (isDrawing)
+        {
+            editButtons.stream().forEach(b -> b.setEnabled(false));
+            btnMutiSelect.setEnabled(false);
+            btnClearSelection.setEnabled(false);
+            btnUndo.setEnabled(true);
+            btnRedo.setEnabled(true);
+            return;
+        }
+        else
+        {
+            btnUndo.setEnabled(false);
+            btnRedo.setEnabled(false);
+            btnMutiSelect.setEnabled(true);
+            btnClearSelection.setEnabled(true);
+        }
+
+        if (count > 0)
+        {
+            btnMutiSelect.setVisibility(View.GONE);
+            btnClearSelection.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            btnMutiSelect.setVisibility(View.VISIBLE);
+            btnClearSelection.setVisibility(View.GONE);
+        }
+        btnDraw.setEnabled(count <= 1);
+        btnDraw.setText(count==0?R.string.edit_btn_draw:R.string.edit_btn_edit);
+        btnMerge.setEnabled(count >= 2);
+        btnDelete.setEnabled(count >= 1);
+        btnSplit.setEnabled(count >= 1);
     }
 
     /**
@@ -191,101 +199,45 @@ public class EditFragment extends Fragment
         return btnMutiSelect.isChecked();
     }
 
-    /**
-     * 设置是否在选择状态
-     *
-     * @param isSelecting
-     */
-    public void setSelectStatus(boolean isSelecting)
-    {
-        if (isSelecting)
-        {
-            btnMutiSelect.setVisibility(View.GONE);
-            btnClearSelection.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            btnMutiSelect.setVisibility(View.VISIBLE);
-            btnClearSelection.setVisibility(View.GONE);
-        }
-    }
 
     /**
      * 设置按钮的单击事件
      *
      * @param v
      */
-    private void setButtonsClickEvent(Activity activity, View v)
+    private void setButtonsClickEvent(View v)
     {
-        resetButtons();
-
         switch (v.getId())
         {
             case R.id.edit_btn_draw:
-                Button btn = (Button) v;
-                //如果在正常状态下，则开始画图；否则结束画图
-                if (btn.getText().toString().equals("画图"))
-                {
-                    if (startEditing(activity))
-                    {
-                        btn.setText("完成");
-                    }
-                }
-                else
-                {
-                    stopEditing();
-                    btn.setText("画图");
-                }
+                startEditing();
                 break;
             case R.id.edit_btn_split:
-                //如果在正常状态下，则结束选取面，开始画线
-                if (!isSpliting)
+                if (MapViewHelper.getInstance().getSelectedFeatures().size() == 0)
                 {
-                    //检查是否选取了1+个面
-                    if (MapViewHelper.getInstance().getSelectedFeatures().size() == 0)
-                    {
-                        Toast.makeText(activity, "还未选择面", Toast.LENGTH_SHORT).show();
-                        break;
-                    }
-                    else
-                    {
-                        Toast.makeText(activity, "请画线", Toast.LENGTH_SHORT).show();
-                        prepareSplit(activity);
-                    }
+                    Toast.makeText(getContext(), "还未选择图形", Toast.LENGTH_SHORT).show();
+                    break;
                 }
-                else
-                {
-                    stopEditing();
-                    isSpliting = false;
-                    Button btnSplit = activity.findViewById(R.id.edit_btn_split);
-                    btnSplit.setText("分割");
-                }
+                Toast.makeText(getContext(), "请绘制分割线", Toast.LENGTH_SHORT).show();
+                startSplitting();
                 break;
             case R.id.edit_btn_union:
                 //合并操作
-                if (MapViewHelper.getInstance().getSelectedFeatures().size() == 0)
+                if (MapViewHelper.getInstance().getSelectedFeatures().size() < 2)
                 {
-                    Toast.makeText(activity, "还未选择面", Toast.LENGTH_SHORT).show();
-                    resetButtons();
+                    Toast.makeText(getContext(), "还未选择足够的图形", Toast.LENGTH_SHORT).show();
                     break;
                 }
-                else
-                {
-                    startUnion();
-                }
+                startUnion();
                 break;
             case R.id.edit_btn_delete:
                 //删除操作
                 if (MapViewHelper.getInstance().getSelectedFeatures().size() == 0)
                 {
-                    Toast.makeText(activity, "还未选择面", Toast.LENGTH_SHORT).show();
-                    resetButtons();
+                    Toast.makeText(getContext(), "还未选择图形", Toast.LENGTH_SHORT).show();
                     break;
                 }
-                else
-                {
-                    startDelete();
-                }
+                delete();
                 break;
         }
     }
@@ -295,9 +247,6 @@ public class EditFragment extends Fragment
      */
     public void startUnion()
     {
-        FeatureTable featureTable = getFeatureTable();
-
-        //将选取的图形加入列表
         List<Geometry> geometries = new ArrayList<>();
         for (Feature feature : MapViewHelper.getInstance().getSelectedFeatures())
         {
@@ -307,11 +256,11 @@ public class EditFragment extends Fragment
         //合并
         Geometry resultGeometry = GeometryEngine.union(geometries);
 
-        Feature resultFeature = featureTable.createFeature();
+        Feature resultFeature = getFeatureTable().createFeature();
         resultFeature.setGeometry(resultGeometry);
 
         // 删除原有要素后添加新的要素
-        featureTable.deleteFeaturesAsync(MapViewHelper.getInstance().getSelectedFeatures()).addDoneListener(() ->
+        getFeatureTable().deleteFeaturesAsync(MapViewHelper.getInstance().getSelectedFeatures()).addDoneListener(() ->
         {
             addGeometryToFeatureTable(resultGeometry, MapViewHelper.getInstance().getSelectedFeatures().get(0).getAttributes());
         });
@@ -320,72 +269,22 @@ public class EditFragment extends Fragment
     /**
      * 删除操作
      */
-    public void startDelete()
+    public void delete()
     {
-
-        FeatureTable featureTable = LayerManager.getInstance().getCurrentLayer().getFeatureTable();
-        featureTable.deleteFeaturesAsync(MapViewHelper.getInstance().getSelectedFeatures());
-
+        getFeatureTable().deleteFeaturesAsync(MapViewHelper.getInstance().getSelectedFeatures());
         operationComplete();
-
-
     }
 
-    /**
-     * 准备分割，开始画线
-     */
-    public void prepareSplit(Activity activity)
-    {
-        Button btnSplit = activity.findViewById(R.id.edit_btn_split);
-        isSpliting = true;
-        try
-        {
-            btnSplit.setText("完成");
-            // isDrawing = true;
-            sketchEditor.start(SketchCreationMode.POLYLINE);
-        }
-        catch (Exception ignored)
-        {
-            Toast.makeText(activity, "开始画线失败", Toast.LENGTH_SHORT).show();
-            resetButtons();
-        }
-
-
-    }
-
-    /**
-     * 重置按钮状态
-     */
-    private void resetButtons()
-    {
-        for (Button editBtn : editButtons)
-        {
-            // editBtn.setBackground(instance.getDrawable(R.drawable.btn_background_normal));
-            if (editBtn.getId() == R.id.edit_btn_split)
-            {
-                editBtn.setText("分割");
-            }
-            if (editBtn.getId() == R.id.main_btn_edit)
-            {
-                if (editBtn.getText() == "完成")
-                {
-                    stopEditing();
-                    editBtn.setText("画图");
-                }
-            }
-        }
-    }
 
     /**
      * 开始绘制（点、线、面的草图）
      */
-    private boolean startEditing(Context context)
+    private boolean startEditing()
     {
         FeatureTable featureTable = LayerManager.getInstance().getCurrentLayer().getFeatureTable();
-
         if (MapViewHelper.getInstance().getSelectedFeatures().size() > 1)
         {
-            Toast.makeText(context, "选择的要素超过一个，不可编辑", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "选择的要素超过一个，不可编辑", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -396,19 +295,19 @@ public class EditFragment extends Fragment
             switch (featureTable.getGeometryType())
             {
                 case POINT:
-
-                    sketchEditor.start(geometry, SketchCreationMode.POINT);
+                    startDraw(geometry, SketchCreationMode.POINT);
                     break;
                 case MULTIPOINT:
-                    sketchEditor.start(geometry, SketchCreationMode.MULTIPOINT);
+                    startDraw(geometry, SketchCreationMode.MULTIPOINT);
                     break;
                 case POLYLINE:
-                    sketchEditor.start(geometry, SketchCreationMode.POLYLINE);
+                    startDraw(geometry, SketchCreationMode.POLYLINE);
                     break;
                 case POLYGON:
-                    sketchEditor.start(geometry, SketchCreationMode.POLYGON);
+                    startDraw(geometry, SketchCreationMode.POLYGON);
                     break;
             }
+            MainActivity.showDrawBar(getView().getRootView(), "正在编辑", this::endEditing, this::cancel);
         }
         else
         {
@@ -417,61 +316,38 @@ public class EditFragment extends Fragment
             {
                 case POINT:
 
-                    sketchEditor.start(SketchCreationMode.POINT);
+                    startDraw(SketchCreationMode.POINT);
                     break;
                 case MULTIPOINT:
-                    sketchEditor.start(SketchCreationMode.MULTIPOINT);
+                    startDraw(SketchCreationMode.MULTIPOINT);
                     break;
                 case POLYLINE:
-                    sketchEditor.start(SketchCreationMode.POLYLINE);
+                    startDraw(SketchCreationMode.POLYLINE);
                     break;
                 case POLYGON:
-                    sketchEditor.start(SketchCreationMode.POLYGON);
+                    startDraw(SketchCreationMode.POLYGON);
                     break;
             }
+            MainActivity.showDrawBar(getView().getRootView(), "正在绘制", this::endEditing, this::cancel);
         }
+
         return true;
     }
 
 
-
-    private void stopEditing()
+    private void endEditing()
     {
-        if (!sketchEditor.isSketchValid())
+        if (!MapViewHelper.getInstance().getSketchEditor().isSketchValid())
         {
-            sketchEditor.stop();
+            stopDraw();
             return;
         }
-        Geometry sketchGeometry = sketchEditor.getGeometry();
-        sketchEditor.stop();
+        Geometry sketchGeometry = MapViewHelper.getInstance().getSketchEditor().getGeometry();
+        stopDraw();
         //如果绘制了东西，那么把绘制的东西加入到图形中
         if (sketchGeometry != null)
         {
-
-            // create a graphic from the sketch editor geometry
-            Graphic graphic = new Graphic(sketchGeometry);
-
-            // assign a symbol based on geometry type
-            if (graphic.getGeometry().getGeometryType() == GeometryType.POLYGON)
-            {
-                graphic.setSymbol(fillSymbol);
-            }
-            else if (graphic.getGeometry().getGeometryType() == GeometryType.POLYLINE)
-            {
-                graphic.setSymbol(lineSymbol);
-            }
-            else if (graphic.getGeometry().getGeometryType() == GeometryType.POINT ||
-                    graphic.getGeometry().getGeometryType() == GeometryType.MULTIPOINT)
-            {
-                graphic.setSymbol(pointSymbol);
-            }
-
-            //如果在分割，那么进行分割；否则直接生成新的要素
-            if (isSpliting)
-            {
-                split((Polyline) sketchGeometry);
-            }
-            else if (editingFeature != null)
+            if (editingFeature != null)
             {
                 editingFeature.setGeometry(sketchGeometry);
                 editingFeature.getFeatureTable().updateFeatureAsync(editingFeature);
@@ -487,22 +363,32 @@ public class EditFragment extends Fragment
     }
 
     /**
-     * 操作完成后进行复位
+     * 准备分割，开始画线
      */
-    private void operationComplete()
+    public void startSplitting()
     {
-        //isSpliting=false;
-        resetButtons();
-        MapViewHelper.getInstance().stopSelect();
+        try
+        {
+            startDraw(SketchCreationMode.POLYLINE);
+            MainActivity.showDrawBar(getView().getRootView(), "正在分割", this::endSplitting, this::cancel);
+        }
+        catch (Exception ignored)
+        {
+            Toast.makeText(getContext(), "开始分割失败", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    /**
-     * 进行分割操作
-     *
-     * @param line
-     */
-    private void split(Polyline line)
+    private void endSplitting()
     {
+        if (!MapViewHelper.getInstance().getSketchEditor().isSketchValid()
+                || !(MapViewHelper.getInstance().getSketchEditor().getGeometry() instanceof Polyline))
+        {
+            stopDraw();
+            return;
+        }
+        Polyline line = (Polyline) MapViewHelper.getInstance().getSketchEditor().getGeometry();
+        stopDraw();
+
         FeatureTable featureTable = getFeatureTable();
         //遍历每一个选取的面/线
         for (Feature feature : MapViewHelper.getInstance().getSelectedFeatures())
@@ -516,13 +402,52 @@ public class EditFragment extends Fragment
                 {
                     addGeometryToFeatureTable(geo, feature.getAttributes());
                 }
-                //Toast.makeText(context,String.valueOf(parts.size()),Toast.LENGTH_SHORT).show();
-
                 featureTable.deleteFeatureAsync(feature);
             }
         }
 
+        operationComplete();
+
+
     }
+
+    private void cancel()
+    {
+        stopDraw();
+        operationComplete();
+    }
+
+    private void startDraw(SketchCreationMode mode)
+    {
+        MapViewHelper.getInstance().getSketchEditor().start(mode);
+        isDrawing = true;
+        updateButtonsEnable();
+    }
+
+    private void startDraw(Geometry geometry, SketchCreationMode mode)
+    {
+        MapViewHelper.getInstance().getSketchEditor().start(geometry, mode);
+        isDrawing = true;
+        updateButtonsEnable();
+    }
+
+    private void stopDraw()
+    {
+        MapViewHelper.getInstance().getSketchEditor().stop();
+        isDrawing = false;
+        updateButtonsEnable();
+    }
+
+
+    /**
+     * 操作完成后进行复位
+     */
+    private void operationComplete()
+    {
+        MapViewHelper.getInstance().stopSelect();
+        updateButtonsEnable();
+    }
+
 
     /**
      * 将图形变成要素并加入要素类，属性为空
@@ -540,7 +465,8 @@ public class EditFragment extends Fragment
      * @param geometry
      * @param attributes
      */
-    private void addGeometryToFeatureTable(Geometry geometry, @Nullable Map<String, Object> attributes)
+    private void addGeometryToFeatureTable(Geometry
+                                                   geometry, @Nullable Map<String, Object> attributes)
     {
         FeatureTable featureTable = getFeatureTable();
         Feature feature = featureTable.createFeature();
@@ -599,10 +525,10 @@ public class EditFragment extends Fragment
      *
      * @return
      */
-    FeatureTable getFeatureTable()
+    private FeatureTable getFeatureTable()
     {
         return LayerManager.getInstance().getCurrentLayer().getFeatureTable();
     }
 
-    private SketchEditor sketchEditor;
+
 }

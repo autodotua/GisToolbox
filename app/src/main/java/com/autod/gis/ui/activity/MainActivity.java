@@ -19,6 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
@@ -27,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -224,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MapViewHelper.getInstance().imgMapCompass.setOnClickListener(this);
         MapViewHelper.getInstance().imgMapCompass.setVisibility(Config.getInstance().showMapCompass ? View.VISIBLE : View.INVISIBLE);
 
-        ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).initialize(this);
+        ((EditFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_edit)).initialize();
 
         ((FeatureAttributionTableFragment) getSupportFragmentManager().findFragmentById(R.id.main_fgm_attri)).Initialize(this);
 
@@ -581,4 +583,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    public static void showDrawBar(@NonNull View rootView, String message, @NonNull Runnable onOkClickListener, @Nullable Runnable onCancelClickListener)
+    {
+        TextView tvw = rootView.findViewById(R.id.main_tvw_draw);
+        TextView btnBarOk = rootView.findViewById(R.id.main_tvw_draw_ok);
+        TextView btnBarCancel =rootView.findViewById(R.id.main_tvw_draw_cancel);
+        View bar=rootView.findViewById(R.id.main_llt_draw_bar);
+        btnBarOk.setEnabled(true);
+        btnBarCancel.setEnabled(true);
+        tvw.setText(message);
+        btnBarOk.setOnClickListener(v -> {
+            btnBarOk.setEnabled(false);
+            btnBarCancel.setEnabled(false);
+            ObjectAnimator.ofFloat(bar, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
+            onOkClickListener.run();
+        });
+        btnBarCancel.setOnClickListener(v -> {
+            btnBarOk.setEnabled(false);
+            btnBarCancel.setEnabled(false);
+            if (onCancelClickListener != null)
+            {
+                onCancelClickListener.run();
+            }
+            ObjectAnimator.ofFloat(bar, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
+        });
+        ObjectAnimator.ofFloat(bar, "translationY", -bar.getHeight()).setDuration(Config.getInstance().animationDuration).start();
+    }
 }
