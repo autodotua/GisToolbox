@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.text.InputType;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,8 +21,6 @@ import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.map.TrackHelper;
 import com.autod.gis.programming.GetString;
 import com.autod.gis.ui.activity.BaseLayerListActivity;
-import com.autod.gis.ui.activity.FileListActivity;
-import com.autod.gis.ui.activity.MainActivity;
 
 public class MenuHelper
 {
@@ -120,11 +117,11 @@ public class MenuHelper
                 menuLocation.setChecked(Config.getInstance().location);
                 if (Config.getInstance().location)
                 {
-                    LocationDisplayHelper.instance.start();
+                    LocationDisplayHelper.getInstance().start();
                 }
                 else
                 {
-                    LocationDisplayHelper.instance.stop();
+                    LocationDisplayHelper.getInstance().stop();
                 }
                 break;
             case R.id.menu_tile_url:
@@ -213,11 +210,24 @@ public class MenuHelper
                         });
                 break;
             case R.id.menu_exit:
-                if (TrackHelper.getInstance().getStatus() != TrackHelper.Status.NotRunning)
+                if (TrackHelper.getInstance().getStatus() != TrackHelper.Status.Stop)
                 {
-                    TrackHelper.getInstance().stop(context);
+
+                    new AlertDialog.Builder(context)
+                            .setTitle("退出")
+                            .setMessage("正在记录轨迹，是否停止？")
+                            .setPositiveButton("否", (d, w) -> {
+                                context.finish();
+                            })
+                            .setNegativeButton("是", (d, w) -> {
+                                TrackHelper.getInstance().stop(context);
+                                context.finish();
+                            }).create().show();
                 }
-                context.finish();
+                else
+                {
+                    context.finish();
+                }
                 break;
             default:
                 break;

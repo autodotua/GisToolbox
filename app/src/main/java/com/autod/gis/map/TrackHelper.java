@@ -25,6 +25,7 @@ import com.autod.gis.R;
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
 import com.autod.gis.service.LocationService;
+import com.esri.arcgisruntime.util.ListenableList;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,7 +52,8 @@ public class TrackHelper
     }
 
     private ShapefileFeatureTable polylineTable;
-    private Status status = Status.NotRunning;
+    private Status status = Status.Stop;
+    private ListenableList<GraphicsOverlay> oldGraphics = null;
     private GraphicsOverlay overlay;
     private List<Point> locationPoints = new ArrayList<>();
     private double length = 0;
@@ -67,24 +69,40 @@ public class TrackHelper
 
     private Date startTime;
 
+    /**
+     * 用于Service仍在运行、但Activity手动关闭或被杀后重新启动后，重新链接
+     */
+    public void resumeOverlay()
+    {
+        oldGraphics.remove(overlay);
+        MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(overlay);
+        oldGraphics=MapViewHelper.getInstance().mapView.getGraphicsOverlays();
+    }
+
     public boolean start(Context context)
     {
         try
         {
+            //初始化字段
             locationPoints.clear();
             length = 0;
             count = 0;
             startTime = new Date(System.currentTimeMillis());
+
+            //初始化GPX文件
             initializeGpx(context);
+
+            //初始化图形覆盖层
             overlay = new GraphicsOverlay();
-            //SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.Style.CIRCLE, Color.parseColor("#64B5F6"), 8);
             SimpleLineSymbol symbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.parseColor("#54A5F6"), 6f);
             overlay.setRenderer(new SimpleRenderer(symbol));
             MapViewHelper.getInstance().mapView.getGraphicsOverlays().add(overlay);
+            oldGraphics = MapViewHelper.getInstance().mapView.getGraphicsOverlays();
 
+            //启动服务
+            context.startService(new Intent(context.getApplicationContext(), LocationService.class));
 
-            context.startService(new Intent(context, LocationService.class));
-
+            //初始化气压计
             usePressureAltitude = false;
             if (Config.getInstance().useBarometer)
             {
@@ -102,6 +120,7 @@ public class TrackHelper
         catch (Exception ex)
         {
             Toast.makeText(context, "开启轨迹记录服务失败：n" + ex.getMessage(), Toast.LENGTH_SHORT).show();
+            status = Status.Stop;
             return false;
         }
     }
@@ -203,7 +222,7 @@ public class TrackHelper
             case Running:
                 text = context.getString(R.string.track_notification_title_running);
                 break;
-            case NotRunning:
+            case Stop:
                 text = "";
                 break;
             case Pausing:
@@ -236,7 +255,7 @@ public class TrackHelper
 
     public void stop(Context context)
     {
-        status = Status.NotRunning;
+        status = Status.Stop;
         context.stopService(new Intent(context, LocationService.class));
         if (Config.getInstance().useBarometer)
         {
@@ -327,18 +346,21 @@ public class TrackHelper
     {
         return lastLocation;
     }
-    public  int getCount(){
-        return  count;
+
+    public int getCount()
+    {
+        return count;
     }
 
-    public  double getLength(){
-        return  length;
+    public double getLength()
+    {
+        return length;
     }
 
     public enum Status
     {
         Running,
-        NotRunning,
+        Stop,
         Pausing,
     }
 }

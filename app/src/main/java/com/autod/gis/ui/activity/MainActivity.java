@@ -3,11 +3,9 @@ package com.autod.gis.ui.activity;
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Outline;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.Html;
@@ -17,14 +15,12 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
-import android.view.ViewOutlineProvider;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -34,7 +30,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 
 import com.autod.gis.data.Config;
 import com.autod.gis.map.LayerManager;
@@ -89,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initializeControls();
         MapViewHelper.getInstance().mapView.addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
         LayerManager.getInstance().initialize(this);
+
         initialized = true;
     }
 
@@ -144,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 if (Config.getInstance().location)
                 {
-                    LocationDisplayHelper.instance.start();
+                    LocationDisplayHelper.getInstance().start();
                 }
 
             }
@@ -172,13 +168,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         if (initialized)
         {
-
-            //MapViewHelper.getInstance().unlinkMapAndMapView();
             try
             {
                 if (Config.getInstance().location && !Config.getInstance().keepLocationBackground)
                 {
-                    LocationDisplayHelper.instance.stop();
+                    LocationDisplayHelper.getInstance().stop();
                 }
             }
             catch (Exception ex)
@@ -194,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (initialized)
         {
             MapViewHelper.getInstance().unlinkMapAndMapView();
+            LocationDisplayHelper.getInstance().stop();
         }
         super.onDestroy();
     }
@@ -277,7 +272,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "没有开启定位功能", Toast.LENGTH_SHORT).show();
                     break;
                 }
-                LocationDisplayHelper.instance.showPanModeDialog(this);
+                LocationDisplayHelper.getInstance().showPanModeDialog(this);
                 break;
             case R.id.main_btn_zoom_in:
                 try
@@ -323,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "没有开启定位功能", Toast.LENGTH_SHORT).show();
                     break;
                 }
-                if (!LocationDisplayHelper.instance.setPan())
+                if (!LocationDisplayHelper.getInstance().setPan())
                 {
                     Toast.makeText(this, "还没有定位", Toast.LENGTH_SHORT).show();
                 }
@@ -432,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void changeTrackStatus()
     {
-        if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.NotRunning)
+        if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Stop)
         {
             if (TrackHelper.getInstance().start(this))
             {

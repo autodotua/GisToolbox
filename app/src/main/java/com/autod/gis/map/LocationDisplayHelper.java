@@ -13,22 +13,24 @@ import com.autod.gis.ui.activity.MainActivity;
 
 public class LocationDisplayHelper
 {
-    public static LocationDisplayHelper instance = new LocationDisplayHelper();
+    private static LocationDisplayHelper instance = new LocationDisplayHelper();
+
+    public static LocationDisplayHelper getInstance()
+    {
+        return instance;
+    }
 
     public LocationDisplay locationDisplay;
 
 
     private boolean confirmLocationOn()
     {
-        if (locationDisplay == null)
+        if (MapViewHelper.getInstance().mapView == null)
         {
-            if (MapViewHelper.getInstance().mapView == null)
-            {
-                return false;
-            }
-            locationDisplay = MapViewHelper.getInstance().mapView.getLocationDisplay();
-
+            return false;
         }
+        locationDisplay = MapViewHelper.getInstance().mapView.getLocationDisplay();
+        locationDisplay.setWanderExtentFactor(0f);//设置Pan为置中时，画面将实时跟随定位点移动
         return true;
     }
 
@@ -61,7 +63,7 @@ public class LocationDisplayHelper
 
     public void showPanModeDialog(Context context)
     {
-        final String[] items = {"普通", "置中", "导航", "指南针"};
+        final String[] items = {"不跟随", "置中", "导航", "指南针"};
         AlertDialog.Builder listDialog =
                 new AlertDialog.Builder(context);
         listDialog.setTitle("罗盘模式");

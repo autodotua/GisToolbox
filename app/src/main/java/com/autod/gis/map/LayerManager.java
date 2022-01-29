@@ -76,11 +76,6 @@ public class LayerManager
 
     private ArcGISMap map = new ArcGISMap();
 
-    public static String[] names()
-    {
-        return Arrays.toString(Basemap.Type.values()).replaceAll("^.|.$", "").split(", ");
-    }
-
     public void initialize(Context context)
     {
         try
@@ -101,6 +96,11 @@ public class LayerManager
                     }
                 }
                 loadLayers(context);
+                if(TrackHelper.getInstance().getStatus()== TrackHelper.Status.Running)
+                {
+                    TrackHelper.getInstance().resumeOverlay();
+                    Toast.makeText(context, "轨迹记录继续运行", Toast.LENGTH_SHORT).show();
+                }
             });
         }
         catch (Exception ex)
