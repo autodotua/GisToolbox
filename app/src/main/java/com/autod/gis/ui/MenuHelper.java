@@ -9,7 +9,6 @@ import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -17,9 +16,8 @@ import com.autod.gis.R;
 import com.autod.gis.data.Config;
 import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
-import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.map.MeasureHelper;
-import com.autod.gis.map.TrackHelper;
+import com.autod.gis.service.TrackHelper;
 import com.autod.gis.programming.GetString;
 import com.autod.gis.ui.activity.BaseLayerListActivity;
 

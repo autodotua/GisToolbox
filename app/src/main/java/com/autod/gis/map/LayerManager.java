@@ -3,19 +3,16 @@ package com.autod.gis.map;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Looper;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.autod.gis.R;
 import com.autod.gis.model.LayerInfo;
+import com.autod.gis.service.TrackHelper;
 import com.esri.arcgisruntime.arcgisservices.LabelDefinition;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.data.TileCache;
@@ -30,7 +27,6 @@ import com.esri.arcgisruntime.layers.WebTiledLayer;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
 import com.esri.arcgisruntime.mapping.Basemap;
-import com.esri.arcgisruntime.mapping.BasemapStyle;
 import com.esri.arcgisruntime.mapping.LayerList;
 import com.esri.arcgisruntime.raster.Raster;
 import com.esri.arcgisruntime.symbology.Renderer;
@@ -41,15 +37,12 @@ import com.esri.arcgisruntime.symbology.Symbol;
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
 import com.esri.arcgisruntime.symbology.UniqueValueRenderer;
-import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 public class LayerManager
@@ -90,7 +83,7 @@ public class LayerManager
                 JSONObject jRenderer = json.getJSONObject("Renderer");
                 UniqueValueRenderer renderer = (UniqueValueRenderer) Renderer.fromJson(jRenderer.toString());
                 layer.setRenderer(renderer);
-                JSONArray jLabels =json.has("Labels")? json.getJSONArray("Labels"): json.getJSONArray("LabelDefinitions");
+                JSONArray jLabels = json.has("Labels") ? json.getJSONArray("Labels") : json.getJSONArray("LabelDefinitions");
                 for (int i = 0; i < jLabels.length(); i++)
                 {
                     LabelDefinition label = LabelDefinition.fromJson(jLabels.getJSONObject(i).toString());
@@ -142,8 +135,23 @@ public class LayerManager
     {
         try
         {
-            Toast toast = Toast.makeText(context, "正在加载地图...", Toast.LENGTH_SHORT);
-            toast.show();
+            //1秒后如果地图还没有加载完毕，则提示正在加载地图
+            new Thread(() -> {
+                try
+                {
+                    Thread.sleep(1000);
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+                if (map.getLoadStatus() == LoadStatus.LOADING)
+                {
+                    Looper.prepare();
+                    Toast.makeText(context, "正在加载地图..", Toast.LENGTH_SHORT).show();
+                    Looper.loop();
+                }
+            }).start();
             Basemap basemap = getBaseMap(context);
             basemap.addDoneLoadingListener(() -> {
                 LayerManager.getInstance().map = new ArcGISMap(basemap);
@@ -163,8 +171,7 @@ public class LayerManager
                 map.addLoadStatusChangedListener(s -> {
                     if (s.getNewLoadStatus() == LoadStatus.FAILED_TO_LOAD)
                     {
-                        toast.setText("加载失败，请检查网络和设置");
-                        toast.show();
+                        Toast.makeText(context, "地图加载失败，请检查网络和设置", Toast.LENGTH_SHORT).show();
                     }
                 });
                 if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)

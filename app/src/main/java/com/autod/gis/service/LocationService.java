@@ -21,20 +21,12 @@ import androidx.core.app.ActivityCompat;
 
 import com.autod.gis.R;
 import com.autod.gis.data.Config;
-import com.autod.gis.map.TrackHelper;
 import com.autod.gis.ui.activity.MainActivity;
 
 import static android.app.PendingIntent.getActivity;
 
 public class LocationService extends Service
 {
-//    private static LocationService instance;
-//
-//    public static LocationService getInstance()
-//    {
-//        return instance;
-//    }
-
     private static LocationManager locationManager;
 
     public LocationService()

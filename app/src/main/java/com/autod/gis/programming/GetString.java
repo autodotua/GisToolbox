@@ -1,6 +1,6 @@
 package com.autod.gis.programming;
 
 public interface GetString
-{        void get(String str);
-
+{
+    void get(String str);
 }

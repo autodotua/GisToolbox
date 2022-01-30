@@ -1,4 +1,4 @@
-package com.autod.gis.map;
+package com.autod.gis.service;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +7,10 @@ import android.location.Location;
 import android.os.Looper;
 import android.widget.Toast;
 
+import com.autod.gis.map.LayerManager;
+import com.autod.gis.map.MapViewHelper;
+import com.autod.gis.map.SensorHelper;
+import com.autod.gis.util.DateTimeUtility;
 import com.esri.arcgisruntime.data.Feature;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.geometry.GeodeticCurveType;
@@ -24,7 +28,6 @@ import com.esri.arcgisruntime.symbology.SimpleRenderer;
 import com.autod.gis.R;
 import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
-import com.autod.gis.service.LocationService;
 import com.esri.arcgisruntime.util.ListenableList;
 
 import java.text.SimpleDateFormat;
@@ -41,16 +44,7 @@ import static com.autod.gis.data.FileHelper.getTimeBasedFileName;
 public class TrackHelper
 {
     private static TrackHelper instance;
-
-    public static TrackHelper getInstance()
-    {
-        if (instance == null)
-        {
-            instance = new TrackHelper();
-        }
-        return instance;
-    }
-
+    private static boolean usePressureAltitude = false;
     private ShapefileFeatureTable polylineTable;
     private Status status = Status.Stop;
     private ListenableList<GraphicsOverlay> oldGraphics = null;
@@ -61,6 +55,17 @@ public class TrackHelper
 
 
     private StringBuilder gpxString;
+    private Date startTime;
+    private Location lastLocation = null;
+
+    public static TrackHelper getInstance()
+    {
+        if (instance == null)
+        {
+            instance = new TrackHelper();
+        }
+        return instance;
+    }
 
     public Status getStatus()
     {
@@ -72,8 +77,6 @@ public class TrackHelper
         return startTime;
     }
 
-    private Date startTime;
-
     /**
      * 用于Service仍在运行、但Activity手动关闭或被杀后重新启动后，重新链接
      */
@@ -81,7 +84,7 @@ public class TrackHelper
     {
         oldGraphics.remove(overlay);
         MapViewHelper.getInstance().getMapView().getGraphicsOverlays().add(overlay);
-        oldGraphics=MapViewHelper.getInstance().getMapView().getGraphicsOverlays();
+        oldGraphics = MapViewHelper.getInstance().getMapView().getGraphicsOverlays();
     }
 
     public boolean start(Context context)
@@ -150,8 +153,6 @@ public class TrackHelper
         return dateFormat.format(time) + "T" + timeFormat.format(time) + "Z";
     }
 
-    private static boolean usePressureAltitude = false;
-
     private void addGpxPoint(Context context, Location location)
     {
         gpxString.append(context.getResources()
@@ -169,8 +170,6 @@ public class TrackHelper
         FileHelper.writeTextToFile(FileHelper.getGpxTrackFilePath(getTimeBasedFileName(startTime) + ".gpx"),
                 gpxString.toString() + context.getResources().getString(R.string.gpx_foot));
     }
-
-    private Location lastLocation = null;
 
     public void locationChanged(Context context, Location location)
     {
@@ -216,10 +215,6 @@ public class TrackHelper
 
     private void updateNotification(Context context)
     {
-        int totalS = (int) ((System.currentTimeMillis() - startTime.getTime()) / 1000);
-        int h = totalS / 3600;
-        int m = (totalS - h * 3600) / 60;
-        int s = totalS % 60;
         String text = null;
         switch (status)
         {
@@ -230,10 +225,10 @@ public class TrackHelper
                 text = "";
                 break;
             case Pausing:
-                text =      context.getString(R.string.track_notification_title_pausing);
+                text = context.getString(R.string.track_notification_title_pausing);
                 break;
         }
-        LocationService.updateNotification(text, context.getString(R.string.track_notification_message, h, m, s, length));
+        LocationService.updateNotification(text, context.getString(R.string.track_notification_message, DateTimeUtility.formatTimeSpan(startTime, new Date()), length));
     }
 
     public void pause(Context context)

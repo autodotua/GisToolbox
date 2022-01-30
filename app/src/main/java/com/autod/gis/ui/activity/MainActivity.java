@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.Spanned;
 import android.util.Base64;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -20,11 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -44,14 +39,14 @@ import com.autod.gis.ui.fragment.EditFragment;
 import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
 import com.autod.gis.ui.MenuHelper;
 import com.autod.gis.R;
-import com.autod.gis.map.TrackHelper;
+import com.autod.gis.service.TrackHelper;
 import com.autod.gis.map.SensorHelper;
+import com.autod.gis.util.DateTimeUtility;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Timer;
@@ -588,8 +583,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss", Locale.CHINA);
             String time = sdf.format(new Date(loc.getTime()));
-            Date diff = new Date(System.currentTimeMillis() - TrackHelper.getInstance().getStartTime().getTime());
-            String duration = sdf.format(diff);
+            String duration = DateTimeUtility.formatTimeSpan(TrackHelper.getInstance().getStartTime(), new Date());
             int count = TrackHelper.getInstance().getCount();
             double length = TrackHelper.getInstance().getLength();
             double lng = loc.getLongitude();
@@ -629,7 +623,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String angle2Direction(double angle)
     {
         angle += 22.5;
-        String[] types = new String[]{"北", "东北", "东", "东南", "南", "西南", "西", "西北"};
+        String[] types = new String[]{"北", "东北", "东", "东南", "南", "西南", "西", "西北", "北"};
         return types[(int) (angle / 45)];
     }
 
