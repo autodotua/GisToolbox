@@ -18,6 +18,7 @@ import com.autod.gis.data.Config;
 import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
+import com.autod.gis.map.MeasureHelper;
 import com.autod.gis.map.TrackHelper;
 import com.autod.gis.programming.GetString;
 import com.autod.gis.ui.activity.BaseLayerListActivity;
@@ -232,6 +233,13 @@ public class MenuHelper
                 break;
             case R.id.menu_reset:
                 LayerManager.getInstance().resetLayers(context);
+                break;
+            case  R.id.menu_measure_length:
+                MeasureHelper.MeasureLength(context.findViewById(android.R.id.content));
+                break;
+            case  R.id.menu_measure_area:
+                MeasureHelper.MeasureArea(context.findViewById(android.R.id.content));
+                break;
             default:
                 break;
         }

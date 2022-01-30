@@ -63,11 +63,11 @@
     <string name="menu_use_tiled_base_layer">使用瓦片底图</string>
     <string name="attri_table_area"><![CDATA[<b>面积：</b>%1$.2f ㎡<br><b>周长：</b>%2$.2f m]]></string>
     <string name="attri_table_length"><b>长度：</b>%1$.2fm</string>
-    <string name="menu_gps_min_distance">GPS最小更新距离</string>
+    <string name="menu_gps_min_distance">GPS最短更新距离</string>
     <string name="menu_create_feature_layer">创建矢量图层</string>
     <string name="menu_compass">显示地图指北针</string>
-    <string name="menu_use_barometer">优先使用气压计获得相对高度</string>
-    <string name="menu_use_relative_altitude">使用相对气压海拔</string>
+    <string name="menu_use_barometer">优先使用气压计高度</string>
+    <string name="menu_use_relative_altitude">使用相对气压高度</string>
     <string name="msg_gps_detail">
 <![CDATA[<b>时间：</b>%1$s<br>
 <b>点数：</b>%2$d<br>
@@ -94,4 +94,9 @@
     <string name="main_tvw_draw_cancel">取消</string>
     <string name="main_track_recording"><b>正在记录轨迹</b></string>
     <string name="menu_reset">重新加载地图</string>
+    <string name="menu_measure">测量</string>
+    <string name="menu_measure_area">测量面积</string>
+    <string name="menu_measure_length">测量长度</string>
+    <string name="measure_length_value">%1$.2f m</string>
+    <string name="measure_area_value">面积%1$.0f ㎡&#160;&#160;周长%2$.0f m</string>
 </resources>

@@ -9,7 +9,10 @@
                 android:id="@+id/menu_rotate"
                 android:checkable="true"
                 android:title="@string/menu_rotate" />
-
+            <item
+                android:id="@+id/menu_compass"
+                android:checkable="true"
+                android:title="@string/menu_compass" />
             <item
                 android:id="@+id/menu_feature_layer_query_extent_every_time"
                 android:checkable="true"
@@ -54,12 +57,14 @@
                 android:title="@string/menu_gps_min_distance" />
         </menu>
     </item>
-    <item android:title="@string/menu_ui">
+    <item android:title="@string/menu_measure">
         <menu>
             <item
-                android:id="@+id/menu_compass"
-                android:checkable="true"
-                android:title="@string/menu_compass" />
+                    android:id="@+id/menu_measure_length"
+                android:title="@string/menu_measure_length" />
+            <item
+                android:id="@+id/menu_measure_area"
+                android:title="@string/menu_measure_area" />
 
         </menu>
     </item>

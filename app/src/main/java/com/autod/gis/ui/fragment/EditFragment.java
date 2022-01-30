@@ -48,6 +48,7 @@ import com.autod.gis.R;
 public class EditFragment extends Fragment
 {
 
+    public Feature editingFeature = null;
     private Button btnClearSelection;
     private ToggleButton btnMutiSelect;
     private Button btnDraw;
@@ -56,8 +57,6 @@ public class EditFragment extends Fragment
     private Button btnDelete;
     private ImageButton btnUndo;
     private ImageButton btnRedo;
-    private boolean isDrawing = false;
-    public Feature editingFeature = null;
     /**
      * 所有编辑操作的按钮
      */
@@ -131,9 +130,7 @@ public class EditFragment extends Fragment
             }
         });
 
-        /**
-         * 多选单选切换按钮
-         */
+        //多选单选切换按钮
         btnMutiSelect = getView().findViewById(R.id.edit_tbtn_multi_select);
         btnMutiSelect.setOnCheckedChangeListener((compoundButton, b) ->
         {
@@ -149,12 +146,13 @@ public class EditFragment extends Fragment
         });
         updateButtonsEnable();
         MapViewHelper.getInstance().addOnSelectionStatusChangedEventListener(hasSelectedFeatures -> updateButtonsEnable());
+        MapViewHelper.getInstance().addOnSketchEditorStatusChangedEventListener(hasSelectedFeatures -> updateButtonsEnable());
     }
 
     private void updateButtonsEnable()
     {
         int count = MapViewHelper.getInstance().getSelectedFeatures().size();
-        if (isDrawing)
+        if (MapViewHelper.getInstance().isDrawing())
         {
             editButtons.stream().forEach(b -> b.setEnabled(false));
             btnMutiSelect.setEnabled(false);
@@ -182,7 +180,7 @@ public class EditFragment extends Fragment
             btnClearSelection.setVisibility(View.GONE);
         }
         btnDraw.setEnabled(count <= 1);
-        btnDraw.setText(count==0?R.string.edit_btn_draw:R.string.edit_btn_edit);
+        btnDraw.setText(count == 0 ? R.string.edit_btn_draw : R.string.edit_btn_edit);
         btnMerge.setEnabled(count >= 2);
         btnDelete.setEnabled(count >= 1);
         btnSplit.setEnabled(count >= 1);
@@ -279,13 +277,12 @@ public class EditFragment extends Fragment
     /**
      * 开始绘制（点、线、面的草图）
      */
-    private boolean startEditing()
+    private void startEditing()
     {
         FeatureTable featureTable = LayerManager.getInstance().getCurrentLayer().getFeatureTable();
         if (MapViewHelper.getInstance().getSelectedFeatures().size() > 1)
         {
             Toast.makeText(getContext(), "选择的要素超过一个，不可编辑", Toast.LENGTH_SHORT).show();
-            return false;
         }
 
         else if (MapViewHelper.getInstance().getSelectedFeatures().size() == 1)
@@ -295,16 +292,16 @@ public class EditFragment extends Fragment
             switch (featureTable.getGeometryType())
             {
                 case POINT:
-                    startDraw(geometry, SketchCreationMode.POINT);
+                    MapViewHelper.getInstance().sketchEditorStart(SketchCreationMode.POINT);
                     break;
                 case MULTIPOINT:
-                    startDraw(geometry, SketchCreationMode.MULTIPOINT);
+                    MapViewHelper.getInstance().sketchEditorStart(geometry, SketchCreationMode.MULTIPOINT);
                     break;
                 case POLYLINE:
-                    startDraw(geometry, SketchCreationMode.POLYLINE);
+                    MapViewHelper.getInstance().sketchEditorStart(geometry, SketchCreationMode.POLYLINE);
                     break;
                 case POLYGON:
-                    startDraw(geometry, SketchCreationMode.POLYGON);
+                    MapViewHelper.getInstance().sketchEditorStart(geometry, SketchCreationMode.POLYGON);
                     break;
             }
             MainActivity.showDrawBar(getView().getRootView(), "正在编辑", this::endEditing, this::cancel);
@@ -316,22 +313,20 @@ public class EditFragment extends Fragment
             {
                 case POINT:
 
-                    startDraw(SketchCreationMode.POINT);
+                    MapViewHelper.getInstance().sketchEditorStart(SketchCreationMode.POINT);
                     break;
                 case MULTIPOINT:
-                    startDraw(SketchCreationMode.MULTIPOINT);
+                    MapViewHelper.getInstance().sketchEditorStart(SketchCreationMode.MULTIPOINT);
                     break;
                 case POLYLINE:
-                    startDraw(SketchCreationMode.POLYLINE);
+                    MapViewHelper.getInstance().sketchEditorStart(SketchCreationMode.POLYLINE);
                     break;
                 case POLYGON:
-                    startDraw(SketchCreationMode.POLYGON);
+                    MapViewHelper.getInstance().sketchEditorStart(SketchCreationMode.POLYGON);
                     break;
             }
             MainActivity.showDrawBar(getView().getRootView(), "正在绘制", this::endEditing, this::cancel);
         }
-
-        return true;
     }
 
 
@@ -339,11 +334,11 @@ public class EditFragment extends Fragment
     {
         if (!MapViewHelper.getInstance().getSketchEditor().isSketchValid())
         {
-            stopDraw();
+            MapViewHelper.getInstance().sketchEditorStop();
             return;
         }
         Geometry sketchGeometry = MapViewHelper.getInstance().getSketchEditor().getGeometry();
-        stopDraw();
+        MapViewHelper.getInstance().sketchEditorStop();
         //如果绘制了东西，那么把绘制的东西加入到图形中
         if (sketchGeometry != null)
         {
@@ -369,7 +364,7 @@ public class EditFragment extends Fragment
     {
         try
         {
-            startDraw(SketchCreationMode.POLYLINE);
+            MapViewHelper.getInstance().sketchEditorStart(SketchCreationMode.POLYLINE);
             MainActivity.showDrawBar(getView().getRootView(), "正在分割", this::endSplitting, this::cancel);
         }
         catch (Exception ignored)
@@ -383,11 +378,11 @@ public class EditFragment extends Fragment
         if (!MapViewHelper.getInstance().getSketchEditor().isSketchValid()
                 || !(MapViewHelper.getInstance().getSketchEditor().getGeometry() instanceof Polyline))
         {
-            stopDraw();
+            MapViewHelper.getInstance().sketchEditorStop();
             return;
         }
         Polyline line = (Polyline) MapViewHelper.getInstance().getSketchEditor().getGeometry();
-        stopDraw();
+        MapViewHelper.getInstance().sketchEditorStop();
 
         FeatureTable featureTable = getFeatureTable();
         //遍历每一个选取的面/线
@@ -413,29 +408,8 @@ public class EditFragment extends Fragment
 
     private void cancel()
     {
-        stopDraw();
+        MapViewHelper.getInstance().sketchEditorStop();
         operationComplete();
-    }
-
-    private void startDraw(SketchCreationMode mode)
-    {
-        MapViewHelper.getInstance().getSketchEditor().start(mode);
-        isDrawing = true;
-        updateButtonsEnable();
-    }
-
-    private void startDraw(Geometry geometry, SketchCreationMode mode)
-    {
-        MapViewHelper.getInstance().getSketchEditor().start(geometry, mode);
-        isDrawing = true;
-        updateButtonsEnable();
-    }
-
-    private void stopDraw()
-    {
-        MapViewHelper.getInstance().getSketchEditor().stop();
-        isDrawing = false;
-        updateButtonsEnable();
     }
 
 

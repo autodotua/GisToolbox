@@ -46,6 +46,8 @@ import com.autod.gis.ui.MenuHelper;
 import com.autod.gis.R;
 import com.autod.gis.map.TrackHelper;
 import com.autod.gis.map.SensorHelper;
+import com.esri.arcgisruntime.layers.Layer;
+import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 
 import java.text.SimpleDateFormat;
@@ -59,11 +61,55 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener
 {
+    public final static int BaseLayerListActivityID = 1;
+    public final static int ImportFilesActivityID = 2;
+    int eggClickTimes = 0;
     private TextView tvwScale;
     private boolean initialized = false;
     private Timer trackInfoTimer = new Timer();
     private TextView tvwTrackInfo;
     private View topBar;
+
+    public static void showDrawBar(@NonNull View rootView, String message, @Nullable Runnable onOkClickListener, @Nullable Runnable onCancelClickListener)
+    {
+        showDrawBar(rootView, message, onOkClickListener, onCancelClickListener, true);
+    }
+
+    public static void showDrawBar(@NonNull View rootView, String message, @Nullable Runnable onOkClickListener)
+    {
+        showDrawBar(rootView, message, onOkClickListener, null, false);
+    }
+
+    public static void showDrawBar(@NonNull View rootView, String message, @Nullable Runnable onOkClickListener, @Nullable Runnable onCancelClickListener, boolean showCancelButton)
+    {
+        TextView tvw = rootView.findViewById(R.id.main_tvw_draw);
+        TextView btnBarOk = rootView.findViewById(R.id.main_tvw_draw_ok);
+        TextView btnBarCancel = rootView.findViewById(R.id.main_tvw_draw_cancel);
+        View bar = rootView.findViewById(R.id.main_llt_draw_bar);
+        btnBarCancel.setVisibility(showCancelButton ? View.VISIBLE : View.GONE);
+        btnBarOk.setEnabled(true);
+        btnBarCancel.setEnabled(true);
+        tvw.setText(message);
+        btnBarOk.setOnClickListener(v -> {
+            btnBarOk.setEnabled(false);
+            btnBarCancel.setEnabled(false);
+            ObjectAnimator.ofFloat(bar, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
+            if (onOkClickListener != null)
+            {
+                onOkClickListener.run();
+            }
+        });
+        btnBarCancel.setOnClickListener(v -> {
+            btnBarOk.setEnabled(false);
+            btnBarCancel.setEnabled(false);
+            if (onCancelClickListener != null)
+            {
+                onCancelClickListener.run();
+            }
+            ObjectAnimator.ofFloat(bar, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
+        });
+        ObjectAnimator.ofFloat(bar, "translationY", -bar.getHeight()).setDuration(Config.getInstance().animationDuration).start();
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -111,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             topBarAnimation(1);
         }
     }
-
 
     /**
      * 检查权限
@@ -182,13 +227,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onPause()
     {
         super.onPause();
-        if(initialized)
+        if (initialized)
         {
             Config.getInstance().lastExtent = MapViewHelper.getInstance().getMapView().getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY).getTargetGeometry().toJson();
             Config.getInstance().trySave();
         }
     }
-
 
     @Override
     protected void onStop()
@@ -268,8 +312,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tvwTrackInfo = findViewById(R.id.main_tvw_track_info);
         topBar = findViewById(R.id.main_llt_top);
     }
-    public final static int BaseLayerListActivityID =1;
-    public final static int ImportFilesActivityID =2;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -279,10 +322,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (requestCode == ImportFilesActivityID)
             {
                 String path = data.getStringExtra("path");
-                LayerManager.getInstance().addLayer(this, path);
+                Layer layer = LayerManager.getInstance().addLayer(this, path);
+                layer.addDoneLoadingListener(() -> {
+                    if (layer.getLoadStatus() == LoadStatus.LOADED)
+                    {
+                        MapViewHelper.getInstance().zoomToLayer(this, layer);
+                    }
+                });
                 Config.getInstance().trySave();
             }
-            else  if(requestCode==BaseLayerListActivityID)
+            else if (requestCode == BaseLayerListActivityID)
             {
                 LayerManager.getInstance().resetLayers(this);
                 Config.getInstance().trySave();
@@ -384,7 +433,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 {
                     Toast.makeText(this, new String(Base64.decode("YXV0b2RvdHVh", Base64.DEFAULT)), Toast.LENGTH_SHORT).show();
                 }
-                MapViewHelper.getInstance().zoomToLayer(this, false);
+
+                if (LayerManager.getInstance().getCurrentLayer() == null)
+                {
+                    Toast.makeText(this, "请先选择当前图层", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                MapViewHelper.getInstance().zoomToLayer(this, LayerManager.getInstance().getCurrentLayer());
                 break;
             case R.id.main_btn_table:
                 foldFeatureAttributionTable();
@@ -533,8 +588,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss", Locale.CHINA);
             String time = sdf.format(new Date(loc.getTime()));
-Date diff=new Date(System.currentTimeMillis()-TrackHelper.getInstance().getStartTime().getTime());
-            String duration=sdf.format(diff);
+            Date diff = new Date(System.currentTimeMillis() - TrackHelper.getInstance().getStartTime().getTime());
+            String duration = sdf.format(diff);
             int count = TrackHelper.getInstance().getCount();
             double length = TrackHelper.getInstance().getLength();
             double lng = loc.getLongitude();
@@ -593,8 +648,6 @@ Date diff=new Date(System.currentTimeMillis()-TrackHelper.getInstance().getStart
         anim.start();
     }
 
-    int eggClickTimes = 0;
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
@@ -605,7 +658,6 @@ Date diff=new Date(System.currentTimeMillis()-TrackHelper.getInstance().getStart
         }
         return super.onKeyDown(keyCode, event);
     }
-
 
     private void updateScale()
     {
@@ -626,33 +678,5 @@ Date diff=new Date(System.currentTimeMillis()-TrackHelper.getInstance().getStart
         {
 
         }
-    }
-
-
-    public static void showDrawBar(@NonNull View rootView, String message, @NonNull Runnable onOkClickListener, @Nullable Runnable onCancelClickListener)
-    {
-        TextView tvw = rootView.findViewById(R.id.main_tvw_draw);
-        TextView btnBarOk = rootView.findViewById(R.id.main_tvw_draw_ok);
-        TextView btnBarCancel = rootView.findViewById(R.id.main_tvw_draw_cancel);
-        View bar = rootView.findViewById(R.id.main_llt_draw_bar);
-        btnBarOk.setEnabled(true);
-        btnBarCancel.setEnabled(true);
-        tvw.setText(message);
-        btnBarOk.setOnClickListener(v -> {
-            btnBarOk.setEnabled(false);
-            btnBarCancel.setEnabled(false);
-            ObjectAnimator.ofFloat(bar, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
-            onOkClickListener.run();
-        });
-        btnBarCancel.setOnClickListener(v -> {
-            btnBarOk.setEnabled(false);
-            btnBarCancel.setEnabled(false);
-            if (onCancelClickListener != null)
-            {
-                onCancelClickListener.run();
-            }
-            ObjectAnimator.ofFloat(bar, "translationY", 0).setDuration(Config.getInstance().animationDuration).start();
-        });
-        ObjectAnimator.ofFloat(bar, "translationY", -bar.getHeight()).setDuration(Config.getInstance().animationDuration).start();
     }
 }
