@@ -54,12 +54,73 @@ import java.util.concurrent.Callable;
 
 public class LayerManager
 {
+    public final static String[] EsriBaseLayers = new String[]{"无", "OpenStreetMap", "卫星影像", "带标签卫星影像", "街道", "亮色", "暗色", "街道", "地貌", "地形", "海洋"};
     private static final String TAG = "Layer";
     private static LayerManager instance = new LayerManager();
+    private FeatureLayer currentLayer = null;
+    private ArcGISMap map = new ArcGISMap();
+    private ArrayList<Callable<Basemap>> EsriBaseLayersMap = new ArrayList<Callable<Basemap>>()
+    {{
+        add(null);
+        add(Basemap::createOpenStreetMap);
+        add(Basemap::createImagery);
+        add(Basemap::createImageryWithLabelsVector);
+        add(Basemap::createStreetsVector);
+        add(Basemap::createLightGrayCanvasVector);
+        add(Basemap::createDarkGrayCanvasVector);
+        add(Basemap::createTopographicVector);
+        add(Basemap::createTerrainWithLabelsVector);
+        add(Basemap::createOceans);
+    }};
 
     public static LayerManager getInstance()
     {
         return instance;
+    }
+
+    static void setFeatureLayerStyle(FeatureLayer layer, String name)
+    {
+        if (new File(FileHelper.getStyleFile(name)).exists())
+        {
+            try
+            {
+                String jsonStr = FileHelper.readTextFile(FileHelper.getStyleFile(name));
+                JSONObject json = new JSONObject(jsonStr);
+
+                JSONObject jRenderer = json.getJSONObject("Renderer");
+                UniqueValueRenderer renderer = (UniqueValueRenderer) Renderer.fromJson(jRenderer.toString());
+                layer.setRenderer(renderer);
+                JSONArray jLabels =json.has("Labels")? json.getJSONArray("Labels"): json.getJSONArray("LabelDefinitions");
+                for (int i = 0; i < jLabels.length(); i++)
+                {
+                    LabelDefinition label = LabelDefinition.fromJson(jLabels.getJSONObject(i).toString());
+                    layer.getLabelDefinitions().add(label);
+                }
+                layer.setLabelsEnabled(true);
+
+
+                JSONObject jDisplay = json.getJSONObject("Display");
+                if (jDisplay.has("MinScale"))
+                {
+                    double value = jDisplay.getDouble("MinScale");
+                    layer.setMinScale(value);
+                }
+                if (jDisplay.has("MaxScale"))
+                {
+                    double value = jDisplay.getDouble("MaxScale");
+                    layer.setMinScale(value);
+                }
+                if (jDisplay.has("Opacity"))
+                {
+                    double value = jDisplay.getDouble("Opacity");
+                    layer.setOpacity((float) value);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.e(TAG, ex.getMessage());
+            }
+        }
     }
 
     public FeatureLayer getCurrentLayer()
@@ -72,14 +133,10 @@ public class LayerManager
         this.currentLayer = currentLayer;
     }
 
-    private FeatureLayer currentLayer = null;
-
     public ArcGISMap getMap()
     {
         return map;
     }
-
-    private ArcGISMap map = new ArcGISMap();
 
     public void initialize(Activity context)
     {
@@ -130,21 +187,6 @@ public class LayerManager
             addLayer(context, layerInfo);
         }
     }
-
-    public final static String[] EsriBaseLayers = new String[]{"无", "OpenStreetMap", "卫星影像", "带标签卫星影像", "街道", "亮色", "暗色", "街道", "地貌", "地形", "海洋"};
-    private ArrayList<Callable<Basemap>> EsriBaseLayersMap = new ArrayList<Callable<Basemap>>()
-    {{
-        add(null);
-        add(Basemap::createOpenStreetMap);
-        add(Basemap::createImagery);
-        add(Basemap::createImageryWithLabelsVector);
-        add(Basemap::createStreetsVector);
-        add(Basemap::createLightGrayCanvasVector);
-        add(Basemap::createDarkGrayCanvasVector);
-        add(Basemap::createTopographicVector);
-        add(Basemap::createTerrainWithLabelsVector);
-        add(Basemap::createOceans);
-    }};
 
     private Basemap getBaseMap(Context context)
     {
@@ -253,7 +295,6 @@ public class LayerManager
 
     }
 
-
     /**
      * 加入图层
      *
@@ -326,7 +367,6 @@ public class LayerManager
         return layer;
     }
 
-
     /**
      * 获取所有图层
      *
@@ -392,43 +432,6 @@ public class LayerManager
                 }).create().show();
 
 
-    }
-
-    static void setFeatureLayerStyle(FeatureLayer layer, String name)
-    {
-        if (new File(FileHelper.getStyleFile(name)).exists())
-        {
-            try
-            {
-                String jsonStr = FileHelper.readTextFile(FileHelper.getStyleFile(name));
-
-                JSONObject json = new JSONObject(jsonStr);
-
-
-                JSONObject jBasic = json.getJSONObject("Basic");
-                if (jBasic.has("MinScale"))
-                {
-                    double value = jBasic.getDouble("MinScale");
-                    layer.setMinScale(value);
-                }
-
-                JSONObject jRenderer = json.getJSONObject("Renderer");
-                UniqueValueRenderer renderer = (UniqueValueRenderer) Renderer.fromJson(jRenderer.toString());
-                layer.setRenderer(renderer);
-
-                JSONArray jLabels = json.getJSONArray("Labels");
-                for (int i = 0; i < jLabels.length(); i++)
-                {
-                    LabelDefinition label = LabelDefinition.fromJson(jLabels.getJSONObject(i).toString());
-                    layer.getLabelDefinitions().add(label);
-                }
-                layer.setLabelsEnabled(true);
-            }
-            catch (Exception ex)
-            {
-                Log.e(TAG, ex.getMessage());
-            }
-        }
     }
 
 }
