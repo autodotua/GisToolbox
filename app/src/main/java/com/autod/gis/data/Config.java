@@ -77,7 +77,7 @@ public class Config
 
     public void save()
     {
-        save(false);
+        save(true);
     }
 
     public void save(boolean includingLayers)
@@ -118,7 +118,6 @@ public class Config
             }
             catch (IOException e)
             {
-                assert false;
                 e.printStackTrace();
             }
             LayerInfo layerInfo = new LayerInfo(path, layer.isVisible(), layer.getOpacity());
@@ -126,8 +125,4 @@ public class Config
         }
     }
 
-    public void trySave()
-    {
-        Config.getInstance().save(true);
-    }
 }

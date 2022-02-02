@@ -1,11 +1,7 @@
 package com.autod.gis.ui.activity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -16,26 +12,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.autod.gis.data.Config;
 import com.autod.gis.data.FileHelper;
 import com.autod.gis.map.LayerManager;
+import com.autod.gis.service.FtpService;
 import com.autod.gis.ui.adapter.FileListAdapter;
 import com.autod.gis.R;
-
-import org.apache.ftpserver.FtpServer;
-import org.apache.ftpserver.FtpServerFactory;
-import org.apache.ftpserver.ftplet.Authority;
-import org.apache.ftpserver.ftplet.UserManager;
-import org.apache.ftpserver.listener.ListenerFactory;
-import org.apache.ftpserver.usermanager.PropertiesUserManagerFactory;
-import org.apache.ftpserver.usermanager.impl.BaseUser;
-import org.apache.ftpserver.usermanager.impl.ConcurrentLoginPermission;
-import org.apache.ftpserver.usermanager.impl.WritePermission;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,9 +30,15 @@ import java.util.List;
  */
 public class ImportFilesActivity extends AppCompatActivity implements View.OnClickListener
 {
-    private  FileListAdapter adapter;
-    private  Button btnFtp;
+    TextView tvwFtp;
+    /**
+     * 匹配的文件列表
+     */
+    List<File> matchedFiles = new ArrayList<>();
+    private FileListAdapter adapter;
+    private Button btnFtp;
     private boolean forBaseLayer;
+    private  boolean hasOpenedFTP=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -56,10 +47,6 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_import_files);
         Bundle extra = getIntent().getExtras();
         forBaseLayer = extra != null && extra.containsKey("base");
-        if (!InitializeFtpServer())
-        {
-            Toast.makeText(this, "初始化FTP服务器失败", Toast.LENGTH_SHORT).show();
-        }
 
         ActionBar actionBar = this.getSupportActionBar();
         assert actionBar != null;
@@ -78,7 +65,6 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         lvwFile.setOnItemClickListener((adapterView, view, i, l) ->
         {
             File clickedFile = adapter.files.get(i);
-            Intent data = new Intent();
             String path = clickedFile.getAbsolutePath();
             try
             {
@@ -93,10 +79,11 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
             }
             catch (IOException e)
             {
-                assert false;
                 e.printStackTrace();
             }
+            Intent data = new Intent();
             data.putExtra("path", path);
+            data.putExtra("reset",hasOpenedFTP);
             setResult(RESULT_OK, data);
             finish();
 //            LayerManager.getInstance().addLayer(this, clickedFile.getAbsolutePath());
@@ -126,16 +113,17 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         return super.onOptionsItemSelected(item);
     }
 
-    TextView tvwFtp;
-
     @Override
     protected void onStop()
     {
         super.onStop();
-        if (!server.isSuspended() && !server.isStopped())
-        {
-            server.stop();
-        }
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        stopService(new Intent(this,FtpService.class));
+        super.onDestroy();
     }
 
     @Override
@@ -149,21 +137,16 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
                     case "打开FTP":
                         try
                         {
-                            //如果FTP首次打开，则start；否则恢复
-                            if (server.isSuspended())
-                            {
-                                server.resume();
-                            }
-                            else
-                            {
-                                server.start();
-                            }
-                            btnFtp.setText("关闭FTP");
-                            String ip = getWIFILocalIpAddress();
+                            hasOpenedFTP=true;
+                            Intent data = new Intent();
+                            data.putExtra("reset",true);
+                            setResult(RESULT_OK, data);
+                            startService(new Intent(this, FtpService.class));
+                            btnFtp.setText(R.string.btn_close_ftp);
+                            String ip = FtpService.getWIFILocalIpAddress(this);
                             if (ip != null)
                             {
-
-                                tvwFtp.setText("ftp://" + ip + ":2222");
+                                tvwFtp.setText(String.format("ftp://%s:2222", ip));
                             }
                         }
                         catch (Exception ex)
@@ -172,8 +155,8 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
                         }
                         break;
                     case "关闭FTP":
-                        server.suspend();
-                        btnFtp.setText("打开FTP");
+                        stopService(new Intent(this,FtpService.class));
+                        btnFtp.setText(R.string.btn_open_ftp);
                         tvwFtp.setText("");
                         searchFiles();
                         break;
@@ -182,11 +165,6 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
 
         }
     }
-
-    /**
-     * 匹配的文件列表
-     */
-    List<File> matchedFiles = new ArrayList<>();
 
     /**
      * 搜索匹配格式的文件
@@ -210,45 +188,6 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         adapter.notifyDataSetChanged();
     }
 
-    /**
-     * 获取当前在WiFi网段下的IP地址
-     *
-     * @return
-     */
-    private String getWIFILocalIpAddress()
-    {
-
-        //获取wifi服务
-        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        //判断wifi是否开启
-        if (wifiManager == null)
-        {
-            Toast.makeText(this, "获取WIFI状态失败", Toast.LENGTH_SHORT).show();
-            return null;
-        }
-        if (!wifiManager.isWifiEnabled())
-        {
-            wifiManager.setWifiEnabled(true);
-        }
-        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-        int ipAddress = wifiInfo.getIpAddress();
-        return formatIpAddress(ipAddress);
-    }
-
-    /**
-     * 格式化IP地址
-     *
-     * @param ipAdress
-     * @return
-     */
-    private String formatIpAddress(int ipAdress)
-    {
-
-        return (ipAdress & 0xFF) + "." +
-                ((ipAdress >> 8) & 0xFF) + "." +
-                ((ipAdress >> 16) & 0xFF) + "." +
-                (ipAdress >> 24 & 0xFF);
-    }
 
     /**
      * 递归遍历所有符合格式的文件
@@ -278,64 +217,4 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    /**
-     * FTP服务器实例
-     */
-    static FtpServer server;
-
-    /**
-     * 初始化FTP服务
-     *
-     * @return
-     */
-    boolean InitializeFtpServer()
-    {
-        //System.setProperty("java.net.preferIPv6Addresses", "false");
-        FtpServerFactory serverFactory = new FtpServerFactory();
-
-        ListenerFactory factory = new ListenerFactory();
-
-        // set the port of the listener
-        int port = 2222;
-        factory.setPort(port);
-
-        // replace the default listener
-        serverFactory.addListener("default", factory.createListener());
-        final PropertiesUserManagerFactory userManagerFactory = new PropertiesUserManagerFactory();
-        try
-        {
-            //设置账户
-            final UserManager userManager = userManagerFactory.createUserManager();
-            BaseUser user = new BaseUser();
-            //设置匿名登陆
-            user.setName("anonymous");
-            user.setPassword("");
-            //设置根目录为Gis文件夹
-            File gisDirectory = new File(Environment.getExternalStorageDirectory().toString() + "/Gis");
-            if (gisDirectory.exists())
-            {
-                user.setHomeDirectory(gisDirectory.getAbsolutePath());
-            }
-            else
-            {
-                user.setHomeDirectory(Environment.getExternalStorageDirectory().toString());
-            }
-
-            List<Authority> authorities = new ArrayList<>();
-            authorities.add(new WritePermission());
-            authorities.add(new ConcurrentLoginPermission(2, Integer.MAX_VALUE));
-            user.setAuthorities(authorities);
-            userManager.save(user);
-            serverFactory.setUserManager(userManager);
-            // start the server
-            server = serverFactory.createServer();
-
-            return true;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-    }
 }

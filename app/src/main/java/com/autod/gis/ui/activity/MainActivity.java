@@ -35,6 +35,7 @@ import com.autod.gis.data.Config;
 import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
+import com.autod.gis.model.LayerInfo;
 import com.autod.gis.ui.fragment.EditFragment;
 import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
 import com.autod.gis.ui.MenuHelper;
@@ -225,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (initialized)
         {
             Config.getInstance().lastExtent = MapViewHelper.getInstance().getMapView().getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY).getTargetGeometry().toJson();
-            Config.getInstance().trySave();
+            Config.getInstance().save();
         }
     }
 
@@ -317,21 +318,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (requestCode == ImportFilesActivityID)
             {
                 String path = data.getStringExtra("path");
-                Layer layer = LayerManager.getInstance().addLayer(this, path);
-                layer.addDoneLoadingListener(() -> {
-                    if (layer.getLoadStatus() == LoadStatus.LOADED)
+                if (data.getBooleanExtra("reset", false))
+                {
+                    try
                     {
-                        MapViewHelper.getInstance().zoomToLayer(this, layer);
+                        if (path != null)
+                        {
+                            Config.getInstance().layers.add(new LayerInfo(path, true, 1));
+                            Config.getInstance().save(false);
+                        }
+                        LayerManager.getInstance().resetLayers(this);
                     }
-                });
-                Config.getInstance().trySave();
+                    catch (Exception ex)
+                    {
+                        Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
+                        ex.printStackTrace();
+                    }
+                }
+                else
+                {
+                    Layer layer = LayerManager.getInstance().addLayer(this, path);
+                    layer.addDoneLoadingListener(() -> {
+                        if (layer.getLoadStatus() == LoadStatus.LOADED)
+                        {
+                            MapViewHelper.getInstance().zoomToLayer(this, layer);
+                        }
+                    });
+                    Config.getInstance().save();
+                }
             }
             else if (requestCode == BaseLayerListActivityID)
             {
                 LayerManager.getInstance().resetLayers(this);
-                Config.getInstance().trySave();
+                Config.getInstance().save();
             }
         }
+
     }
 
     @Override

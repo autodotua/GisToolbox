@@ -76,7 +76,7 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
     protected void onPause()
     {
         super.onPause();
-        Config.getInstance().trySave();
+        Config.getInstance().save();
     }
 
     @Override

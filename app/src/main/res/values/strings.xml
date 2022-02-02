@@ -99,4 +99,6 @@
     <string name="menu_measure_length">测量长度</string>
     <string name="measure_length_value">%1$.2f m</string>
     <string name="measure_area_value">面积%1$.0f ㎡&#160;&#160;周长%2$.0f m</string>
+    <string name="btn_open_ftp">打开FTP</string>
+    <string name="btn_close_ftp">关闭FTP</string>
 </resources>

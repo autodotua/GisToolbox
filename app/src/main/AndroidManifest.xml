@@ -39,6 +39,9 @@
             android:name="com.autod.gis.service.LocationService"
             android:enabled="true"
             android:exported="true" />
+        <service
+            android:name="com.autod.gis.service.FtpService"
+            android:enabled="true" />
 
     </application>
     <uses-feature
