@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:title="@string/menu_map">
         <menu>
             <item
@@ -26,41 +26,51 @@
                 android:title="@string/menu_create_feature_layer" />
         </menu>
     </item>
-    <item android:title="@string/menu_location">
+    <item android:title="@string/menu_track">
         <menu>
-
+        <item
+            android:id="@+id/menu_center_when_recording"
+            android:checkable="true"
+            android:title="@string/menu_center_when_recording" />
+        <item
+            android:id="@+id/menu_use_barometer"
+            android:checkable="true"
+            android:title="@string/menu_use_barometer" />
+        <item
+            android:id="@+id/menu_use_relative_altitude"
+            android:checkable="true"
+            android:title="@string/menu_use_relative_altitude" />
+        <item
+            android:id="@+id/menu_gps_min_time"
+            android:title="@string/menu_gps_min_time" />
+        <item
+            android:id="@+id/menu_gps_min_distance"
+            android:title="@string/menu_gps_min_distance" /></menu>
+    </item>
+    <item android:title="@string/menu_location_display">
+        <menu>
             <item
-                android:id="@+id/menu_location_display"
+                android:id="@+id/menu_show_location_display"
                 android:checkable="true"
-                android:title="@string/menu_location_display" />
-            <item
-                android:id="@+id/menu_center_when_recording"
-                android:checkable="true"
-                android:title="@string/menu_center_when_recording" />
-            <item
-                android:id="@+id/menu_use_barometer"
-                android:checkable="true"
-                android:title="@string/menu_use_barometer" />
-            <item
-                android:id="@+id/menu_use_relative_altitude"
-                android:checkable="true"
-                android:title="@string/menu_use_relative_altitude" />
+                android:title="@string/menu_show_location_display" />
             <item
                 android:id="@+id/menu_keep_location_display_background"
                 android:checkable="true"
                 android:title="@string/menu_keep_location_display_background" />
             <item
-                android:id="@+id/menu_gps_min_time"
-                android:title="@string/menu_gps_min_time" />
+                android:id="@+id/menu_use_gps_data_source"
+                android:checkable="true"
+                android:title="@string/menu_use_gps_data_source" />
             <item
-                android:id="@+id/menu_gps_min_distance"
-                android:title="@string/menu_gps_min_distance" />
+                android:id="@+id/menu_gps_data_source_min_fixed_satellite_count"
+                android:title="@string/menu_gps_data_source_min_fixed_satellite_count" />
+
         </menu>
     </item>
     <item android:title="@string/menu_measure">
         <menu>
             <item
-                    android:id="@+id/menu_measure_length"
+                android:id="@+id/menu_measure_length"
                 android:title="@string/menu_measure_length" />
             <item
                 android:id="@+id/menu_measure_area"

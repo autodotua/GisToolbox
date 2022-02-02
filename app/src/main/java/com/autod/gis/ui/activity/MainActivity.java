@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 if (Config.getInstance().location)
                 {
-                    LocationDisplayHelper.getInstance().start();
+                    LocationDisplayHelper.getInstance().start(this);
                 }
 
             }
@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 if (Config.getInstance().location && !Config.getInstance().keepLocationBackground)
                 {
-                    LocationDisplayHelper.getInstance().stop();
+                    LocationDisplayHelper.getInstance().stop(this);
                 }
             }
             catch (Exception ex)
@@ -255,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (initialized)
         {
             MapViewHelper.getInstance().unlinkMapAndMapView();
-            LocationDisplayHelper.getInstance().stop();
+            LocationDisplayHelper.getInstance().stop(this);
         }
         super.onDestroy();
     }
@@ -414,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "没有开启定位功能", Toast.LENGTH_SHORT).show();
                     break;
                 }
-                if (!LocationDisplayHelper.getInstance().setPan())
+                if (!LocationDisplayHelper.getInstance().setPan(this))
                 {
                     Toast.makeText(this, "还没有定位", Toast.LENGTH_SHORT).show();
                 }
@@ -644,9 +644,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String angle2Direction(double angle)
     {
-        angle += 22.5;
-        String[] types = new String[]{"北", "东北", "东", "东南", "南", "西南", "西", "西北", "北"};
-        return types[(int) (angle / 45)];
+        angle += 11.25;
+        String[] types = new String[]{"北", "北偏东","东北","东偏北", "东","东偏南", "东南","南偏东", "南","南偏西", "西南","西偏南", "西","西偏北", "西北","北偏西", "北"};
+        return types[(int) (angle / 22.5)];
     }
 
     private void topBarAnimation(int direction)

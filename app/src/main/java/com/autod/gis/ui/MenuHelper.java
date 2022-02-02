@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Looper;
 import android.text.InputType;
 import android.util.Base64;
 import android.view.Menu;
@@ -35,6 +36,7 @@ public class MenuHelper
     private MenuItem menuMapCompass;
     private MenuItem menuUseBarometer;
     private MenuItem menuUseRelativeAltitude;
+    private MenuItem menuUseGpsLocationDataSource;
 
 
     private static MenuHelper instance = new MenuHelper();
@@ -49,7 +51,7 @@ public class MenuHelper
         menuInflater.inflate(R.menu.menu, menu);
         menuRotate = menu.findItem(R.id.menu_rotate);
 
-        menuLocation = menu.findItem(R.id.menu_location_display);
+        menuLocation = menu.findItem(R.id.menu_show_location_display);
 
         menuCenterWhenRecording = menu.findItem(R.id.menu_center_when_recording);
 
@@ -62,6 +64,8 @@ public class MenuHelper
         menuUseBarometer = menu.findItem(R.id.menu_use_barometer);
 
         menuUseRelativeAltitude = menu.findItem(R.id.menu_use_relative_altitude);
+
+        menuUseGpsLocationDataSource=menu.findItem(R.id.menu_use_gps_data_source);
 
         resetValues();
     }
@@ -76,6 +80,7 @@ public class MenuHelper
         menuMapCompass.setChecked(Config.getInstance().showMapCompass);
         menuUseBarometer.setChecked(Config.getInstance().useBarometer);
         menuUseRelativeAltitude.setChecked(Config.getInstance().useRelativeAltitude);
+        menuUseGpsLocationDataSource.setChecked(Config.getInstance().useGpsLocationDataSource);
 
     }
 
@@ -112,16 +117,16 @@ public class MenuHelper
                 menuMapCompass.setChecked(Config.getInstance().showMapCompass);
                 Toast.makeText(context, "设置成功，将在下次启动时应用", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.menu_location_display:
+            case R.id.menu_show_location_display:
                 Config.getInstance().location = !Config.getInstance().location;
                 menuLocation.setChecked(Config.getInstance().location);
                 if (Config.getInstance().location)
                 {
-                    LocationDisplayHelper.getInstance().start();
+                    LocationDisplayHelper.getInstance().start(context);
                 }
                 else
                 {
-                    LocationDisplayHelper.getInstance().stop();
+                    LocationDisplayHelper.getInstance().stop(context);
                 }
                 break;
             case R.id.menu_tile_url:
@@ -206,6 +211,43 @@ public class MenuHelper
                             catch (Exception ex)
                             {
                                 Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                break;
+            case R.id.menu_use_gps_data_source:
+                Config.getInstance().useGpsLocationDataSource = !Config.getInstance().useGpsLocationDataSource;
+                menuUseGpsLocationDataSource.setChecked(Config.getInstance().useGpsLocationDataSource);
+                if (Config.getInstance().location)
+                {
+                    LocationDisplayHelper.getInstance().resetLocationDataSource(context);
+                }
+                break;
+            case  R.id.menu_gps_data_source_min_fixed_satellite_count:
+                showSetValueDialog(context, context.getString(R.string.menu_gps_data_source_min_fixed_satellite_count),
+                        "少于该数量的卫星被确定位置时，将不认可当前定位",
+                        String.valueOf(Config.getInstance().gpsLocationDataSourceMinFixedSatelliteCount), InputType.TYPE_CLASS_NUMBER, p ->
+                        {
+                            try
+                            {
+                                int value = Integer.parseInt(p);
+                                if (value <= 0)
+                                {
+                                    Toast.makeText(context, "卫星数量不可小于0", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                if(value>20)
+                                {
+                                    Toast.makeText(context, "卫星数量不可大于20", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                Config.getInstance().gpsLocationDataSourceMinFixedSatelliteCount = value;
+                                Config.getInstance().save();
+                                Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Toast.makeText(context, "设置失败，请输入一个整数", Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;

@@ -73,6 +73,11 @@ public class Config
     public boolean useBarometer = false;
 
     public boolean useRelativeAltitude = false;
+
+    public  boolean useGpsLocationDataSource=true;
+
+    public  int gpsLocationDataSourceMinFixedSatelliteCount=10;
+
     public String lastExtent="";
 
     public void save()

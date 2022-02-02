@@ -47,11 +47,11 @@
     <string name="layer_btn_delete">删除</string>
     <string name="menu_map">地图</string>
     <string name="menu_rotate">地图旋转</string>
-    <string name="menu_location_display">定位标志</string>
+    <string name="menu_location_display">位置显示</string>
     <string name="menu_center_when_recording">记录轨迹时自动置中</string>
     <string name="menu_keep_location_display_background">后台保持定位</string>
     <string name="menu_feature_layer_query_extent_every_time">矢量图层重算范围</string>
-    <string name="menu_location">位置</string>
+    <string name="menu_show_location_display">显示定位</string>
     <string name="menu_base_layer">底图设置</string>
     <string name="menu_default_scale">默认比例尺</string>
     <string name="menu_gps_min_time">GPS最小更新时间</string>
@@ -101,4 +101,7 @@
     <string name="measure_area_value">面积%1$.0f ㎡&#160;&#160;周长%2$.0f m</string>
     <string name="btn_open_ftp">打开FTP</string>
     <string name="btn_close_ftp">关闭FTP</string>
+    <string name="menu_track">轨迹</string>
+    <string name="menu_use_gps_data_source">使用自定义GPS位置数据源</string>
+    <string name="menu_gps_data_source_min_fixed_satellite_count">最少可信卫星数量</string>
 </resources>
