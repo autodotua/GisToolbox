@@ -625,14 +625,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 vAcc = loc.getVerticalAccuracyMeters();
                 sAcc = loc.getSpeedAccuracyMetersPerSecond();
             }
+            int satCount=TrackHelper.getInstance().getLastSatelliteCount();
+            int satFixedCount=TrackHelper.getInstance().getLastFixedSatelliteCount();
             if (type == 1)
             {
-                return Html.fromHtml(getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, gpsAlt, pAlt, speed, speedKm, bearing, bearingDesc, hAcc, vAcc, sAcc), Html.FROM_HTML_MODE_LEGACY);
+                return Html.fromHtml(getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, gpsAlt, pAlt, speed, speedKm, bearing, bearingDesc, hAcc, vAcc, sAcc,satFixedCount,satCount), Html.FROM_HTML_MODE_LEGACY);
             }
             else if (type == 2)
             {
                 return Html.fromHtml(getResources().getString(R.string.msg_gps_detail_bar, duration, length, lng, lat, alt, speed, speedKm, bearing, bearingDesc), Html.FROM_HTML_MODE_LEGACY);
-
             }
             else
             {

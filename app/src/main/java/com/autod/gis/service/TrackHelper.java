@@ -3,6 +3,7 @@ package com.autod.gis.service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.GnssStatus;
 import android.location.Location;
 import android.os.Looper;
 import android.widget.Toast;
@@ -57,6 +58,8 @@ public class TrackHelper
     private StringBuilder gpxString;
     private Date startTime;
     private Location lastLocation = null;
+    private  int lastSatelliteCount=0;
+    private  int lastFixedSatelliteCount=0;
 
     public static TrackHelper getInstance()
     {
@@ -213,6 +216,20 @@ public class TrackHelper
 
     }
 
+    public  void  satelliteStatusChanged(GnssStatus status)
+    {
+        lastSatelliteCount=status.getSatelliteCount();
+        int fixed = 0;
+        for (int i = 0; i < lastSatelliteCount; i++)
+        {
+            if (status.usedInFix(i))
+            {
+                fixed++;
+            }
+        }
+        lastFixedSatelliteCount=fixed;
+    }
+
     private void updateNotification(Context context)
     {
         String text = null;
@@ -256,10 +273,7 @@ public class TrackHelper
     {
         status = Status.Stop;
         context.stopService(new Intent(context, LocationService.class));
-        if (Config.getInstance().useBarometer)
-        {
-            SensorHelper.getInstance().stop();
-        }
+        SensorHelper.getInstance().stop();
 
         MapViewHelper.getInstance().getMapView().getGraphicsOverlays().remove(overlay);
 
@@ -354,6 +368,16 @@ public class TrackHelper
     public double getLength()
     {
         return length;
+    }
+
+    public int getLastSatelliteCount()
+    {
+        return lastSatelliteCount;
+    }
+
+    public int getLastFixedSatelliteCount()
+    {
+        return lastFixedSatelliteCount;
     }
 
     public enum Status

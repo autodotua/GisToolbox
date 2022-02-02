@@ -77,7 +77,9 @@
 <b>海拔：</b>%6$.0f/%7$.0f m (GPS/BARO)<br>
 <b>速度：</b>%8$.2f m/s&nbsp;&nbsp;%9$.2f km/h<br>
 <b>方向：</b>%10$.0f°&nbsp;&nbsp;%11$s<br>
-<b>精度：</b>%12$.1f/%13$.1f/%14$.1f m (H/V/S)]]>
+<b>精度：</b>%12$.1f/%13$.1f/%14$.1f m (H/V/S)<br>
+<b>卫星：</b>%15$d / %16$d
+]]>
     </string>
     <string name="msg_gps_detail_bar">
 <![CDATA[<b>状态：</b>%1$s&nbsp;&nbsp;%2$.0fm<br>

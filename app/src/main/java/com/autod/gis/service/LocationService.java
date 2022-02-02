@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
+import android.location.GnssStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,23 +28,56 @@ import static android.app.PendingIntent.getActivity;
 
 public class LocationService extends Service
 {
+    private static final int NotificationId = 1024;
     private static LocationManager locationManager;
+    private static Notification.Builder notificationBuilder;
+    private static NotificationManager notificationManager;
+    public boolean isLocationRegistered;
+    LocationListener listener = new LocationListener()
+    {
+        @Override
+        public void onLocationChanged(Location location)
+        {
+            // 当GPS定位信息发生改变时，更新定位
+            TrackHelper.getInstance().locationChanged(LocationService.this, location);
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras)
+        {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String provider)
+        {
+            if (ActivityCompat.checkSelfPermission(LocationService.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(LocationService.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            {
+                return;
+            }
+
+        }
+
+        @Override
+        public void onProviderDisabled(String provider)
+        {
+
+        }
+    };
+    GnssStatus.Callback gnssCallback = new GnssStatus.Callback()
+    {
+        @Override
+        public void onSatelliteStatusChanged(GnssStatus status)
+        {
+            TrackHelper.getInstance().satelliteStatusChanged(status);
+            super.onSatelliteStatusChanged(status);
+        }
+    };
 
     public LocationService()
     {
     }
-
-
-    @Override
-    public IBinder onBind(Intent intent)
-    {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    private static Notification.Builder notificationBuilder;
-    private static NotificationManager notificationManager;
-    private static final int NotificationId = 1024;
 
     public static void updateNotification(String title, String message)
     {
@@ -53,6 +87,13 @@ public class LocationService extends Service
         {
             notificationManager.notify(NotificationId, notificationBuilder.build());
         }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent)
+    {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
@@ -103,7 +144,7 @@ public class LocationService extends Service
             return START_NOT_STICKY;
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, Config.getInstance().gpsMinTime, Config.getInstance().gpsMinDistance, listener);
-
+        locationManager.registerGnssStatusCallback(gnssCallback);
         isLocationRegistered = true;
 
         return START_STICKY;
@@ -126,47 +167,12 @@ public class LocationService extends Service
         try
         {
             locationManager.removeUpdates(listener);
+            locationManager.unregisterGnssStatusCallback(gnssCallback);
             isLocationRegistered = false;
         }
         catch (Exception ex)
         {
-            Toast.makeText(this, "停止轮询失败", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "停止位置更新失败", Toast.LENGTH_SHORT).show();
         }
     }
-
-
-    public boolean isLocationRegistered;
-
-    LocationListener listener = new LocationListener()
-    {
-        @Override
-        public void onLocationChanged(Location location)
-        {
-            // 当GPS定位信息发生改变时，更新定位
-            TrackHelper.getInstance().locationChanged(LocationService.this, location);
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider)
-        {
-            if (ActivityCompat.checkSelfPermission(LocationService.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(LocationService.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            {
-                return;
-            }
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider)
-        {
-
-        }
-    };
 }
