@@ -21,6 +21,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.autod.gis.R;
@@ -29,6 +30,7 @@ import com.autod.gis.data.FileHelper;
 import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.map.SensorHelper;
+import com.autod.gis.model.TrackInfo;
 import com.autod.gis.ui.activity.MainActivity;
 import com.autod.gis.util.DateTimeUtility;
 import com.esri.arcgisruntime.data.Feature;
@@ -54,6 +56,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.app.PendingIntent.getActivity;
 import static com.autod.gis.data.FileHelper.getTimeBasedFileName;
@@ -82,8 +86,42 @@ public class TrackService extends Service
         @Override
         public void onLocationChanged(Location location)
         {
-            // 当GPS定位信息发生改变时，更新定位
-            locationChanged(location);
+            if (isPausing())
+            {
+                return;
+            }
+            lastLocation = location;
+            Point point = new Point(location.getLongitude(),
+                    location.getLatitude(),
+                    SpatialReferences.getWgs84());
+            addGpxPoint(location);
+
+            locationPoints.add(point);
+            if ((++count) >= 2)
+            {
+                ArrayList<Point> twoPoints = new ArrayList<Point>()
+                {
+                    {
+                        add(locationPoints.get(count - 2));
+                        add(point);
+                    }
+                };
+
+                Polyline line = new Polyline(new PointCollection(twoPoints));
+                length += GeometryEngine.lengthGeodetic(line, null, GeodeticCurveType.NORMAL_SECTION);
+                Graphic graphic = new Graphic(line);
+                overlay.getGraphics().add(graphic);
+            }
+
+            if (Config.getInstance().autoCenterWhenRecording)
+            {
+                MapViewHelper.getInstance().getMapView().setViewpointCenterAsync(point);
+            }
+
+            if (count % 10 == 0)
+            {
+                saveGpx();
+            }
         }
 
         @Override
@@ -109,6 +147,7 @@ public class TrackService extends Service
 
         }
     };
+    private Timer trackTimer = new Timer();
     private int lastSatelliteCount = 0;
     private int lastFixedSatelliteCount = 0;
     GnssStatus.Callback gnssCallback = new GnssStatus.Callback()
@@ -116,34 +155,67 @@ public class TrackService extends Service
         @Override
         public void onSatelliteStatusChanged(GnssStatus status)
         {
-            satelliteStatusChanged(status);
+            lastSatelliteCount = status.getSatelliteCount();
+            int fixed = 0;
+            for (int i = 0; i < lastSatelliteCount; i++)
+            {
+                if (status.usedInFix(i))
+                {
+                    fixed++;
+                }
+            }
+            lastFixedSatelliteCount = fixed;
             super.onSatelliteStatusChanged(status);
         }
     };
     private boolean isRunning = false;
+    private List<OnTrackTimerListener> onTrackTimerListeners = new ArrayList<OnTrackTimerListener>();
 
     public TrackService()
     {
     }
 
+    public TrackInfo getLastTrackInfo()
+    {
+        return new TrackInfo(startTime, lastLocation, count, length, lastSatelliteCount, lastFixedSatelliteCount);
+    }
+
+    @Override
+    public void onCreate()
+    {
+        trackTimer.scheduleAtFixedRate(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                if (!isLocationRegistered)
+                {
+                    return;
+                }
+                notificationBuilder.setContentTitle(pausing ? "暂停记录轨迹" : "正在记录轨迹");
+                notificationBuilder.setContentText(getString(R.string.track_notification_message, DateTimeUtility.formatTimeSpan(startTime, new Date()), length));
+                if (notificationManager != null)
+                {
+                    notificationManager.notify(NotificationId, notificationBuilder.build());
+                }
+                TrackInfo info = getLastTrackInfo();
+                for (OnTrackTimerListener listener : onTrackTimerListeners)
+                {
+                    listener.tick(info);
+                }
+            }
+        }, 0, 1000);
+        super.onCreate();
+    }
+
+    public void addOnTrackTimerListener(@NonNull OnTrackTimerListener listener)
+    {
+        onTrackTimerListeners.add(listener);
+    }
+
     public boolean isPausing()
     {
         return pausing;
-    }
-
-    public void updateNotification(String title, String message)
-    {
-        notificationBuilder.setContentTitle(title);
-        notificationBuilder.setContentText(message);
-        if (notificationManager != null)
-        {
-            notificationManager.notify(NotificationId, notificationBuilder.build());
-        }
-    }
-
-    public Date getStartTime()
-    {
-        return startTime;
     }
 
     /**
@@ -223,73 +295,9 @@ public class TrackService extends Service
                 gpxString.toString() + getResources().getString(R.string.gpx_foot));
     }
 
-    public void locationChanged(Location location)
-    {
-        if (isPausing())
-        {
-            return;
-        }
-        lastLocation = location;
-        Point point = new Point(location.getLongitude(),
-                location.getLatitude(),
-                SpatialReferences.getWgs84());
-        addGpxPoint(location);
-
-        locationPoints.add(point);
-        if ((++count) >= 2)
-        {
-            ArrayList<Point> twoPoints = new ArrayList<Point>()
-            {
-                {
-                    add(locationPoints.get(count - 2));
-                    add(point);
-                }
-            };
-
-            Polyline line = new Polyline(new PointCollection(twoPoints));
-            length += GeometryEngine.lengthGeodetic(line, null, GeodeticCurveType.NORMAL_SECTION);
-            Graphic graphic = new Graphic(line);
-            overlay.getGraphics().add(graphic);
-        }
-
-        updateNotification();
-        if (Config.getInstance().autoCenterWhenRecording)
-        {
-            MapViewHelper.getInstance().getMapView().setViewpointCenterAsync(point);
-        }
-
-        if (count % 10 == 0)
-        {
-            saveGpx();
-        }
-
-    }
-
-    public void satelliteStatusChanged(GnssStatus status)
-    {
-        lastSatelliteCount = status.getSatelliteCount();
-        int fixed = 0;
-        for (int i = 0; i < lastSatelliteCount; i++)
-        {
-            if (status.usedInFix(i))
-            {
-                fixed++;
-            }
-        }
-        lastFixedSatelliteCount = fixed;
-    }
-
-    private void updateNotification()
-    {
-        String text = pausing ? getString(R.string.track_notification_title_pausing) : getString(R.string.track_notification_title_running);
-
-        updateNotification(text, getString(R.string.track_notification_message, DateTimeUtility.formatTimeSpan(startTime, new Date()), length));
-    }
-
     public void pause(Context context)
     {
         pausing = true;
-        updateNotification();
         if (Config.getInstance().useBarometer)
         {
             SensorHelper.getInstance().stop();
@@ -300,7 +308,6 @@ public class TrackService extends Service
     public void resume(Context context)
     {
         pausing = false;
-        updateNotification();
         if (Config.getInstance().useBarometer)
         {
             SensorHelper.getInstance().start(context);
@@ -324,30 +331,35 @@ public class TrackService extends Service
 
     }
 
-    public Location getLastLocation()
-    {
-        return lastLocation;
-    }
-
-    public int getCount()
-    {
-        return count;
-    }
-
-    public double getLength()
-    {
-        return length;
-    }
-
-    public int getLastSatelliteCount()
-    {
-        return lastSatelliteCount;
-    }
-
-    public int getLastFixedSatelliteCount()
-    {
-        return lastFixedSatelliteCount;
-    }
+//    public Date getStartTime()
+//    {
+//        return startTime;
+//    }
+//
+//    public Location getLastLocation()
+//    {
+//        return lastLocation;
+//    }
+//
+//    public int getCount()
+//    {
+//        return count;
+//    }
+//
+//    public double getLength()
+//    {
+//        return length;
+//    }
+//
+//    public int getLastSatelliteCount()
+//    {
+//        return lastSatelliteCount;
+//    }
+//
+//    public int getLastFixedSatelliteCount()
+//    {
+//        return lastFixedSatelliteCount;
+//    }
 
     @Override
     public IBinder onBind(Intent intent)
@@ -445,7 +457,8 @@ public class TrackService extends Service
     @Override
     public void onDestroy()
     {
-
+        trackTimer.cancel();
+        trackTimer.purge();
         if (notificationManager != null)
         {
             notificationManager.cancel(NotificationId);
@@ -530,9 +543,14 @@ public class TrackService extends Service
         }).start();
     }
 
-   public class TrackBinder extends Binder
+    public interface OnTrackTimerListener
     {
-      public TrackService getService()
+        void tick(TrackInfo trackInfo);
+    }
+
+    public class TrackBinder extends Binder
+    {
+        public TrackService getService()
         {
             return TrackService.this;
         }

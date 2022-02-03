@@ -341,5 +341,8 @@
 	新增记录轨迹显示详细信息中，增加卫星数量
 
 20220203
-	将轨迹帮助类整合进了轨迹服务中，使用服务来控制轨迹记录的开始结束与暂停
+	将轨迹帮助类整合进了轨迹服务中，使用服务来控制轨迹记录的开始结束与暂停。统一了通知、横幅和详细信息对话框的更新方式，使用Timer进行更新。
+		原本的结构是：TrackHelper是单例模式，受到MainActivity等UI类控制，UI通过start、stop和pause方法控制轨迹记录的启停。服务由TrackHelper创建，并且在位置等信息发生改变时将数据主动提交给TrackHelper。这样结构就是：UI→TrackHelper⇄LocationService。
+		修改后，TrackHelper和LocationService合并为TrackService，MainActivity通过startService和bindSercvice创建并启动服务，同时也启动了轨迹记录。通过stopSercvice停止服务，同时也停止了轨迹记录。然后通过Binder将服务实例由ServiceConnection传到Activity中，来调用pause和resume方法。位置和卫星改变时，记录轨迹，同时保存最新的位置。使用Timer定时播报位置，让UI每秒更新一次相关信息。
 	修复了配置文件的保存与打开
+	轨迹对话框修改为菜单形式，详细信息通过点击顶部横条进行显示。

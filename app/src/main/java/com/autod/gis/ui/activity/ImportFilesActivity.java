@@ -86,10 +86,6 @@ public class ImportFilesActivity extends AppCompatActivity implements View.OnCli
             data.putExtra("reset",hasOpenedFTP);
             setResult(RESULT_OK, data);
             finish();
-//            LayerManager.getInstance().addLayer(this, clickedFile.getAbsolutePath());
-//            Config.getInstance().trySave();
-//            Intent intent = new Intent(ImportFilesActivity.this, MainActivity.class);
-//            startActivity(intent);
         });
 
         lvwFile.setOnItemLongClickListener((parent, view, i, id) -> {

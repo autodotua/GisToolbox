@@ -101,9 +101,9 @@ public class Config
         save(name, false);
     }
 
-    public void save(String name, boolean resaveLayer)
+    public void save(String name, boolean saveLayer)
     {
-        if (resaveLayer)
+        if (saveLayer)
         {
             saveLayers();
         }
