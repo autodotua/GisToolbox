@@ -32,7 +32,7 @@ public class Config
         if (json == null)
         {
             instance = new Config();
-            FileHelper.setConfigJson(gson.toJson(instance));
+            FileHelper.saveConfigJson(gson.toJson(instance));
         }
         else
         {
@@ -93,7 +93,7 @@ public class Config
         }
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-        FileHelper.setConfigJson(gson.toJson(this));
+        FileHelper.saveConfigJson(gson.toJson(this));
     }
 
     public void save(String name)
@@ -108,7 +108,7 @@ public class Config
             saveLayers();
         }
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        FileHelper.setConfigJson(name, gson.toJson(this));
+        FileHelper.saveConfigJson(name, gson.toJson(this));
     }
 
     private void saveLayers()

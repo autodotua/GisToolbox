@@ -12,7 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.autod.gis.model.LayerInfo;
-import com.autod.gis.service.TrackHelper;
+import com.autod.gis.ui.activity.MainActivity;
 import com.esri.arcgisruntime.arcgisservices.LabelDefinition;
 import com.esri.arcgisruntime.data.ShapefileFeatureTable;
 import com.esri.arcgisruntime.data.TileCache;
@@ -131,7 +131,7 @@ public class LayerManager
         return map;
     }
 
-    public void initialize(Activity context)
+    public void initialize(MainActivity context)
     {
         try
         {
@@ -174,9 +174,9 @@ public class LayerManager
                         Toast.makeText(context, "地图加载失败，请检查网络和设置", Toast.LENGTH_SHORT).show();
                     }
                 });
-                if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)
+                if (context.getTrackService()!=null)
                 {
-                    TrackHelper.getInstance().resumeOverlay();
+                    context.getTrackService().resumeOverlay();
                     Toast.makeText(context, "轨迹记录继续运行", Toast.LENGTH_SHORT).show();
                 }
             });
@@ -253,7 +253,7 @@ public class LayerManager
     /**
      * 重置图层
      */
-    public void resetLayers(Activity context)
+    public void resetLayers(MainActivity context)
     {
         try
         {

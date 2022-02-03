@@ -36,7 +36,7 @@
             android:launchMode="singleTask" />
 
         <service
-            android:name="com.autod.gis.service.LocationService"
+            android:name="com.autod.gis.service.TrackService"
             android:enabled="true"
             android:exported="true" />
         <service

@@ -23,6 +23,7 @@ import com.autod.gis.ui.MenuHelper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 
 /**
@@ -102,8 +103,8 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
     {
         ArrayList<String> configNames = new ArrayList<>();
         HashMap<String, String> configNamePaths = new HashMap<>();
-        File gisFolder = new File(FileHelper.getShapefileDirPath());
-        for (File file : gisFolder.listFiles())
+        File gisFolder = new File(FileHelper.getConfigDir());
+        for (File file : Objects.requireNonNull(gisFolder.listFiles()))
         {
             if (file.getPath().endsWith(".json"))
             {
@@ -128,8 +129,8 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
             try
             {
                 Config.setInstance(configNames.get(which));
-                LayerManager.getInstance().resetLayers(this);
-                MenuHelper.getInstance().resetValues();
+                setResult(RESULT_OK);
+                finish();
             }
             catch (Exception ex)
             {
@@ -172,23 +173,11 @@ public class LayerListActivity extends AppCompatActivity implements View.OnClick
             {
                 try
                 {
-//                    Config.getInstance().layerPath.clear();
-//                    Config.getInstance().layerVisible.clear();
-//                    for (Layer layer : LayerManager.getInstance().getLayers())
-//                    {
-////                if (layer instanceof FeatureLayer)
-////                {
-//                        String path = LayerManager.getInstance().layerFilePath.get(layer);
-//                        Config.getInstance().layerPath.add(path);
-//                        Config.getInstance().layerVisible.put(path, layer.isVisible());
-//                        //}
-//                    }
                     Config.getInstance().save(name, true);
                     Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
                 }
                 catch (Exception ex)
                 {
-
                     UIHelper.showSimpleErrorDialog(this, "保存失败：\n" + ex.getMessage());
                 }
             }

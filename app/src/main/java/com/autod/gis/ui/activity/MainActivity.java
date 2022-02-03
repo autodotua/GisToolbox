@@ -4,11 +4,17 @@ import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.text.Html;
 import android.util.Base64;
 import android.util.TypedValue;
@@ -36,17 +42,18 @@ import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MapViewHelper;
 import com.autod.gis.model.LayerInfo;
+import com.autod.gis.service.TrackService;
 import com.autod.gis.ui.fragment.EditFragment;
 import com.autod.gis.ui.fragment.FeatureAttributionTableFragment;
 import com.autod.gis.ui.MenuHelper;
 import com.autod.gis.R;
-import com.autod.gis.service.TrackHelper;
 import com.autod.gis.map.SensorHelper;
 import com.autod.gis.util.DateTimeUtility;
 import com.esri.arcgisruntime.layers.Layer;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Viewpoint;
 
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -59,12 +66,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 {
     public final static int BaseLayerListActivityID = 1;
     public final static int ImportFilesActivityID = 2;
+    public final static int LayerListActivityID = 3;
     int eggClickTimes = 0;
     private TextView tvwScale;
     private boolean initialized = false;
     private Timer trackInfoTimer = new Timer();
     private TextView tvwTrackInfo;
     private View topBar;
+    private TrackService trackService;
+    private boolean resumingTrack = false;
+    private ServiceConnection connection = new ServiceConnection()
+    {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service)
+        {
+            TrackService.TrackBinder trackBinder = (TrackService.TrackBinder) service;
+            trackService = trackBinder.getService();
+            if (getTrackService() != null && resumingTrack)
+            {
+                resumingTrack = false;
+                getTrackService().resumeOverlay();
+                Toast.makeText(MainActivity.this, "轨迹记录继续运行", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name)
+        {
+        }
+    };
 
     public static void showDrawBar(@NonNull View rootView, String message, @Nullable Runnable onOkClickListener, @Nullable Runnable onCancelClickListener)
     {
@@ -107,6 +137,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ObjectAnimator.ofFloat(bar, "translationY", -bar.getHeight()).setDuration(Config.getInstance().animationDuration).start();
     }
 
+    public TrackService getTrackService()
+    {
+        return trackService;
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -122,6 +157,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         checkPermission();
     }
 
+    private boolean isServiceRunning(Class<?> serviceClass)
+    {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+        {
+            if (serviceClass.getName().equals(service.service.getClassName()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * 初始化
      */
@@ -131,8 +179,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MapViewHelper.getInstance().Initialize(this);
         initializeControls();
         MapViewHelper.getInstance().getMapView().addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
-        LayerManager.getInstance().initialize(this);
         initializeTrack();
+        LayerManager.getInstance().initialize(this);
         initialized = true;
     }
 
@@ -148,8 +196,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
             }
         }, 0, 1000);
-        if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)
+        if (isServiceRunning(TrackService.class))
         {
+            //bindService后connection连接成功的调用晚于图层的初始化，导致轨迹覆盖层无法显示，因此需要在connection连接成功的事件里重设覆盖层
+            resumingTrack = true;
+            bindService(new Intent(this, TrackService.class), connection, 0);
             topBarAnimation(1);
         }
     }
@@ -256,6 +307,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             MapViewHelper.getInstance().unlinkMapAndMapView();
             LocationDisplayHelper.getInstance().stop(this);
+
+            if (getTrackService() != null)
+            {
+                stopTrack(false);
+            }
         }
         super.onDestroy();
     }
@@ -318,11 +374,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (requestCode == ImportFilesActivityID)
             {
                 String path = data.getStringExtra("path");
-                if (data.getBooleanExtra("reset", false))
+                if (data.getBooleanExtra("reset", false))//开过FTP，需要重置
                 {
                     try
                     {
-                        if (path != null)
+                        if (path != null)//没有加图层
                         {
                             Config.getInstance().layers.add(new LayerInfo(path, true, 1));
                             Config.getInstance().save(false);
@@ -335,7 +391,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         ex.printStackTrace();
                     }
                 }
-                else
+                else//不需要重置，只需要加图层
                 {
                     Layer layer = LayerManager.getInstance().addLayer(this, path);
                     layer.addDoneLoadingListener(() -> {
@@ -351,6 +407,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 LayerManager.getInstance().resetLayers(this);
                 Config.getInstance().save();
+            }
+            else if(requestCode==LayerListActivityID)
+            {
+                LayerManager.getInstance().resetLayers(this);
             }
         }
 
@@ -421,7 +481,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.main_btn_layer:
                 intent = new Intent(this, LayerListActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent,LayerListActivityID);
                 break;
             case R.id.main_btn_zoom_in:
                 try
@@ -468,9 +528,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 PopupMenu popup = new PopupMenu(this, view);
                 MenuInflater inflater = popup.getMenuInflater();
                 Menu menu = popup.getMenu();
-                MenuHelper.getInstance().initialize(inflater, menu);
+                MenuHelper helper=new MenuHelper();
+                helper.initialize(inflater, menu);
                 popup.setOnMenuItemClickListener(item -> {
-                    MenuHelper.getInstance().menuClick(MainActivity.this, item);
+                    helper.menuClick(MainActivity.this, item);
                     return true;
                 });
                 popup.show();
@@ -524,51 +585,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState, @NonNull PersistableBundle outPersistentState)
+    {
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
     private void changeTrackStatus()
     {
-        if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Stop)
+        if (trackService == null)
         {
-            if (TrackHelper.getInstance().start(this))
-            {
-                topBarAnimation(1);
-            }
+            startTrack();
         }
-        else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Running)
+        else
         {
-
+            boolean p=trackService.isPausing();
             AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("正在记录轨迹")
+                    .setTitle(p? "轨迹记录暂停中" : "正在记录轨迹")
                     .setMessage(getLocationMessage(1))
-                    .setPositiveButton("暂停", (d, which) -> {
-                        TrackHelper.getInstance().pause(this);
-                        topBarAnimation(0);
+                    .setPositiveButton(p ? "继续" : "暂停", (d, which) -> {
+                        if (p)
+                        {
+                            trackService.resume(this);
+                            topBarAnimation(1);
+                        }
+                        else
+                        {
+                            trackService.pause(this);
+                            topBarAnimation(0);
+                        }
                     })
                     .setNegativeButton("停止", (d, which) -> {
-                        TrackHelper.getInstance().stop(this);
-                        topBarAnimation(0);
+                        stopTrack(true);
                     })
                     .setNeutralButton("取消", (d, which) -> {
-
                     }).create();
             showTrackDialog(dialog);
+
         }
-        else if (TrackHelper.getInstance().getStatus() == TrackHelper.Status.Pausing)
+    }
+
+    private void startTrack()
+    {
+        startService(new Intent(this, TrackService.class));
+        bindService(new Intent(this, TrackService.class), connection, 0);
+        topBarAnimation(1);
+    }
+
+    public void stopTrack(boolean stopService)
+    {
+        trackService = null;
+        unbindService(connection);
+        if (stopService)
         {
-            AlertDialog dialog = new AlertDialog.Builder(this)
-                    .setTitle("暂停记录轨迹中")
-                    .setMessage(getLocationMessage(1))
-                    .setPositiveButton("继续", (d, which) -> {
-                        TrackHelper.getInstance().resume(this);
-                        topBarAnimation(1);
-                    })
-                    .setNegativeButton("停止", (d, which) -> {
-                        TrackHelper.getInstance().stop(this);
-                    })
-                    .setNeutralButton("取消", (d, which) -> {
-
-                    }).create();
-            showTrackDialog(dialog);
+            stopService(new Intent(this, TrackService.class));
         }
+        topBarAnimation(0);
     }
 
     private void showTrackDialog(AlertDialog dialog)
@@ -600,14 +672,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private CharSequence getLocationMessage(int type)
     {
-        Location loc = TrackHelper.getInstance().getLastLocation();
+        if (trackService == null)
+        {
+            return "";
+        }
+        Location loc = trackService.getLastLocation();
         if (loc != null)
         {
             SimpleDateFormat sdf = new SimpleDateFormat("H:mm:ss", Locale.CHINA);
             String time = sdf.format(new Date(loc.getTime()));
-            String duration = DateTimeUtility.formatTimeSpan(TrackHelper.getInstance().getStartTime(), new Date());
-            int count = TrackHelper.getInstance().getCount();
-            double length = TrackHelper.getInstance().getLength();
+            String duration = DateTimeUtility.formatTimeSpan(trackService.getStartTime(), new Date());
+            int count = trackService.getCount();
+            double length = trackService.getLength();
             double lng = loc.getLongitude();
             double lat = loc.getLatitude();
             double gpsAlt = loc.getAltitude();
@@ -625,11 +701,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 vAcc = loc.getVerticalAccuracyMeters();
                 sAcc = loc.getSpeedAccuracyMetersPerSecond();
             }
-            int satCount=TrackHelper.getInstance().getLastSatelliteCount();
-            int satFixedCount=TrackHelper.getInstance().getLastFixedSatelliteCount();
+            int satCount = trackService.getLastSatelliteCount();
+            int satFixedCount = trackService.getLastFixedSatelliteCount();
             if (type == 1)
             {
-                return Html.fromHtml(getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, gpsAlt, pAlt, speed, speedKm, bearing, bearingDesc, hAcc, vAcc, sAcc,satFixedCount,satCount), Html.FROM_HTML_MODE_LEGACY);
+                return Html.fromHtml(getResources().getString(R.string.msg_gps_detail, time, count, length, lng, lat, gpsAlt, pAlt, speed, speedKm, bearing, bearingDesc, hAcc, vAcc, sAcc, satFixedCount, satCount), Html.FROM_HTML_MODE_LEGACY);
             }
             else if (type == 2)
             {
@@ -637,16 +713,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             else
             {
-                return "未知";
+                return "未知类型";
             }
         }
-        return Html.fromHtml("暂无位置信息", Html.FROM_HTML_MODE_LEGACY);
+        return "暂无位置信息";
     }
 
     private String angle2Direction(double angle)
     {
         angle += 11.25;
-        String[] types = new String[]{"北", "北偏东","东北","东偏北", "东","东偏南", "东南","南偏东", "南","南偏西", "西南","西偏南", "西","西偏北", "西北","北偏西", "北"};
+        String[] types = new String[]{"北", "北偏东", "东北", "东偏北", "东", "东偏南", "东南", "南偏东", "南", "南偏西", "西南", "西偏南", "西", "西偏北", "西北", "北偏西", "北"};
         return types[(int) (angle / 22.5)];
     }
 

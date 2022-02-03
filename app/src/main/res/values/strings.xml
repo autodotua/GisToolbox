@@ -83,7 +83,7 @@
     </string>
     <string name="msg_gps_detail_bar">
 <![CDATA[<b>状态：</b>%1$s&nbsp;&nbsp;%2$.0fm<br>
-<b>位置：</b>%3$.6f&nbsp;&nbsp;%4$.6f&nbsp;&nbsp;%5$.0f°<br>
+<b>位置：</b>%3$.6f&nbsp;&nbsp;%4$.6f&nbsp;&nbsp;%5$.0f m<br>
 <b>速度：</b>%6$.2fm/s&nbsp;&nbsp;%7$.2fkm/h&nbsp;&nbsp;%8$.0f°&nbsp;(%9$s)]]>
     </string>
     <string name="scale_large">1:%1$.0f</string>

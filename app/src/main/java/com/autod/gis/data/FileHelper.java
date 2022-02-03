@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class FileHelper
 {
@@ -108,65 +109,46 @@ public class FileHelper
         }
     }
 
-    public static String getFilePath(String subPath)
+    public static boolean createFolderIfNotExists(File folder)
+    {
+        if (folder.exists())
+            return true;
+        else
+            return folder.mkdirs();
+    }
+
+    public static String getFilePath(String subPath, boolean isFile)
     {
         if (subPath.startsWith("/"))
         {
             subPath = subPath.substring(1);
         }
-        return Environment.getExternalStorageDirectory().toString() + "/GIS/" + subPath;
-    }
-
-    public static String getCrashLogPath(String name)
-    {
-        return getFilePath("Logs/" + name);
-    }
-
-    public static String getConfigPath(String name)
-    {
-        return getFilePath(name + ".json");
-    }
-
-    public static String getShapefileDirPath()
-    {
-        return getShapefilePath("", false);
-    }
-
-    public static String getShapefilePath(String name, boolean addDotShp)
-    {
-        if (addDotShp && !name.endsWith(".shp"))
+        String path = Environment.getExternalStorageDirectory().toString() + "/GIS/" + subPath;
+        File file = new File(path);
+        if (isFile)
         {
-            name = name + ".shp";
+            createFolderIfNotExists(Objects.requireNonNull(file.getParentFile()));
         }
-        return getFilePath("Shapefile/" + name);
+        else
+        {
+            createFolderIfNotExists(file);
+        }
+        return path;
     }
 
-    public static String getBaseLayerPath(String name)
+    public static String getConfigDir()
     {
-        return getFilePath("Base/" + name);
+        return getFilePath("Configs/", false);
     }
 
-    public static String getBaseLayerDirPath()
-    {
-        return getBaseLayerPath("");
-    }
-
-    public static String getConfigPath()
+    public static String getDefaultConfigPath()
     {
         return getConfigPath("config");
     }
 
     public static String getConfigJson()
     {
-        File file = new File(getConfigPath());
-        if (file.exists())
-        {
-            return readTextFile(file);
-        }
-        else
-        {
-            return null;
-        }
+        return getConfigJson("config");
     }
 
     public static String getConfigJson(String name)
@@ -182,25 +164,60 @@ public class FileHelper
         }
     }
 
-    public static void setConfigJson(String json)
+    public static void saveConfigJson(String json)
     {
-        writeTextToFile(getConfigPath(), json);
+        writeTextToFile(getDefaultConfigPath(), json);
     }
 
-    public static void setConfigJson(String name, String json)
+    public static void saveConfigJson(String name, String json)
     {
         String path = getConfigPath(name);
         writeTextToFile(path, json);
     }
 
+    public static String getCrashLogPath(String name)
+    {
+        return getFilePath("Logs/" + name, true);
+    }
+
+    public static String getConfigPath(String name)
+    {
+        return getConfigDir() + name + ".json";
+    }
+
+    public static String getShapefileDirPath()
+    {
+        return getShapefilePath("", false);
+    }
+
+    public static String getShapefilePath(String name, boolean addDotShp)
+    {
+        if (addDotShp && !name.endsWith(".shp"))
+        {
+            name = name + ".shp";
+        }
+        return getFilePath("Shapefile/" + name, true);
+    }
+
+    public static String getBaseLayerPath(String name)
+    {
+        return getFilePath("Base/" + name, true);
+    }
+
+    public static String getBaseLayerDirPath()
+    {
+        return getBaseLayerPath("");
+    }
+
+
     public static String getPolylineTrackFilePath(String name)
     {
-        return getFilePath("Track/Shapefile/" + name);
+        return getFilePath("Track/Shapefile/" + name, true);
     }
 
     public static String getGpxTrackFilePath(String name)
     {
-        return getFilePath("Track/" + name);
+        return getFilePath("Track/" + name, true);
     }
 
     public static String getStyleFile(String shapeFileName)

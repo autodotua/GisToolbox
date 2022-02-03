@@ -18,16 +18,15 @@ import com.autod.gis.data.Config;
 import com.autod.gis.map.LayerManager;
 import com.autod.gis.map.LocationDisplayHelper;
 import com.autod.gis.map.MeasureHelper;
-import com.autod.gis.service.TrackHelper;
 import com.autod.gis.programming.GetString;
+import com.autod.gis.service.TrackService;
 import com.autod.gis.ui.activity.BaseLayerListActivity;
+import com.autod.gis.ui.activity.MainActivity;
 
 import static com.autod.gis.ui.activity.MainActivity.BaseLayerListActivityID;
 
 public class MenuHelper
 {
-
-
     private MenuItem menuRotate;
     private MenuItem menuLocation;
     private MenuItem menuCenterWhenRecording;
@@ -38,12 +37,18 @@ public class MenuHelper
     private MenuItem menuUseRelativeAltitude;
     private MenuItem menuUseGpsLocationDataSource;
 
-
-    private static MenuHelper instance = new MenuHelper();
-
-    public static MenuHelper getInstance()
+    public static void showSetValueDialog(Context context, String title, String message, String value, int type, GetString r)
     {
-        return instance;
+        final EditText editText = new EditText(context);
+        editText.setInputType(type);
+        editText.setText(value);
+        editText.setSingleLine(false);
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setView(editText)
+                .setPositiveButton("确定", (dialog, which) -> r.get(editText.getText().toString()))
+                .create().show();
     }
 
     public void initialize(MenuInflater menuInflater, Menu menu)
@@ -65,7 +70,7 @@ public class MenuHelper
 
         menuUseRelativeAltitude = menu.findItem(R.id.menu_use_relative_altitude);
 
-        menuUseGpsLocationDataSource=menu.findItem(R.id.menu_use_gps_data_source);
+        menuUseGpsLocationDataSource = menu.findItem(R.id.menu_use_gps_data_source);
 
         resetValues();
     }
@@ -84,7 +89,7 @@ public class MenuHelper
 
     }
 
-    public void menuClick(Activity context, MenuItem item)
+    public void menuClick(MainActivity activity, MenuItem item)
     {
         switch (item.getItemId())
         {
@@ -115,28 +120,28 @@ public class MenuHelper
             case R.id.menu_compass:
                 Config.getInstance().showMapCompass = !Config.getInstance().showMapCompass;
                 menuMapCompass.setChecked(Config.getInstance().showMapCompass);
-                Toast.makeText(context, "设置成功，将在下次启动时应用", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "设置成功，将在下次启动时应用", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_show_location_display:
                 Config.getInstance().location = !Config.getInstance().location;
                 menuLocation.setChecked(Config.getInstance().location);
                 if (Config.getInstance().location)
                 {
-                    LocationDisplayHelper.getInstance().start(context);
+                    LocationDisplayHelper.getInstance().start(activity);
                 }
                 else
                 {
-                    LocationDisplayHelper.getInstance().stop(context);
+                    LocationDisplayHelper.getInstance().stop(activity);
                 }
                 break;
             case R.id.menu_tile_url:
-                context.startActivityForResult(new Intent(context, BaseLayerListActivity.class),BaseLayerListActivityID);
+                activity.startActivityForResult(new Intent(activity, BaseLayerListActivity.class), BaseLayerListActivityID);
                 break;
             case R.id.menu_create_feature_layer:
-                LayerManager.getInstance().createFeatureLayer(context);
+                LayerManager.getInstance().createFeatureLayer(activity);
                 break;
             case R.id.menu_about:
-                new AlertDialog.Builder(context)
+                new AlertDialog.Builder(activity)
                         .setTitle("关于")
                         .setPositiveButton("确定", (dialog, which) -> {
                         })
@@ -145,7 +150,7 @@ public class MenuHelper
 
                 break;
             case R.id.menu_default_scale:
-                showSetValueDialog(context, "默认比例尺",
+                showSetValueDialog(activity, "默认比例尺",
                         "地图默认的比例尺",
                         String.valueOf(Config.getInstance().gpsMinTime), InputType.TYPE_CLASS_NUMBER, p ->
                         {
@@ -154,22 +159,22 @@ public class MenuHelper
                                 double scale = Double.parseDouble(p);
                                 if (scale <= 0)
                                 {
-                                    Toast.makeText(context, "比例尺不可小于0", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, "比例尺不可小于0", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 Config.getInstance().defaultScale = scale;
                                 Config.getInstance().save();
-                                Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "设置成功", Toast.LENGTH_SHORT).show();
 
                             }
                             catch (Exception ex)
                             {
-                                Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "设置失败", Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
             case R.id.menu_gps_min_time:
-                showSetValueDialog(context, "GPS最小更新时间",
+                showSetValueDialog(activity, "GPS最小更新时间",
                         "设置GPS最小更新的时间间隔，当位置更新时，获取两个位置之间的最小时间。单位为毫秒",
                         String.valueOf(Config.getInstance().gpsMinTime), InputType.TYPE_CLASS_NUMBER, p ->
                         {
@@ -178,21 +183,21 @@ public class MenuHelper
                                 int time = Integer.parseInt(p);
                                 if (time <= 0)
                                 {
-                                    Toast.makeText(context, "最小时间不可小于1", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, "最小时间不可小于1", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 Config.getInstance().gpsMinTime = time;
                                 Config.getInstance().save();
-                                Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "设置成功", Toast.LENGTH_SHORT).show();
                             }
                             catch (Exception ex)
                             {
-                                Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "设置失败", Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
             case R.id.menu_gps_min_distance:
-                showSetValueDialog(context, "GPS最小更新距离",
+                showSetValueDialog(activity, "GPS最小更新距离",
                         "设置GPS最小更新的距离间隔，当位置更新时，仅当于上一个点距离超过该值时才会更新",
                         String.valueOf(Config.getInstance().gpsMinDistance), InputType.TYPE_CLASS_NUMBER, p ->
                         {
@@ -201,16 +206,16 @@ public class MenuHelper
                                 int time = Integer.parseInt(p);
                                 if (time <= 0)
                                 {
-                                    Toast.makeText(context, "最小距离不可小于1米", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, "最小距离不可小于1米", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 Config.getInstance().gpsMinDistance = time;
                                 Config.getInstance().save();
-                                Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "设置成功", Toast.LENGTH_SHORT).show();
                             }
                             catch (Exception ex)
                             {
-                                Toast.makeText(context, "设置失败", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "设置失败", Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
@@ -219,11 +224,11 @@ public class MenuHelper
                 menuUseGpsLocationDataSource.setChecked(Config.getInstance().useGpsLocationDataSource);
                 if (Config.getInstance().location)
                 {
-                    LocationDisplayHelper.getInstance().resetLocationDataSource(context);
+                    LocationDisplayHelper.getInstance().resetLocationDataSource(activity);
                 }
                 break;
-            case  R.id.menu_gps_data_source_min_fixed_satellite_count:
-                showSetValueDialog(context, context.getString(R.string.menu_gps_data_source_min_fixed_satellite_count),
+            case R.id.menu_gps_data_source_min_fixed_satellite_count:
+                showSetValueDialog(activity, activity.getString(R.string.menu_gps_data_source_min_fixed_satellite_count),
                         "少于该数量的卫星被确定位置时，将不认可当前定位",
                         String.valueOf(Config.getInstance().gpsLocationDataSourceMinFixedSatelliteCount), InputType.TYPE_CLASS_NUMBER, p ->
                         {
@@ -232,71 +237,57 @@ public class MenuHelper
                                 int value = Integer.parseInt(p);
                                 if (value <= 0)
                                 {
-                                    Toast.makeText(context, "卫星数量不可小于0", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, "卫星数量不可小于0", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
-                                if(value>20)
+                                if (value > 20)
                                 {
-                                    Toast.makeText(context, "卫星数量不可大于20", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(activity, "卫星数量不可大于20", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 Config.getInstance().gpsLocationDataSourceMinFixedSatelliteCount = value;
                                 Config.getInstance().save();
-                                Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "设置成功", Toast.LENGTH_SHORT).show();
 
                             }
                             catch (Exception ex)
                             {
-                                Toast.makeText(context, "设置失败，请输入一个整数", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "设置失败，请输入一个整数", Toast.LENGTH_SHORT).show();
                             }
                         });
                 break;
             case R.id.menu_exit:
-                if (TrackHelper.getInstance().getStatus() != TrackHelper.Status.Stop)
+                if (activity.getTrackService() == null)
                 {
-
-                    new AlertDialog.Builder(context)
-                            .setTitle("退出")
-                            .setMessage("正在记录轨迹，是否停止？")
-                            .setPositiveButton("否", (d, w) -> {
-                                context.finish();
-                            })
-                            .setNegativeButton("是", (d, w) -> {
-                                TrackHelper.getInstance().stop(context);
-                                context.finish();
-                            }).create().show();
+                    activity.finish();
                 }
                 else
                 {
-                    context.finish();
+
+                    new AlertDialog.Builder(activity)
+                            .setTitle("退出")
+                            .setMessage("正在记录轨迹，是否停止？")
+                            .setPositiveButton("否", (d, w) -> {
+                                activity.finish();
+                            })
+                            .setNegativeButton("是", (d, w) -> {
+                                activity.stopTrack(true);
+                                activity.finish();
+                            }).create().show();
                 }
                 break;
             case R.id.menu_reset:
-                LayerManager.getInstance().resetLayers(context);
+                LayerManager.getInstance().resetLayers(activity);
                 break;
-            case  R.id.menu_measure_length:
-                MeasureHelper.MeasureLength(context.findViewById(android.R.id.content));
+            case R.id.menu_measure_length:
+                MeasureHelper.MeasureLength(activity.findViewById(android.R.id.content));
                 break;
-            case  R.id.menu_measure_area:
-                MeasureHelper.MeasureArea(context.findViewById(android.R.id.content));
+            case R.id.menu_measure_area:
+                MeasureHelper.MeasureArea(activity.findViewById(android.R.id.content));
                 break;
             default:
                 break;
         }
         Config.getInstance().save();
-    }
-
-    public static void showSetValueDialog(Context context, String title, String message, String value, int type, GetString r)
-    {
-        final EditText editText = new EditText(context);
-        editText.setInputType(type);
-        editText.setText(value);
-        editText.setSingleLine(false);
-        new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setMessage(message)
-                .setView(editText)
-                .setPositiveButton("确定", (dialog, which) -> r.get(editText.getText().toString()))
-                .create().show();
     }
 }
