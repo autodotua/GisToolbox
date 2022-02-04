@@ -67,8 +67,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int eggClickTimes = 0;
     private TextView tvwScale;
     private boolean initialized = false;
-    private TextView tvwTrackInfo;
+    private TextView topBarDetail;
     private View topBar;
+    private TextView topBarTitle;
     private TrackService trackService;
     private boolean resumingTrack = false;
     private AlertDialog locationDetailDialog = null;
@@ -79,21 +80,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         {
             TrackService.TrackBinder trackBinder = (TrackService.TrackBinder) service;
             trackService = trackBinder.getService();
-            if (getTrackService() != null && resumingTrack)
+            if (getTrackService() != null && resumingTrack)//Activity启动时，Service已经在运行
             {
                 resumingTrack = false;
                 getTrackService().resumeOverlay();
+                topBarTitle.setText(R.string.main_track_recording_paused);
+                topBar.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.colorOrange));
+                topBarAnimation(1);
                 Toast.makeText(MainActivity.this, "轨迹记录继续运行", Toast.LENGTH_SHORT).show();
             }
             trackService.addOnTrackTimerListener(trackInfo -> runOnUiThread(() -> {
-                tvwTrackInfo.setText(getLocationMessage(2, trackInfo));
+                topBarDetail.setText(getLocationMessage(2, trackInfo));
                 if (locationDetailDialog != null && locationDetailDialog.isShowing())
                 {
                     CharSequence msg = getLocationMessage(1, trackInfo);
                     locationDetailDialog.setMessage(msg);
                 }
             }));
-            tvwTrackInfo.setText(getLocationMessage(2, trackService.getLastTrackInfo()));
+            topBarDetail.setText(getLocationMessage(2, trackService.getLastTrackInfo()));
         }
 
         @Override
@@ -193,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //bindService后connection连接成功的调用晚于图层的初始化，导致轨迹覆盖层无法显示，因此需要在connection连接成功的事件里重设覆盖层
             resumingTrack = true;
             bindService(new Intent(this, TrackService.class), connection, 0);
-            topBarAnimation(1);
         }
     }
 
@@ -353,9 +356,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ImageButton btnTrack = findViewById(R.id.main_btn_track);
         btnTrack.setOnClickListener(this);
 
-        tvwTrackInfo = findViewById(R.id.main_tvw_track_info);
+        topBarDetail = findViewById(R.id.main_tvw_track_info);
         topBar = findViewById(R.id.main_llt_top);
         topBar.setOnClickListener(this);
+
+        topBarTitle=findViewById(R.id.main_tvw_track_title);
 
     }
 
@@ -595,6 +600,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onSaveInstanceState(outState, outPersistentState);
     }
 
+    @SuppressLint("RestrictedApi")
     private void changeTrackStatus(View view)
     {
         if (trackService == null)
@@ -606,21 +612,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             boolean p = trackService.isPausing();
 
             PopupMenu popup = new PopupMenu(this, view);
-            popup.getMenuInflater().inflate(R.menu.menu_track_running, popup.getMenu());
+            Menu menu=popup.getMenu();
+            popup.getMenuInflater().inflate(R.menu.menu_track, menu);
+            menu.findItem(R.id.menu_track_pause).setVisible(!p);
+            menu.findItem(R.id.menu_track_resume).setVisible(p);
             popup.setOnMenuItemClickListener(item -> {
                 switch (item.getItemId())
                 {
-                    case R.id.menu_track_pausing_stop:
-                    case R.id.menu_track_running_stop:
+                    case R.id.menu_track_stop:
                         stopTrack(true);
                         break;
-                    case R.id.menu_track_running_pause:
-                        topBarAnimation(0);
+                    case R.id.menu_track_pause:
+                        topBarTitle.setText(R.string.main_track_recording_paused);
+                        topBar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorOrange));
                         trackService.pause(this);
                         break;
-                    case R.id.menu_track_pausing_resume:
+                    case R.id.menu_track_resume:
+                        topBarTitle.setText(R.string.main_track_recording);
+                        topBar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
                         trackService.resume(this);
-                        topBarAnimation(1);
                         break;
                 }
                 return true;
@@ -699,11 +709,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return types[(int) (angle / 22.5)];
     }
 
-    private void topBarAnimation(int direction)
+    private void topBarAnimation(double direction)
     {
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 92f, getResources().getDisplayMetrics())
                 + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48f, getResources().getDisplayMetrics());
-        ValueAnimator anim = ValueAnimator.ofInt(topBar.getMeasuredHeight(), direction * (int) px);
+        ValueAnimator anim = ValueAnimator.ofInt(topBar.getMeasuredHeight(), (int) (direction * px));
         anim.addUpdateListener(valueAnimator -> {
             int val = (Integer) valueAnimator.getAnimatedValue();
             ViewGroup.LayoutParams layoutParams = topBar.getLayoutParams();

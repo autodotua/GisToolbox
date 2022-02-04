@@ -83,7 +83,7 @@
     </string>
     <string name="msg_gps_detail_bar">
 <![CDATA[<b>状态：</b>%1$s&nbsp;&nbsp;%2$.0fm<br>
-<b>位置：</b>%3$.6f&nbsp;&nbsp;%4$.6f&nbsp;&nbsp;%5$.0f m<br>
+<b>位置：</b>%3$.4f&nbsp;&nbsp;%4$.4f&nbsp;&nbsp;%5$.0f m<br>
 <b>速度：</b>%6$.2fm/s&nbsp;&nbsp;%7$.2fkm/h&nbsp;&nbsp;%8$.0f°&nbsp;(%9$s)]]>
     </string>
     <string name="scale_large">1:%1$.0f</string>
@@ -95,6 +95,7 @@
     <string name="main_tvw_draw_ok">完成</string>
     <string name="main_tvw_draw_cancel">取消</string>
     <string name="main_track_recording"><b>正在记录轨迹</b></string>
+    <string name="main_track_recording_paused"><b>暂停记录轨迹</b></string>
     <string name="menu_reset">重新加载地图</string>
     <string name="menu_measure">测量</string>
     <string name="menu_measure_area">测量面积</string>
@@ -106,4 +107,7 @@
     <string name="menu_track">轨迹</string>
     <string name="menu_use_gps_data_source">使用自定义GPS位置数据源</string>
     <string name="menu_gps_data_source_min_fixed_satellite_count">最少可信卫星数量</string>
+    <string name="menu_resume">恢复</string>
+    <string name="menu_pause">暂停</string>
+    <string name="menu_stop">停止</string>
 </resources>

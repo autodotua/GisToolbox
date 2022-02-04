@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:title="@string/menu_resume"
+        android:id="@+id/menu_track_resume" />
+    <item
+        android:title="@string/menu_pause"
+        android:id="@+id/menu_track_pause" />
+    <item
+        android:title="@string/menu_stop"
+        android:id="@+id/menu_track_stop" />
+</menu>

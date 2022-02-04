@@ -346,3 +346,6 @@
 		修改后，TrackHelper和LocationService合并为TrackService，MainActivity通过startService和bindSercvice创建并启动服务，同时也启动了轨迹记录。通过stopSercvice停止服务，同时也停止了轨迹记录。然后通过Binder将服务实例由ServiceConnection传到Activity中，来调用pause和resume方法。位置和卫星改变时，记录轨迹，同时保存最新的位置。使用Timer定时播报位置，让UI每秒更新一次相关信息。
 	修复了配置文件的保存与打开
 	轨迹对话框修改为菜单形式，详细信息通过点击顶部横条进行显示。
+
+20220204
+	修改了记录轨迹暂停时的界面，横条不消失但修改了背景颜色和标题

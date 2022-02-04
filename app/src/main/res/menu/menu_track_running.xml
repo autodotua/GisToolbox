@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="暂停" android:id="@+id/menu_track_running_pause"></item>
-    <item android:title="停止" android:id="@+id/menu_track_running_stop"></item>
-</menu>

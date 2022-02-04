@@ -6,5 +6,5 @@
     <color name="colorAccentDark">#AA1061</color>
     <color name="colorDarkGray">#444444</color>
     <color name="colorWhiteOverlay">#AAFFFFFF</color>
-
+    <color name="colorOrange">#FFA726</color>
 </resources>
