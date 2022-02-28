@@ -28,24 +28,25 @@
     </item>
     <item android:title="@string/menu_track">
         <menu>
-        <item
-            android:id="@+id/menu_center_when_recording"
-            android:checkable="true"
-            android:title="@string/menu_center_when_recording" />
-        <item
-            android:id="@+id/menu_use_barometer"
-            android:checkable="true"
-            android:title="@string/menu_use_barometer" />
-        <item
-            android:id="@+id/menu_use_relative_altitude"
-            android:checkable="true"
-            android:title="@string/menu_use_relative_altitude" />
-        <item
-            android:id="@+id/menu_gps_min_time"
-            android:title="@string/menu_gps_min_time" />
-        <item
-            android:id="@+id/menu_gps_min_distance"
-            android:title="@string/menu_gps_min_distance" /></menu>
+            <item
+                android:id="@+id/menu_center_when_recording"
+                android:checkable="true"
+                android:title="@string/menu_center_when_recording" />
+            <item
+                android:id="@+id/menu_use_barometer"
+                android:checkable="true"
+                android:title="@string/menu_use_barometer" />
+            <item
+                android:id="@+id/menu_use_relative_altitude"
+                android:checkable="true"
+                android:title="@string/menu_use_relative_altitude" />
+            <item
+                android:id="@+id/menu_gps_min_time"
+                android:title="@string/menu_gps_min_time" />
+            <item
+                android:id="@+id/menu_gps_min_distance"
+                android:title="@string/menu_gps_min_distance" />
+        </menu>
     </item>
     <item android:title="@string/menu_location_display">
         <menu>
@@ -78,7 +79,14 @@
 
         </menu>
     </item>
-
+    <item android:title="@string/menu_ui">
+        <menu>
+            <item
+                android:title="@string/menu_screen_on"
+                android:checkable="true"
+                android:id="@+id/menu_screen_on" />
+        </menu>
+    </item>
     <item
         android:id="@+id/menu_reset"
         android:title="@string/menu_reset" />

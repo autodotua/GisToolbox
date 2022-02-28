@@ -78,6 +78,8 @@ public class Config
 
     public  int gpsLocationDataSourceMinFixedSatelliteCount=10;
 
+    public  boolean screenAlwaysOn=false;
+
     public String lastExtent="";
 
     public void save()

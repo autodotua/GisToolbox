@@ -84,10 +84,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 resumingTrack = false;
                 getTrackService().resumeOverlay();
-                topBarTitle.setText(R.string.main_track_recording_paused);
-                topBar.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.colorOrange));
+                updateTrackBar();
                 topBarAnimation(1);
-                Toast.makeText(MainActivity.this, "轨迹记录继续运行", Toast.LENGTH_SHORT).show();
             }
             trackService.addOnTrackTimerListener(trackInfo -> runOnUiThread(() -> {
                 topBarDetail.setText(getLocationMessage(2, trackInfo));
@@ -187,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         MapViewHelper.getInstance().getMapView().addMapScaleChangedListener(mapScaleChangedEvent -> updateScale());
         initializeTrack();
         LayerManager.getInstance().initialize(this);
+        findViewById(R.id.main_map).setKeepScreenOn(Config.getInstance().screenAlwaysOn);
         initialized = true;
     }
 
@@ -360,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         topBar = findViewById(R.id.main_llt_top);
         topBar.setOnClickListener(this);
 
-        topBarTitle=findViewById(R.id.main_tvw_track_title);
+        topBarTitle = findViewById(R.id.main_tvw_track_title);
 
     }
 
@@ -612,7 +611,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             boolean p = trackService.isPausing();
 
             PopupMenu popup = new PopupMenu(this, view);
-            Menu menu=popup.getMenu();
+            Menu menu = popup.getMenu();
             popup.getMenuInflater().inflate(R.menu.menu_track, menu);
             menu.findItem(R.id.menu_track_pause).setVisible(!p);
             menu.findItem(R.id.menu_track_resume).setVisible(p);
@@ -623,19 +622,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         stopTrack(true);
                         break;
                     case R.id.menu_track_pause:
-                        topBarTitle.setText(R.string.main_track_recording_paused);
-                        topBar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorOrange));
                         trackService.pause(this);
+                        updateTrackBar();
                         break;
                     case R.id.menu_track_resume:
-                        topBarTitle.setText(R.string.main_track_recording);
-                        topBar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
                         trackService.resume(this);
+                        updateTrackBar();
                         break;
                 }
                 return true;
             });
             popup.show();
+        }
+    }
+
+    private void updateTrackBar()
+    {
+        if (trackService == null)
+        {
+            throw new RuntimeException("没有启动轨迹记录服务");
+        }
+        if (trackService.isPausing())
+        {
+            topBarTitle.setText(R.string.main_track_recording_paused);
+            topBar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorOrange));
+        }
+        else
+        {
+            topBarTitle.setText(R.string.main_track_recording);
+            topBar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
+
         }
     }
 

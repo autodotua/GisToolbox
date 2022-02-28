@@ -36,6 +36,7 @@ public class MenuHelper
     private MenuItem menuUseBarometer;
     private MenuItem menuUseRelativeAltitude;
     private MenuItem menuUseGpsLocationDataSource;
+    private MenuItem menuScreenOn;
 
     public static void showSetValueDialog(Context context, String title, String message, String value, int type, GetString r)
     {
@@ -72,6 +73,8 @@ public class MenuHelper
 
         menuUseGpsLocationDataSource = menu.findItem(R.id.menu_use_gps_data_source);
 
+        menuScreenOn = menu.findItem(R.id.menu_screen_on);
+
         resetValues();
     }
 
@@ -86,7 +89,7 @@ public class MenuHelper
         menuUseBarometer.setChecked(Config.getInstance().useBarometer);
         menuUseRelativeAltitude.setChecked(Config.getInstance().useRelativeAltitude);
         menuUseGpsLocationDataSource.setChecked(Config.getInstance().useGpsLocationDataSource);
-
+        menuScreenOn.setChecked(Config.getInstance().screenAlwaysOn);
     }
 
     public void menuClick(MainActivity activity, MenuItem item)
@@ -284,6 +287,11 @@ public class MenuHelper
                 break;
             case R.id.menu_measure_area:
                 MeasureHelper.MeasureArea(activity.findViewById(android.R.id.content));
+                break;
+            case R.id.menu_screen_on:
+                Config.getInstance().screenAlwaysOn = !Config.getInstance().screenAlwaysOn;
+                menuScreenOn.setChecked(Config.getInstance().screenAlwaysOn);
+                activity.findViewById(R.id.main_map).setKeepScreenOn(Config.getInstance().screenAlwaysOn);
                 break;
             default:
                 break;
