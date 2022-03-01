@@ -111,4 +111,5 @@
     <string name="menu_pause">暂停</string>
     <string name="menu_stop">停止</string>
     <string name="menu_screen_on">屏幕常亮</string>
+    <string name="menu_navigation_point_height_factor">导航模式图标位置</string>
 </resources>

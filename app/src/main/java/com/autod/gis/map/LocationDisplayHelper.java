@@ -46,6 +46,7 @@ public class LocationDisplayHelper
         }
         resetLocationDataSource(context);
         locationDisplay.setWanderExtentFactor(0f);//设置Pan为置中时，画面将实时跟随定位点移动
+        locationDisplay.setNavigationPointHeightFactor(Config.getInstance().navigationPointHeightFactor);
         return true;
     }
 

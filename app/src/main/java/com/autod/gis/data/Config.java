@@ -60,6 +60,8 @@ public class Config
 
     public int gpsMinDistance = 5;
 
+    public float navigationPointHeightFactor=0.4f;
+
     public boolean location = true;
 
     public boolean autoCenterWhenRecording = true;

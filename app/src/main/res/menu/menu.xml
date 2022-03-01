@@ -65,7 +65,9 @@
             <item
                 android:id="@+id/menu_gps_data_source_min_fixed_satellite_count"
                 android:title="@string/menu_gps_data_source_min_fixed_satellite_count" />
-
+            <item
+                android:id="@+id/menu_navigation_point_height_factor"
+                android:title="@string/menu_navigation_point_height_factor" />
         </menu>
     </item>
     <item android:title="@string/menu_measure">

@@ -222,6 +222,29 @@ public class MenuHelper
                             }
                         });
                 break;
+                case R.id.menu_navigation_point_height_factor:
+                showSetValueDialog(activity, "导航模式图标位置",
+                        "设置定位点导航模式下，距离屏幕下边缘与屏幕高度的比值",
+                        String.valueOf(Config.getInstance().navigationPointHeightFactor), InputType.TYPE_CLASS_NUMBER, p ->
+                        {
+                            try
+                            {
+                                float value = Float.parseFloat(p);
+                                if (value <= 0||value>=1)
+                                {
+                                    Toast.makeText(activity, "值需要介于0和1之间", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                Config.getInstance().navigationPointHeightFactor = value;
+                                Config.getInstance().save();
+                                Toast.makeText(activity, "设置成功", Toast.LENGTH_SHORT).show();
+                            }
+                            catch (Exception ex)
+                            {
+                                Toast.makeText(activity, "设置失败", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                break;
             case R.id.menu_use_gps_data_source:
                 Config.getInstance().useGpsLocationDataSource = !Config.getInstance().useGpsLocationDataSource;
                 menuUseGpsLocationDataSource.setChecked(Config.getInstance().useGpsLocationDataSource);
@@ -266,7 +289,6 @@ public class MenuHelper
                 }
                 else
                 {
-
                     new AlertDialog.Builder(activity)
                             .setTitle("退出")
                             .setMessage("正在记录轨迹，是否停止？")
