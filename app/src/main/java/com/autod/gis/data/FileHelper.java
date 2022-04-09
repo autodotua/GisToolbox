@@ -46,26 +46,46 @@ public class FileHelper
      *
      * @param file
      * @param value
-     * @throws IOException
      */
     public static void writeTextToFile(File file, String value)
     {
+        //首先把文件写入到temp文件中，然后将原文件备份，之后将temp文件重命名为原文件，来防止写入时出错导致文件锁坏
         try
         {
-            if (!file.getParentFile().exists())
+            File tempFile = new File(file.getAbsolutePath() + ".temp"); //用于写入的临时文件
+            File bakFile = new File(file.getAbsolutePath() + ".bak"); //用于备份的文件
+            if (!Objects.requireNonNull(file.getParentFile()).exists())
             {
                 file.getParentFile().mkdirs();
             }
-            OutputStream out = new FileOutputStream(file);
-
+            OutputStream out = new FileOutputStream(tempFile);
             Writer writer = new OutputStreamWriter(out);
             writer.write(value);
-
             writer.close();
+            copy(file, bakFile);
+            tempFile.renameTo(file);
+
         }
         catch (Exception ex)
         {
 
+        }
+    }
+
+    public static void copy(File src, File dst) throws IOException
+    {
+        try (InputStream in = new FileInputStream(src))
+        {
+            try (OutputStream out = new FileOutputStream(dst))
+            {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0)
+                {
+                    out.write(buf, 0, len);
+                }
+            }
         }
     }
 
