@@ -3,6 +3,7 @@ package com.autod.gis.data;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
+import android.widget.Toast;
 
 import com.esri.arcgisruntime.geometry.GeometryType;
 
@@ -62,13 +63,19 @@ public class FileHelper
             Writer writer = new OutputStreamWriter(out);
             writer.write(value);
             writer.close();
-            copy(file, bakFile);
-            tempFile.renameTo(file);
+            if (file.exists())
+            {
+                copy(file, bakFile);
+            }
+            if (!tempFile.renameTo(file))
+            {
+                throw new IOException("重命名失败");
+            }
 
         }
         catch (Exception ex)
         {
-
+            ex.printStackTrace();
         }
     }
 
