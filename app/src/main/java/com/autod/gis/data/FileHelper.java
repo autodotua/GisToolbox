@@ -54,7 +54,7 @@ public class FileHelper
         try
         {
             File tempFile = new File(file.getAbsolutePath() + ".temp"); //用于写入的临时文件
-            File bakFile = new File(file.getAbsolutePath() + ".bak"); //用于备份的文件
+            File bakFile = new File(Objects.requireNonNull(file.getParentFile()).getAbsoluteFile() + "/bakup/" + file.getName()); //用于备份的文件
             if (!Objects.requireNonNull(file.getParentFile()).exists())
             {
                 file.getParentFile().mkdirs();
@@ -81,6 +81,9 @@ public class FileHelper
 
     public static void copy(File src, File dst) throws IOException
     {
+        if(!Objects.requireNonNull(dst.getParentFile()).isDirectory()){
+            dst.getParentFile().mkdir();
+        }
         try (InputStream in = new FileInputStream(src))
         {
             try (OutputStream out = new FileOutputStream(dst))

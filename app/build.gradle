@@ -4,7 +4,7 @@ android {
     packagingOptions {
         exclude 'META-INF/spring.schemas'
         exclude 'META-INF/spring.DEPENDENCIES'
-        exclude 'META-INF/DEPENDENCIES'r
+        exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/spring.handlers'
         exclude 'META-INF/license.txt'
     }
@@ -15,7 +15,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
-        versionName "22.4.17"
+        versionName "22.05.08"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     splits {
