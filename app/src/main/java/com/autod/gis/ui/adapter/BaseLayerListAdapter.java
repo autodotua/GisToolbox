@@ -32,7 +32,7 @@ public class BaseLayerListAdapter extends BaseAdapter
 {
     private LayoutInflater mInflater;
     private Context context;
-    private ArrayList<LayerInfo> layers = Config.getInstance().baseLayers;
+    private ArrayList<LayerInfo> layers;
 
     public void addLayer(String url)
     {
@@ -46,6 +46,11 @@ public class BaseLayerListAdapter extends BaseAdapter
 
     public BaseLayerListAdapter(Context context)
     {
+        layers = new ArrayList<>();
+        for (LayerInfo layer : Config.getInstance().baseLayers)
+        {
+            layers.add(layer.clone());
+        }
         this.mInflater = LayoutInflater.from(context);
         this.context = context;
     }
@@ -68,7 +73,7 @@ public class BaseLayerListAdapter extends BaseAdapter
         return 0;
     }
 
-    private List<ViewHolder> holders = new ArrayList<>();
+    private final List<ViewHolder> holders = new ArrayList<>();
 
 
     @SuppressLint("SetTextI18n")
@@ -107,7 +112,7 @@ public class BaseLayerListAdapter extends BaseAdapter
         holder.tvwOpacity.setText(opacity + "%");
         holder.tvwFilePath.setText(layers.get(realIndex).getPath());
         holder.chkVisible.setOnClickListener(v ->
-                layers.get(realIndex).setVisible(holders.get(index).chkVisible.isChecked()));
+                layers.get(realIndex).setVisible(((Switch) v).isChecked()));
 
         holder.btnUp.setOnClickListener(v ->
         {

@@ -216,6 +216,10 @@ public class LayerManager
         }
         for (LayerInfo layerInfo : Config.getInstance().baseLayers)
         {
+            if(!layerInfo.isVisible())
+            {
+                continue;
+            }
             String url = layerInfo.getPath();
             Layer layer = null;
             if (url.startsWith("http://") || url.startsWith("https://"))
@@ -243,7 +247,6 @@ public class LayerManager
                 }
             });
             layer.setOpacity(layerInfo.getOpacity());
-            layerInfo.setVisible(layer.isVisible());
             basemap.getBaseLayers().add(layer);
         }
         return basemap;

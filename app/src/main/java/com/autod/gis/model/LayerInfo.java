@@ -12,9 +12,10 @@ public class LayerInfo
         this.visible = visible;
         this.opacity = opacity;
     }
+
     public LayerInfo(String path)
     {
-        this(path,true,1f);
+        this(path, true, 1f);
     }
 
     public String getPath()
@@ -50,4 +51,9 @@ public class LayerInfo
     private String path;
     private boolean visible;
     private float opacity;
+
+    public LayerInfo clone()
+    {
+        return new LayerInfo(path, visible, opacity);
+    }
 }
