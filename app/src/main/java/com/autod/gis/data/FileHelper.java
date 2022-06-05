@@ -54,7 +54,7 @@ public class FileHelper
         try
         {
             File tempFile = new File(file.getAbsolutePath() + ".temp"); //用于写入的临时文件
-            File bakFile = new File(Objects.requireNonNull(file.getParentFile()).getAbsoluteFile() + "/bakup/" + file.getName()); //用于备份的文件
+            File bakFile = new File(Objects.requireNonNull(file.getParentFile()).getAbsoluteFile() + "/backup/" + file.getName()); //用于备份的文件
             if (!Objects.requireNonNull(file.getParentFile()).exists())
             {
                 file.getParentFile().mkdirs();
