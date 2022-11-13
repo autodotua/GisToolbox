@@ -15,7 +15,7 @@ android {
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
-        versionName "22.05.08"
+        versionName "22.07.19"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     splits {
@@ -46,7 +46,7 @@ android {
 
 dependencies {
     //之前切换到13.0时，提示：Duplicate class org.slf4j.*
-    implementation 'com.esri.arcgisruntime:arcgis-android:100.13.0'
+    implementation 'com.esri.arcgisruntime:arcgis-android:100.15.0'
     implementation 'com.jaredrummler:colorpicker:1.0.2'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support.constraint:constraint-layout:2.0.4'
@@ -54,5 +54,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'org.apache.ftpserver:ftpserver-core:1.1.1'
-    implementation 'com.google.code.gson:gson:2.8.8'
+    implementation 'com.google.code.gson:gson:2.9.0'
 }

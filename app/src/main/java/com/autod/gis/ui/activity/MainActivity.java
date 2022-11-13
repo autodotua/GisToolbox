@@ -12,10 +12,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -197,7 +199,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             resumingTrack = true;
             bindService(new Intent(this, TrackService.class), connection, 0);
         }
+
+        if (getIntent().getData() != null && TextUtils.equals(getIntent().getAction(), Intent.ACTION_VIEW))
+        {
+            String data = getIntent().getData().toString();
+            if (data.equals("track"))
+            {
+                getIntent().setData(null);
+                if (!isServiceRunning(TrackService.class)&&trackService == null)
+                {
+                    startTrack();
+                }
+                else
+                {
+                    Toast.makeText(MainActivity.this, "轨迹记录已经开始", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
+
 
     /**
      * 检查权限

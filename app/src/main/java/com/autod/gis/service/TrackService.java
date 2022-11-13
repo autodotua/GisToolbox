@@ -188,7 +188,7 @@ public class TrackService extends Service
             @Override
             public void run()
             {
-                if (!isLocationRegistered||pausing)
+                if (!isLocationRegistered || pausing)
                 {
                     return;
                 }

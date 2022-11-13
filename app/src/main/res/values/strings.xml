@@ -112,4 +112,5 @@
     <string name="menu_stop">停止</string>
     <string name="menu_screen_on">屏幕常亮</string>
     <string name="menu_navigation_point_height_factor">导航模式图标位置</string>
+    <string name="shortcut_start_track">开始记录轨迹</string>
 </resources>

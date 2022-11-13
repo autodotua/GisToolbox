@@ -174,7 +174,7 @@ public class LayerManager
                         Toast.makeText(context, "地图加载失败，请检查网络和设置", Toast.LENGTH_SHORT).show();
                     }
                 });
-                if (context.getTrackService()!=null)
+                if (context.getTrackService() != null)
                 {
                     context.getTrackService().resumeOverlay();
                     Toast.makeText(context, "轨迹记录继续运行", Toast.LENGTH_SHORT).show();
@@ -216,7 +216,7 @@ public class LayerManager
         }
         for (LayerInfo layerInfo : Config.getInstance().baseLayers)
         {
-            if(!layerInfo.isVisible())
+            if (!layerInfo.isVisible())
             {
                 continue;
             }
